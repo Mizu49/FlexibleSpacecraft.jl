@@ -1,9 +1,0 @@
-services:
-  julia-study:
-    restart: always
-    build: .
-    container_name: 'julia-container'
-    working_dir: '/root/opt'
-    tty: true
-    volumes:
-      - ./opt:/root/opt

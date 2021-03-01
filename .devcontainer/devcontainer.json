@@ -1,0 +1,17 @@
+{
+    "name": "Julia dev container",
+    "context": "..",
+    "dockerFile": "Dockerfile",
+
+    "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "git.path": "/usr/bin/git"
+    },
+
+
+    "remoteUser": "root",
+
+    "extensions": [
+        "julialang.language-julia"
+    ]
+}
