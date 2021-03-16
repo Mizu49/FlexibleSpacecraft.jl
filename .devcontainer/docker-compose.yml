@@ -1,0 +1,7 @@
+services:
+  julia-container:
+    build:
+      context: '..'
+      dockerfile: 'Dockerfile'
+    environment:
+      - DISPLAY=${DISPLAY}
