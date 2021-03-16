@@ -1,4 +1,4 @@
 using Plots
-plot(rand(10)) 
+plot(rand(100)) 
 
-savefig("test.svg")
+savefig("test.png")
