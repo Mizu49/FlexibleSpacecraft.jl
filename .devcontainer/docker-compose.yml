@@ -1,7 +1,0 @@
-services:
-  julia-container:
-    build:
-      context: '..'
-      dockerfile: 'Dockerfile'
-    # environment:
-    #   - DISPLAY=192.168.10.18:0.0

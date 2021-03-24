@@ -12,5 +12,5 @@ RUN julia -e 'using Pkg; Pkg.REPLMode.pkgstr("add Plots;precompile");using Plots
 
 
 ENV DISPLAY host.docker.internal:0.0
-# ENV XDG_RUNTIME_DIR /run/user/$UID
+ENV XDG_RUNTIME_DIR /workspaces/Julia-programing/.tmp
 ENV LIBGL_ALWAYS_INDIRECT 1
