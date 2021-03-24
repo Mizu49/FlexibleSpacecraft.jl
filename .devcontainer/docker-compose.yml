@@ -3,5 +3,5 @@ services:
     build:
       context: '..'
       dockerfile: 'Dockerfile'
-    environment:
-      - DISPLAY=${DISPLAY}
+    # environment:
+    #   - DISPLAY=192.168.10.18:0.0
