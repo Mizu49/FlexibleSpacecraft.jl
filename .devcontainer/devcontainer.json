@@ -1,16 +1,23 @@
 {
     "name": "Julia dev container",
+
+    // specify your workspace
     "context": "..",
+
     "dockerFile": "Dockerfile",
 
     "settings": { 
+        // use bash as terminal
         "terminal.integrated.shell.linux": "/bin/bash",
+
+        // set path of git
         "git.path": "/usr/bin/git"
     },
 
-
+    // user name of container
     "remoteUser": "root",
 
+    // specify vs code extentions you will use on remote
     "extensions": [
         "julialang.language-julia"
     ]
