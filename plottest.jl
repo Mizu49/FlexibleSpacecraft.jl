@@ -1,4 +1,4 @@
 using Plots
 
 
-plot(rand(10))
+plot(rand(1000))
