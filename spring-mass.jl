@@ -1,5 +1,5 @@
 # 1DOF　バネマス系のシミュレーションプログラム
-
+using Plots
 
 function RK4(sysA, sysB, sysE, Ts, state, input1, input2)
     
@@ -12,11 +12,11 @@ function RK4(sysA, sysB, sysE, Ts, state, input1, input2)
 end
 
 # パラメータ設定
-m = 10
+m = 20
 c = 1
 k = 100
 
-loopNUM = 50000
+loopNUM = 200000
 Ts = 1e-3
 
 A = [
@@ -41,6 +41,8 @@ stateArray[:,1] = [1;0]
 for counter = 1:loopNUM-1
     stateArray[:,counter+1] = RK4(A, B, E, Ts, stateArray[:,counter], 0, 0)
 
-    println(stateArray[1, counter])
+    # println(stateArray[1, counter])
 end
+
+plot(0:Ts:Ts*(loopNUM-1), stateArray[1, :])
 
