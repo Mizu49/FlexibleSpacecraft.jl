@@ -11,7 +11,10 @@
         "terminal.integrated.shell.linux": "/bin/bash",
 
         // set path of git
-        "git.path": "/usr/bin/git"
+        "git.path": "/usr/bin/git",
+
+        // save changes automatically
+        "files.autoSave": "afterDelay",
     },
 
     // user name of container
