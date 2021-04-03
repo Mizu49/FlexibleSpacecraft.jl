@@ -25,3 +25,5 @@ p2 = Point2(3.5, 4.6)
 
 result2 = distance(p2)
 println(result2)
+
+plot(result1, result2)
