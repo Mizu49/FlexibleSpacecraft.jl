@@ -1,5 +1,17 @@
 using LinearAlgebra
 
+
+function rungeKutta(f, currentTime, currentState, samplingTime)
+    k1 = f(currentTime                 , currentState                      )
+    k2 = f(currentTime + samplingTime/2, currentState + samplingTime/2 * k1)
+    k3 = f(currentTime + samplingTime/2, currentState + samplingTime/2 * k2)
+    k4 = f(currentTime + samplingTime  , currentState + samplingTime   * k3)
+
+    nextState = currentState + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
+
+    return nextState
+end
+
 # サンプリング時間
 Ts = 1e-3
 simulationTime = 10
