@@ -53,7 +53,8 @@ dynamicsModel = DynamicsModel(I, M, b)
 
 # サンプリング時間
 Ts = 1e-4
-simulationTime = 3
+simulationTime = 10
+
 
 simDataNum = round(Int, simulationTime/Ts)
 
