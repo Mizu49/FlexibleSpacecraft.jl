@@ -26,17 +26,18 @@ function diffDynamics(model::DynamicsModel, currentTime, currentOmega)
     return differential
 end
 
-# 4th order runge kutta method
-function rungeKutta(f, currentTime, currentState, samplingTime)
 
-    k1 = f(currentTime                 , currentState                      )
-    k2 = f(currentTime + samplingTime/2, currentState + samplingTime/2 * k1)
-    k3 = f(currentTime + samplingTime/2, currentState + samplingTime/2 * k2)
-    k4 = f(currentTime + samplingTime  , currentState + samplingTime   * k3)
+function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime)
+    # Update the angular velocity vector using 4th order runge kutta method
 
-    nextState = currentState + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
+    k1 = diffDynamics(model, currentTime                 , currentOmega                      )
+    k2 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1)
+    k3 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2)
+    k4 = diffDynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3)
 
-    return nextState
+    nextOmega = currentOmega + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
+
+    return nextOmega
 end
 
 # Inertia matrix
@@ -52,8 +53,8 @@ dynamicsModel = DynamicsModel(I, M, b)
 
 
 # サンプリング時間
-Ts = 1e-4
-simulationTime = 10
+Ts = 1e-3
+simulationTime = 60
 
 
 simDataNum = round(Int, simulationTime/Ts)
@@ -66,9 +67,10 @@ omegaBA[:,1] = [0.1 0.0 0.0]';
 for loopCounter = 1:simDataNum-1
 
     # println(loopCounter)     
-    diff = diffDynamics(dynamicsModel, Ts*loopCounter, omegaBA[:, loopCounter])
 
-    omegaBA[:, loopCounter+1] = omegaBA[:, loopCounter] + diff * Ts
+    currentTime = loopCounter*Ts
+
+    omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, currentTime, omegaBA[:, loopCounter], Ts)
 
     println(omegaBA[:, loopCounter])
 end
