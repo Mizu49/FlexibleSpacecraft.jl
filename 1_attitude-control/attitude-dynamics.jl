@@ -55,6 +55,20 @@ function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, 
     return nextOmega
 end
 
+
+function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
+    # Update the quaterion vector using 4th order runge kutta method
+
+    k1 = diffQuaternion(currentOmega, currentQuaternion                      );
+    k2 = diffQuaternion(currentOmega, currentQuaternion + samplingTime/2 * k1);
+    k3 = diffQuaternion(currentOmega, currentQuaternion + samplingTime/2 * k2);
+    k4 = diffQuaternion(currentOmega, currentQuaternion + samplingTime   * k3);
+
+    nextQuaternion = currentQuaternion + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4);
+
+    return nextQuaternion    
+end
+
 # Inertia matrix
 I = diagm(0 => [1.0, 1.0, 2.0])
 
@@ -89,8 +103,8 @@ for loopCounter = 1:simDataNum-1
 
     omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, currentTime, omegaBA[:, loopCounter], Ts)
 
-    quaternion[:, loopCounter+1] = quaternion[:, loopCounter] + Ts * diffQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter])
+    quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
     # println(omegaBA[:, loopCounter])
-    println(quaternion[:, loopCounter])
+    # println(quaternion[:, loopCounter])
 end
