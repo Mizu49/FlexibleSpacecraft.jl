@@ -27,6 +27,21 @@ function diffDynamics(model::DynamicsModel, currentTime, currentOmega)
 end
 
 
+# Equation of Quaternion
+function diffQuaternion(omega, quaternion)
+
+    OMEGA = [
+        0 omega[3] -omega[2] omega[1]
+        -omega[3] 0 omega[1] omega[2]
+        omega[2] -omega[1] 0 omega[3]
+        -omega[1] -omega[2] -omega[3] 0
+    ]
+
+    differential = 1/2 * OMEGA * quaternion
+
+    return differential
+end
+
 function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime)
     # Update the angular velocity vector using 4th order runge kutta method
 
@@ -63,6 +78,8 @@ simDataNum = round(Int, simulationTime/Ts)
 omegaBA = zeros(3, simDataNum)
 omegaBA[:,1] = [0.1 0.0 0.0]';
 
+quaternion = zeros(4, simDataNum)
+quaternion[:, 1] = [1.0 0.0 0.0 0.0]';
 
 for loopCounter = 1:simDataNum-1
 
@@ -72,5 +89,8 @@ for loopCounter = 1:simDataNum-1
 
     omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, currentTime, omegaBA[:, loopCounter], Ts)
 
-    println(omegaBA[:, loopCounter])
+    quaternion[:, loopCounter+1] = quaternion[:, loopCounter] + Ts * diffQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter])
+
+    # println(omegaBA[:, loopCounter])
+    println(quaternion[:, loopCounter])
 end
