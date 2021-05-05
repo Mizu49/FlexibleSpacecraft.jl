@@ -1,4 +1,5 @@
 using LinearAlgebra
+using Plots
 
 # Define Dynamic Model
 struct DynamicsModel
@@ -83,10 +84,13 @@ dynamicsModel = DynamicsModel(I, M, b)
 
 # サンプリング時間
 Ts = 1e-3
-simulationTime = 60
+simulationTime = 10
 
+# 時刻
+time = 0:Ts:simulationTime
 
-simDataNum = round(Int, simulationTime/Ts)
+# Numbers of simulation data
+simDataNum = round(Int, simulationTime/Ts) + 1;
 
 
 omegaBA = zeros(3, simDataNum)
@@ -99,9 +103,7 @@ for loopCounter = 1:simDataNum-1
 
     # println(loopCounter)     
 
-    currentTime = loopCounter*Ts
-
-    omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, currentTime, omegaBA[:, loopCounter], Ts)
+    omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts)
 
     quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
