@@ -83,8 +83,8 @@ dynamicsModel = DynamicsModel(I, M, b)
 
 
 # サンプリング時間
-Ts = 1e-3
-simulationTime = 10
+Ts = 1e-2
+simulationTime = 30
 
 # 時刻
 time = 0:Ts:simulationTime
@@ -94,10 +94,10 @@ simDataNum = round(Int, simulationTime/Ts) + 1;
 
 
 omegaBA = zeros(3, simDataNum)
-omegaBA[:,1] = [0.1 0.0 0.0]';
+omegaBA[:,1] = [1.0 0.0 1.0]';
 
 quaternion = zeros(4, simDataNum)
-quaternion[:, 1] = [1.0 0.0 0.0 0.0]';
+quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
 
 for loopCounter = 1:simDataNum-1
 
@@ -110,3 +110,24 @@ for loopCounter = 1:simDataNum-1
     # println(omegaBA[:, loopCounter])
     # println(quaternion[:, loopCounter])
 end
+
+fig1 = plot(time, omegaBA[1, :], 
+    xlabel ="Time [s]",
+    ylabel ="omega [rad/s]",
+    label  ="Angular velocity 1",
+)
+
+fig2 = plot(time, omegaBA[2, :], 
+    xlabel ="Time [s]",
+    ylabel ="omega [rad/s]",
+    label  ="Angular velocity 2",
+)
+
+fig3 = plot(time, omegaBA[3, :], 
+    xlabel ="Time [s]",
+    ylabel ="omega [rad/s]",
+    label  ="Angular velocity 3",
+)
+
+# Graph of the angular velocity
+plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
