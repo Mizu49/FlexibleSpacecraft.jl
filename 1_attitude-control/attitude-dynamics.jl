@@ -92,12 +92,13 @@ time = 0:Ts:simulationTime
 # Numbers of simulation data
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
-
 omegaBA = zeros(3, simDataNum)
 omegaBA[:,1] = [1.0 0.0 1.0]';
 
 quaternion = zeros(4, simDataNum)
 quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
+
+quaternionConstraint = zeros(1, simDataNum)
 
 for loopCounter = 1:simDataNum-1
 
@@ -107,8 +108,11 @@ for loopCounter = 1:simDataNum-1
 
     quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
+    quaternionConstraint[1, loopCounter] = 
+        quaternion[1]^2 + quaternion[2]^2 + quaternion[3]^2 + quaternion[4]^2
+
     # println(omegaBA[:, loopCounter])
-    # println(quaternion[:, loopCounter])
+    # println(quaternion[:, loopCount`er])
 end
 
 fig1 = plot(time, omegaBA[1, :], 
@@ -131,3 +135,5 @@ fig3 = plot(time, omegaBA[3, :],
 
 # Graph of the angular velocity
 plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
+
+plot(time, quaternionConstraint')
