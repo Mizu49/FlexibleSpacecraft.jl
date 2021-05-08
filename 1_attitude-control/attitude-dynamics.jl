@@ -10,7 +10,7 @@ struct DynamicsModel
     DisturbanceTorque::Vector
 
     # 座標系Bのマトリクス
-    corrdinateB::Matrix
+    coordinateB::Matrix
 end
 
 # Equation of dynamics
@@ -22,7 +22,7 @@ function diffDynamics(model::DynamicsModel, currentTime, currentOmega)
         currentOmega[3] 0 -currentOmega[1]
         -currentOmega[2] currentOmega[1] 0]
 
-    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - model.corrdinateB' * model.InertiaMatrix * skewOmega * model.corrdinateB * model.corrdinateB' * currentOmega)
+    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - model.coordinateB' * model.InertiaMatrix * skewOmega * model.coordinateB * model.coordinateB' * currentOmega)
 
     return differential
 end
@@ -118,7 +118,7 @@ for loopCounter = 1:simDataNum-1
 
     ]
 
-    # dynamicsModel.corrdinateB = 
+    # dynamicsModel.coordinateB = 
     
     # println(omegaBA[:, loopCounter])
     # println(q[:, loopCount`er])
