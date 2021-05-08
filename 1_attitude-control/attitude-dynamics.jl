@@ -2,7 +2,7 @@ using LinearAlgebra
 using Plots
 
 # Define Dynamic Model
-struct DynamicsModel
+mutable struct DynamicsModel
     # 慣性ダイアディック
     InertiaMatrix::Matrix
 
@@ -70,8 +70,18 @@ function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
     return nextQuaternion    
 end
 
+function getTransformationMatrix(q)
+    C = [
+        q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2    2* (q[1]*q[2] + q[3]*q[4])         2* (q[1]*q[3] - q[2]*q[4])
+        2*(q[2]*q[1] - q[3]*q[4])           q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2   2*(q[2]*q[3] + q[1]*q[4])
+        2*(q[3]*q[1] + q[2]*q[4])           2*(q[3]*q[2] - q[1]*q[4])           q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
+    ]
+
+    return C
+end
+
 # Inertia matrix
-I = diagm(0 => [1.0, 1.0, 2.0])
+I = diagm(0 => [1.0, 1.0, 1.0])
 
 # Disturbance torque
 M = [0.0, 0.0, 0.0]
@@ -96,10 +106,10 @@ time = 0:Ts:simulationTime
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
 omegaBA = zeros(3, simDataNum)
-omegaBA[:,1] = [1.0 0.0 1.0]';
+omegaBA[:,1] = [1.0 0.0 0.0]';
 
-q = zeros(4, simDataNum)
-q[:, 1] = [0.0 0.0 0.0 1.0]';
+quaternion = zeros(4, simDataNum)
+quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
 
 quaternionConstraint = zeros(1, simDataNum)
 
@@ -109,20 +119,20 @@ for loopCounter = 1:simDataNum-1
 
     omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts)
 
-    q[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], q[:, loopCounter], Ts)
+    quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
     quaternionConstraint[1, loopCounter] = 
-        q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
+        quaternion[1]^2 + quaternion[2]^2 + quaternion[3]^2 + quaternion[4]^2
 
-    C = [
+    C = getTransformationMatrix(quaternion[:, loopCounter])
 
-    ]
-
-    # dynamicsModel.coordinateB = 
+    dynamicsModel.coordinateB = C * coordinateA
     
     # println(omegaBA[:, loopCounter])
-    # println(q[:, loopCount`er])
+    # println(quaternion[:, loopCounter]
 end
+
+
 
 fig1 = plot(time, omegaBA[1, :], 
     xlabel ="Time [s]",
@@ -146,5 +156,3 @@ fig3 = plot(time, omegaBA[3, :],
 hoge = plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
 display(hoge)
 
-poyo = plot(time, quaternionConstraint')
-display(poyo)
