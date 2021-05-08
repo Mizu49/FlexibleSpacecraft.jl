@@ -134,6 +134,8 @@ fig3 = plot(time, omegaBA[3, :],
 )
 
 # Graph of the angular velocity
-plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
+hoge = plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
+display(hoge)
 
-plot(time, quaternionConstraint')
+poyo = plot(time, quaternionConstraint')
+display(poyo)
