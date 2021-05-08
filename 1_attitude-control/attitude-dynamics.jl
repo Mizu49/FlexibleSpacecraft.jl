@@ -76,6 +76,9 @@ I = diagm(0 => [1.0, 1.0, 2.0])
 # Disturbance torque
 M = [0.0, 0.0, 0.0]
 
+# Coordinate system of a
+coordinateA = ones(Float64, 3, 3)
+
 # Coordinate system of b
 b = ones(Float64, 3, 3)
 
@@ -95,8 +98,8 @@ simDataNum = round(Int, simulationTime/Ts) + 1;
 omegaBA = zeros(3, simDataNum)
 omegaBA[:,1] = [1.0 0.0 1.0]';
 
-quaternion = zeros(4, simDataNum)
-quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
+q = zeros(4, simDataNum)
+q[:, 1] = [0.0 0.0 0.0 1.0]';
 
 quaternionConstraint = zeros(1, simDataNum)
 
@@ -106,13 +109,19 @@ for loopCounter = 1:simDataNum-1
 
     omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts)
 
-    quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
+    q[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], q[:, loopCounter], Ts)
 
     quaternionConstraint[1, loopCounter] = 
-        quaternion[1]^2 + quaternion[2]^2 + quaternion[3]^2 + quaternion[4]^2
+        q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
 
+    C = [
+
+    ]
+
+    # dynamicsModel.corrdinateB = 
+    
     # println(omegaBA[:, loopCounter])
-    # println(quaternion[:, loopCount`er])
+    # println(q[:, loopCount`er])
 end
 
 fig1 = plot(time, omegaBA[1, :], 
