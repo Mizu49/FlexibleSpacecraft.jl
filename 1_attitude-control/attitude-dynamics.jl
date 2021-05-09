@@ -71,6 +71,20 @@ function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
 end
 
 function getTransformationMatrix(q)
+
+    # Check if the quaterion satisfies its constraint
+    try
+        constraint = q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
+
+    catch constraint
+
+        if constraint < 0.995
+            error("Quaternion does not satisfy constraint")
+        elseif constraint > 1.005
+            error("Quaternion does not satisfy constraint")
+        end
+    end
+
     C = [
         q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2    2* (q[1]*q[2] + q[3]*q[4])         2* (q[1]*q[3] - q[2]*q[4])
         2*(q[2]*q[1] - q[3]*q[4])           q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2   2*(q[2]*q[3] + q[1]*q[4])
@@ -111,7 +125,6 @@ omegaBA[:,1] = [0.0 0.0 1.0]';
 quaternion = zeros(4, simDataNum)
 quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
 
-quaternionConstraint = zeros(1, simDataNum)
 
 for loopCounter = 1:simDataNum-1
 
@@ -120,9 +133,6 @@ for loopCounter = 1:simDataNum-1
     omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts)
 
     quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
-
-    quaternionConstraint[1, loopCounter] = 
-        quaternion[1]^2 + quaternion[2]^2 + quaternion[3]^2 + quaternion[4]^2
 
     C = getTransformationMatrix(quaternion[:, loopCounter])
 
