@@ -112,7 +112,8 @@ dynamicsModel = DynamicsModel(Inertia, Torque, coordinateB)
 
 # サンプリング時間
 Ts = 1e-2
-simulationTime = 30
+
+simulationTime = 15
 
 # 時刻
 time = 0:Ts:simulationTime
@@ -167,3 +168,24 @@ fig3 = plot(time, omegaBA[3, :],
 hoge = plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
 display(hoge)
 
+coordFig = quiver(
+    zeros(3), zeros(3), zeros(3),
+    quiver = ( coordinateA[1,:], coordinateA[2,:], coordinateA[3,:] ),
+    color = :black,
+    linewidth = 4,
+    xlims = (-1.2, 1.2),
+    ylims = (-1.2, 1.2),
+    zlims = (-1.2, 1.2),
+    framestyle = :origin)
+
+coordFig = quiver!(
+    zeros(3), zeros(3), zeros(3),
+    quiver = ( dynamicsModel.coordinateB[1,:], dynamicsModel.coordinateB[2,:], dynamicsModel.coordinateB[3,:] ),
+    color = :blue,
+    linewidth = 4,
+    xlims = (-1.2, 1.2),
+    ylims = (-1.2, 1.2),
+    zlims = (-1.2, 1.2),
+    framestyle = :origin)
+
+display(coordFig)
