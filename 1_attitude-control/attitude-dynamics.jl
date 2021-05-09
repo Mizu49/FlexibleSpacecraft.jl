@@ -86,27 +86,28 @@ function getTransformationMatrix(q)
     end
 
     C = [
-        q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2    2* (q[1]*q[2] + q[3]*q[4])         2* (q[1]*q[3] - q[2]*q[4])
-        2*(q[2]*q[1] - q[3]*q[4])           q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2   2*(q[2]*q[3] + q[1]*q[4])
-        2*(q[3]*q[1] + q[2]*q[4])           2*(q[3]*q[2] - q[1]*q[4])           q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
+        q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2  2*(q[1]*q[2] + q[3]*q[4])          2*(q[1]*q[3] - q[2]*q[4])
+        2*(q[2]*q[1] - q[3]*q[4])          q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2  2*(q[2]*q[3] + q[1]*q[4])
+        2*(q[3]*q[1] + q[2]*q[4])          2*(q[3]*q[2] - q[1]*q[4])          q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
     ]
 
     return C
 end
 
 # Inertia matrix
-I = diagm(0 => [1.0, 1.0, 2.0])
+Inertia = diagm([1.0, 1.0, 2.0])
 
 # Disturbance torque
-M = [0.0, 0.0, 0.0]
+Torque = [0.0, 0.0, 0.0]
 
 # Coordinate system of a
-coordinateA = ones(Float64, 3, 3)
+coordinateA = diagm([1.0, 1.0, 1.0])
 
 # Coordinate system of b
-b = ones(Float64, 3, 3)
+coordinateB = diagm([1.0, 1.0, 1.0])
 
-dynamicsModel = DynamicsModel(I, M, b)
+# Dynamics model (mutable struct)
+dynamicsModel = DynamicsModel(Inertia, Torque, coordinateB)
 
 
 # サンプリング時間
@@ -139,7 +140,7 @@ for loopCounter = 1:simDataNum-1
     dynamicsModel.coordinateB = C * coordinateA
     
     # println(omegaBA[:, loopCounter])
-    # println(quaternion[:, loopCounter]
+    # println(dynamicsModel.coordinateB[:,1])
 end
 
 
