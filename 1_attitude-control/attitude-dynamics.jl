@@ -81,7 +81,7 @@ function getTransformationMatrix(q)
 end
 
 # Inertia matrix
-I = diagm(0 => [1.0, 1.0, 1.0])
+I = diagm(0 => [1.0, 1.0, 2.0])
 
 # Disturbance torque
 M = [0.0, 0.0, 0.0]
@@ -106,7 +106,7 @@ time = 0:Ts:simulationTime
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
 omegaBA = zeros(3, simDataNum)
-omegaBA[:,1] = [1.0 0.0 0.0]';
+omegaBA[:,1] = [0.0 0.0 1.0]';
 
 quaternion = zeros(4, simDataNum)
 quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
