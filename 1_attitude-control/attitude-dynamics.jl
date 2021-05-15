@@ -9,12 +9,18 @@ mutable struct DynamicsModel
     # 外乱トルク
     DisturbanceTorque::Vector
 
-    # 座標系Bのマトリクス
-    coordinateB::Matrix
 end
 
+# Struct of each coordinate
+mutable struct CoordinateVectors
+    x::Matrix
+    y::Matrix
+    z::Matrix
+end
+
+
 # Equation of dynamics
-function diffDynamics(model::DynamicsModel, currentTime, currentOmega)
+function diffDynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)
 
     # skew matrix of angular velocity vector
     skewOmega = [
@@ -22,7 +28,7 @@ function diffDynamics(model::DynamicsModel, currentTime, currentOmega)
         currentOmega[3] 0 -currentOmega[1]
         -currentOmega[2] currentOmega[1] 0]
 
-    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - model.coordinateB' * model.InertiaMatrix * skewOmega * model.coordinateB * model.coordinateB' * currentOmega)
+    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - currentCoordB' * model.InertiaMatrix * skewOmega * currentCoordB * currentCoordB' * currentOmega)
 
     return differential
 end
@@ -43,13 +49,15 @@ function diffQuaternion(omega, quaternion)
     return differential
 end
 
-function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime)
+function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
     # Update the angular velocity vector using 4th order runge kutta method
 
-    k1 = diffDynamics(model, currentTime                 , currentOmega                      )
-    k2 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1)
-    k3 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2)
-    k4 = diffDynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3)
+
+
+    k1 = diffDynamics(model, currentTime                 , currentOmega                      , currentCoordB)
+    k2 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1, currentCoordB)
+    k3 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2, currentCoordB)
+    k4 = diffDynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3, currentCoordB)
 
     nextOmega = currentOmega + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
 
@@ -100,14 +108,9 @@ Inertia = diagm([1.0, 1.0, 2.0])
 # Disturbance torque
 Torque = [0.0, 0.0, 0.0]
 
-# Coordinate system of a
-coordinateA = diagm([1.0, 1.0, 1.0])
-
-# Coordinate system of b
-coordinateB = diagm([1.0, 1.0, 1.0])
 
 # Dynamics model (mutable struct)
-dynamicsModel = DynamicsModel(Inertia, Torque, coordinateB)
+dynamicsModel = DynamicsModel(Inertia, Torque)
 
 
 # サンプリング時間
@@ -121,6 +124,18 @@ time = 0:Ts:simulationTime
 # Numbers of simulation data
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
+# Coordinate system of b
+coordinateB = CoordinateVectors(
+    zeros(3, simDataNum),
+    zeros(3, simDataNum),
+    zeros(3, simDataNum),
+)
+
+coordinateB.x[:, 1] = [1, 0, 0]
+coordinateB.y[:, 1] = [0, 1, 0]
+coordinateB.z[:, 1] = [0, 0, 1]
+
+
 omegaBA = zeros(3, simDataNum)
 omegaBA[:,1] = [0.0 0.0 1.0]';
 
@@ -130,15 +145,19 @@ quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
 
 for loopCounter = 1:simDataNum-1
 
-    # println(loopCounter)     
+    # println(loopCounter)    
+    
+    currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
 
-    omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts)
+    omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
 
     quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
     C = getTransformationMatrix(quaternion[:, loopCounter])
 
-    dynamicsModel.coordinateB = C * coordinateA
+    coordinateB.x[:, loopCounter+1] = C * [1, 0, 0]
+    coordinateB.y[:, loopCounter+1] = C * [0, 1, 0]
+    coordinateB.z[:, loopCounter+1] = C * [0, 0, 1]
     
     # println(omegaBA[:, loopCounter])
     # println(dynamicsModel.coordinateB[:,1])
@@ -168,9 +187,11 @@ fig3 = plot(time, omegaBA[3, :],
 hoge = plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
 display(hoge)
 
+plotIndex = 400
+
 coordFig = quiver(
     zeros(3), zeros(3), zeros(3),
-    quiver = ( coordinateA[1,:], coordinateA[2,:], coordinateA[3,:] ),
+    quiver = ( [1,0,0], [0,0,0], [0,0,1]),
     color = :black,
     linewidth = 4,
     xlims = (-1.2, 1.2),
@@ -180,7 +201,10 @@ coordFig = quiver(
 
 coordFig = quiver!(
     zeros(3), zeros(3), zeros(3),
-    quiver = ( dynamicsModel.coordinateB[1,:], dynamicsModel.coordinateB[2,:], dynamicsModel.coordinateB[3,:] ),
+    quiver = ( 
+        [coordinateB.x[1,plotIndex], coordinateB.y[1,plotIndex], coordinateB.z[1,plotIndex]], 
+        [coordinateB.x[2,plotIndex], coordinateB.y[2,plotIndex], coordinateB.z[2,plotIndex]], 
+        [coordinateB.x[3,plotIndex], coordinateB.y[3,plotIndex], coordinateB.z[3,plotIndex]]),
     color = :blue,
     linewidth = 4,
     xlims = (-1.2, 1.2),
