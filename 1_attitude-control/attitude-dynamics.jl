@@ -1,111 +1,14 @@
 using LinearAlgebra
 using Plots
 
-# Define Dynamic Model
-mutable struct DynamicsModel
-    # 慣性ダイアディック
-    InertiaMatrix::Matrix
-
-    # 外乱トルク
-    DisturbanceTorque::Vector
-
-end
-
-# Struct of each coordinate
-struct CoordinateVector
-    x::Vector
-    y::Vector
-    z::Vector
-end
+# Include module `AttitudeDynamics`
+include("AttitudeDynamics.jl")
+using .AttitudeDynamics
 
 mutable struct CoordinateVectors
     x::Matrix
     y::Matrix
     z::Matrix
-end
-
-
-# Equation of dynamics
-function diffDynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)
-
-    # skew matrix of angular velocity vector
-    skewOmega = [
-        0 -currentOmega[3] currentOmega[2]
-        currentOmega[3] 0 -currentOmega[1]
-        -currentOmega[2] currentOmega[1] 0]
-
-    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - currentCoordB' * model.InertiaMatrix * skewOmega * currentCoordB * currentCoordB' * currentOmega)
-
-    return differential
-end
-
-
-# Equation of Quaternion
-function diffQuaternion(omega, quaternion)
-
-    OMEGA = [
-        0 omega[3] -omega[2] omega[1]
-        -omega[3] 0 omega[1] omega[2]
-        omega[2] -omega[1] 0 omega[3]
-        -omega[1] -omega[2] -omega[3] 0
-    ]
-
-    differential = 1/2 * OMEGA * quaternion
-
-    return differential
-end
-
-function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
-    # Update the angular velocity vector using 4th order runge kutta method
-
-
-
-    k1 = diffDynamics(model, currentTime                 , currentOmega                      , currentCoordB)
-    k2 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1, currentCoordB)
-    k3 = diffDynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2, currentCoordB)
-    k4 = diffDynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3, currentCoordB)
-
-    nextOmega = currentOmega + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return nextOmega
-end
-
-
-function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
-    # Update the quaterion vector using 4th order runge kutta method
-
-    k1 = diffQuaternion(currentOmega, currentQuaternion                      );
-    k2 = diffQuaternion(currentOmega, currentQuaternion + samplingTime/2 * k1);
-    k3 = diffQuaternion(currentOmega, currentQuaternion + samplingTime/2 * k2);
-    k4 = diffQuaternion(currentOmega, currentQuaternion + samplingTime   * k3);
-
-    nextQuaternion = currentQuaternion + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4);
-
-    return nextQuaternion    
-end
-
-function getTransformationMatrix(q)
-
-    # Check if the quaterion satisfies its constraint
-    try
-        constraint = q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
-
-    catch constraint
-
-        if constraint < 0.995
-            error("Quaternion does not satisfy constraint")
-        elseif constraint > 1.005
-            error("Quaternion does not satisfy constraint")
-        end
-    end
-
-    C = [
-        q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2  2*(q[1]*q[2] + q[3]*q[4])          2*(q[1]*q[3] - q[2]*q[4])
-        2*(q[2]*q[1] - q[3]*q[4])          q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2  2*(q[2]*q[3] + q[1]*q[4])
-        2*(q[3]*q[1] + q[2]*q[4])          2*(q[3]*q[2] - q[1]*q[4])          q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
-    ]
-
-    return C
 end
 
 # Inertia matrix
@@ -116,7 +19,7 @@ Torque = [0.0, 0.0, 0.0]
 
 
 # Dynamics model (mutable struct)
-dynamicsModel = DynamicsModel(Inertia, Torque)
+dynamicsModel = AttitudeDynamics.DynamicsModel(Inertia, Torque)
 
 
 # サンプリング時間
@@ -131,7 +34,7 @@ time = 0:Ts:simulationTime
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
 # Coordinate system of a
-coordinateA = CoordinateVector(
+coordinateA = AttitudeDynamics.CoordinateVector(
     [1, 0, 0],
     [0, 1, 0],
     [0, 0, 1]
@@ -162,11 +65,11 @@ for loopCounter = 1:simDataNum-1
     
     currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
 
-    omegaBA[:, loopCounter+1] = updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
+    omegaBA[:, loopCounter+1] = AttitudeDynamics.updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
 
-    quaternion[:, loopCounter+1] = updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
+    quaternion[:, loopCounter+1] = AttitudeDynamics.updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
-    C = getTransformationMatrix(quaternion[:, loopCounter])
+    C = AttitudeDynamics.getTransformationMatrix(quaternion[:, loopCounter])
 
     coordinateB.x[:, loopCounter+1] = C * coordinateA.x
     coordinateB.y[:, loopCounter+1] = C * coordinateA.y
