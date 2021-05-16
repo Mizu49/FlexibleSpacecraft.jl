@@ -9,6 +9,10 @@ import .AttitudeDynamics
 include("TimeLine.jl")
 import .TimeLine as tl
 
+# Include module `PlotGenerator`
+include("PlotGenerator.jl")
+import .PlotGenerator as pl
+
 
 # Inertia matrix
 Inertia = diagm([1.0, 1.0, 2.0])
