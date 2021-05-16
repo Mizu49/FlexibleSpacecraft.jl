@@ -3,13 +3,12 @@ using Plots
 
 # Include module `AttitudeDynamics`
 include("AttitudeDynamics.jl")
-using .AttitudeDynamics
+import .AttitudeDynamics
 
-mutable struct CoordinateVectors
-    x::Matrix
-    y::Matrix
-    z::Matrix
-end
+# Include module `TimeLine`
+include("TimeLine.jl")
+import .TimeLine as tl
+
 
 # Inertia matrix
 Inertia = diagm([1.0, 1.0, 2.0])
@@ -20,7 +19,6 @@ Torque = [0.0, 0.0, 0.0]
 
 # Dynamics model (mutable struct)
 dynamicsModel = AttitudeDynamics.DynamicsModel(Inertia, Torque)
-
 
 # サンプリング時間
 Ts = 1e-2
@@ -41,15 +39,7 @@ coordinateA = AttitudeDynamics.CoordinateVector(
 )
 
 # Coordinate system of b
-coordinateB = CoordinateVectors(
-    zeros(3, simDataNum),
-    zeros(3, simDataNum),
-    zeros(3, simDataNum),
-)
-
-coordinateB.x[:, 1] = coordinateA.x
-coordinateB.y[:, 1] = coordinateA.y
-coordinateB.z[:, 1] = coordinateA.z
+coordinateB = tl.initBodyCoordinate(simDataNum, coordinateA)
 
 
 omegaBA = zeros(3, simDataNum)
