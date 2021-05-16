@@ -12,6 +12,12 @@ mutable struct DynamicsModel
 end
 
 # Struct of each coordinate
+struct CoordinateVector
+    x::Vector
+    y::Vector
+    z::Vector
+end
+
 mutable struct CoordinateVectors
     x::Matrix
     y::Matrix
@@ -124,6 +130,13 @@ time = 0:Ts:simulationTime
 # Numbers of simulation data
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
+# Coordinate system of a
+coordinateA = CoordinateVector(
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1]
+)
+
 # Coordinate system of b
 coordinateB = CoordinateVectors(
     zeros(3, simDataNum),
@@ -131,9 +144,9 @@ coordinateB = CoordinateVectors(
     zeros(3, simDataNum),
 )
 
-coordinateB.x[:, 1] = [1, 0, 0]
-coordinateB.y[:, 1] = [0, 1, 0]
-coordinateB.z[:, 1] = [0, 0, 1]
+coordinateB.x[:, 1] = coordinateA.x
+coordinateB.y[:, 1] = coordinateA.y
+coordinateB.z[:, 1] = coordinateA.z
 
 
 omegaBA = zeros(3, simDataNum)
@@ -142,7 +155,7 @@ omegaBA[:,1] = [0.0 0.0 1.0]';
 quaternion = zeros(4, simDataNum)
 quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
 
-
+println("Begin simulation!")
 for loopCounter = 1:simDataNum-1
 
     # println(loopCounter)    
@@ -155,14 +168,14 @@ for loopCounter = 1:simDataNum-1
 
     C = getTransformationMatrix(quaternion[:, loopCounter])
 
-    coordinateB.x[:, loopCounter+1] = C * [1, 0, 0]
-    coordinateB.y[:, loopCounter+1] = C * [0, 1, 0]
-    coordinateB.z[:, loopCounter+1] = C * [0, 0, 1]
+    coordinateB.x[:, loopCounter+1] = C * coordinateA.x
+    coordinateB.y[:, loopCounter+1] = C * coordinateA.y
+    coordinateB.z[:, loopCounter+1] = C * coordinateA.z
     
     # println(omegaBA[:, loopCounter])
     # println(dynamicsModel.coordinateB[:,1])
 end
-
+println("Simulation is completed!")
 
 
 fig1 = plot(time, omegaBA[1, :], 
@@ -187,11 +200,14 @@ fig3 = plot(time, omegaBA[3, :],
 hoge = plot(fig1, fig2, fig3, layout = (3, 1), legend = true)
 display(hoge)
 
-plotIndex = 400
+plotIndex = 1000
 
 coordFig = quiver(
     zeros(3), zeros(3), zeros(3),
-    quiver = ( [1,0,0], [0,0,0], [0,0,1]),
+    quiver = ( 
+        [coordinateA.x[1], coordinateA.y[1], coordinateA.z[1]], 
+        [coordinateA.x[2], coordinateA.y[2], coordinateA.z[2]], 
+        [coordinateA.x[3], coordinateA.y[3], coordinateA.z[3]]),
     color = :black,
     linewidth = 4,
     xlims = (-1.2, 1.2),
