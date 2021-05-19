@@ -18,6 +18,34 @@ mutable struct CoordinateVectors
 end
 
 """
+    initAngularVelocity(simDataNum, initVector)
+
+Time response of angular velocity
+"""
+function initAngularVelocity(simDataNum, initVector)
+
+    angularVelocityArray = zeros(3, simDataNum)
+    angularVelocityArray[:,1] = initVector;
+
+    return angularVelocityArray
+end
+
+
+"""
+    initQuaternion(simDataNum, initVector)
+
+Initialize quaternion array for simulation
+"""
+function initQuaternion(simDataNum, initVector)
+
+    quaternion = zeros(4, simDataNum)
+    quaternion[:, 1] = initVector;
+    
+    return quaternion
+end
+
+
+"""
     initBodyCoordinate(simDataNum, initVectors)
 
 Initialize time-variant coordinate vectors

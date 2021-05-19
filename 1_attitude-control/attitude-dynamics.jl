@@ -45,12 +45,9 @@ coordinateA = AttitudeDynamics.CoordinateVector(
 # Coordinate system of b
 coordinateB = tl.initBodyCoordinate(simDataNum, coordinateA)
 
+omegaBA = tl.initAngularVelocity(simDataNum, [0, 0, 1])
 
-omegaBA = zeros(3, simDataNum)
-omegaBA[:,1] = [0.0 0.0 1.0]';
-
-quaternion = zeros(4, simDataNum)
-quaternion[:, 1] = [0.0 0.0 0.0 1.0]';
+quaternion = tl.initQuaternion(simDataNum, [0, 0, 0, 1])
 
 println("Begin simulation!")
 for loopCounter = 1:simDataNum-1
