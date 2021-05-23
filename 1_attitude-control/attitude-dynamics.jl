@@ -70,4 +70,4 @@ for loopCounter = 1:simDataNum-1
 end
 println("Simulation is completed!")
 
-plt.plotAngularVelocity()
+plt.plotAngularVelocity(time, omegaBA)
