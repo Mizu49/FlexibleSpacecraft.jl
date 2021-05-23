@@ -29,6 +29,22 @@ mutable struct CoordinateVectors
 end
 
 """
+    function extractCoordinateVector(time, samplingPeriod, coordinateVectors::TimeLine.CoordinateVectors)
+"""
+function extractCoordinateVector(time, samplingPeriod, coordinateVectors::TimeLine.CoordinateVectors)
+
+    sampleStep = floor(Int, time/samplingPeriod)
+
+    sampledCoordinate = CoordinateVector(
+        coordinateVectors.x[:, sampleStep],
+        coordinateVectors.y[:, sampleStep],
+        coordinateVectors.z[:, sampleStep]        
+    )
+    
+    return sampledCoordinate
+end
+
+"""
     initAngularVelocity(simDataNum, initVector)
 
 Time response of angular velocity

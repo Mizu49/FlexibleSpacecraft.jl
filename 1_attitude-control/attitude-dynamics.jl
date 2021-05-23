@@ -65,9 +65,11 @@ for loopCounter = 1:simDataNum-1
     coordinateB.y[:, loopCounter+1] = C * coordinateA.y
     coordinateB.z[:, loopCounter+1] = C * coordinateA.z
     
-    # println(omegaBA[:, loopCounter])
-    # println(dynamicsModel.coordinateB[:,1])
 end
 println("Simulation is completed!")
 
 plt.plotAngularVelocity(time, omegaBA)
+
+plotTime = 10
+bodyCoord = tl.extractCoordinateVector(plotTime, Ts, coordinateB)
+plt.plotCoordinate(plotTime, coordinateA, bodyCoord)
