@@ -33,18 +33,6 @@ mutable struct DynamicsModel
     DisturbanceTorque::Vector
 end
 
-"""
-    CoordinateVector(x::Vector, y::Vector, z::Vector)
-
-Struct of immutable coordinate vectors. Use this for inertia frame (coordinate system A)
-"""
-struct CoordinateVector
-    x::Vector
-    y::Vector
-    z::Vector
-end
-
-
 # Equation of dynamics
 """
     diffDynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)

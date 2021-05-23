@@ -7,6 +7,17 @@ module TimeLine
 
 
 """
+    CoordinateVector(x::Vector, y::Vector, z::Vector)
+
+Struct of immutable coordinate vectors. Use this for inertia frame (coordinate system A)
+"""
+struct CoordinateVector
+    x::Vector
+    y::Vector
+    z::Vector
+end
+
+"""
     mutable struct CoordinateVectors(x::Matrix, y::Matrix, z::Matrix)
 
 Struct of array of time-variant coordinate vectors

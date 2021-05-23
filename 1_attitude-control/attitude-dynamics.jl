@@ -35,7 +35,7 @@ time = 0:Ts:simulationTime
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
 # Coordinate system of a
-coordinateA = AttitudeDynamics.CoordinateVector(
+coordinateA = tl.CoordinateVector(
     [1, 0, 0],
     [0, 1, 0],
     [0, 0, 1]
