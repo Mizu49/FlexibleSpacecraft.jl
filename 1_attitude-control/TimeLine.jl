@@ -33,7 +33,7 @@ end
 """
 function extractCoordinateVector(time, samplingPeriod, coordinateVectors::TimeLine.CoordinateVectors)
 
-    sampleStep = floor(Int, time/samplingPeriod)
+    sampleStep = floor(Int, time/samplingPeriod) + 1
 
     sampledCoordinate = CoordinateVector(
         coordinateVectors.x[:, sampleStep],

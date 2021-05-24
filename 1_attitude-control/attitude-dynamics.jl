@@ -1,4 +1,5 @@
 using LinearAlgebra
+using Plots
 
 # Include module `AttitudeDynamics`
 include("AttitudeDynamics.jl")
@@ -73,3 +74,13 @@ plt.plotAngularVelocity(time, omegaBA)
 plotTime = 10
 bodyCoord = tl.extractCoordinateVector(plotTime, Ts, coordinateB)
 plt.plotCoordinate(plotTime, coordinateA, bodyCoord)
+
+
+dataNum = size(time, 1)
+anim = @animate for index in 1:dataNum
+
+    bodyCoordinate = tl.extractCoordinateVector(time[index], Ts, coordinateB)
+
+    plt.plotCoordinate(time[index], coordinateA, bodyCoordinate)
+end every 10
+gif(anim, "attitude.gif", fps = 120)
