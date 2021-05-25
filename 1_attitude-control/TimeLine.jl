@@ -29,9 +29,9 @@ mutable struct CoordinateVectors
 end
 
 """
-    function extractCoordinateVector(time, samplingPeriod, coordinateVectors::TimeLine.CoordinateVectors)
+    function extractCoordinateVector(time, samplingPeriod, coordinateVectors)
 """
-function extractCoordinateVector(time, samplingPeriod, coordinateVectors::TimeLine.CoordinateVectors)
+function extractCoordinateVector(time, samplingPeriod, coordinateVectors)
 
     sampleStep = floor(Int, time/samplingPeriod) + 1
 

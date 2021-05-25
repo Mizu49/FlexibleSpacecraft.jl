@@ -1,5 +1,4 @@
 using LinearAlgebra
-using Plots
 
 # Include module `AttitudeDynamics`
 include("AttitudeDynamics.jl")
@@ -27,7 +26,7 @@ dynamicsModel = AttitudeDynamics.DynamicsModel(Inertia, Torque)
 # サンプリング時間
 Ts = 1e-2
 
-simulationTime = 15
+simulationTime = 60
 
 # 時刻
 time = 0:Ts:simulationTime
@@ -69,18 +68,8 @@ for loopCounter = 1:simDataNum-1
 end
 println("Simulation is completed!")
 
-plt.plotAngularVelocity(time, omegaBA)
+fig1 = plt.plotAngularVelocity(time, omegaBA)
+display(fig1)
 
-plotTime = 10
-bodyCoord = tl.extractCoordinateVector(plotTime, Ts, coordinateB)
-plt.plotCoordinate(plotTime, coordinateA, bodyCoord)
-
-
-dataNum = size(time, 1)
-anim = @animate for index in 1:dataNum
-
-    bodyCoordinate = tl.extractCoordinateVector(time[index], Ts, coordinateB)
-
-    plt.plotCoordinate(time[index], coordinateA, bodyCoordinate)
-end every 10
-gif(anim, "attitude.gif", fps = 120)
+fig2 = plt.getCoordinateGif(time, Ts, coordinateA, coordinateB)
+display(fig2)

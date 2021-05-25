@@ -7,6 +7,9 @@ module PlotGenerator
 
 using Plots
 
+# Include module `TimeLine`
+include("TimeLine.jl")
+import .TimeLine
 
 """
     plotAngularVelocity(time::Matrix, angularVelocity::Matrix)
@@ -70,6 +73,28 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
         framestyle = :origin)
 
     return coordFig
+end
+
+"""
+    function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif, Fps,)
+"""
+function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+
+    dataNum = size(time, 1)
+    steps = round(Int, Tgif/Tsampling)
+
+    # create animation
+    anim = @animate for index in 1:dataNum
+
+        bodyCoordinate = TimeLine.extractCoordinateVector(time[index], Tsampling, bodyCoordinateArray)
+
+        plotCoordinate(time[index], refCoordinate, bodyCoordinate)
+    end every steps
+
+    # make gif image
+    gifanime = gif(anim, "attitude.gif", fps = FPS)
+
+    return gifanime
 end
 
 end
