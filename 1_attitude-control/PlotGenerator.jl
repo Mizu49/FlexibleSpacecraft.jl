@@ -70,7 +70,8 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
         xlims = (-1.2, 1.2),
         ylims = (-1.2, 1.2),
         zlims = (-1.2, 1.2),
-        framestyle = :origin)
+        framestyle = :origin,
+        title = "Time: $time [s]")
 
     return coordFig
 end
