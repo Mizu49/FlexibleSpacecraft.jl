@@ -20,8 +20,9 @@
     // user name of container
     "remoteUser": "root",
 
-    // specify vs code extentions you will use on remote
+    // specify vs code extensions you will use on remote
     "extensions": [
-        "julialang.language-julia"
+        // mandatory for julia development
+        "julialang.language-julia",
     ]
 }
