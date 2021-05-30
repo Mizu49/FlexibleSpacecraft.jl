@@ -52,11 +52,11 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [refCoordinate.x[1], refCoordinate.y[1], refCoordinate.z[1]], 
             [refCoordinate.x[2], refCoordinate.y[2], refCoordinate.z[2]], 
             [refCoordinate.x[3], refCoordinate.y[3], refCoordinate.z[3]]),
-        color = :black,
+        color = RGBA(colorant"#000000", 0.5),
         linewidth = 4,
-        xlims = (-1.2, 1.2),
-        ylims = (-1.2, 1.2),
-        zlims = (-1.2, 1.2),
+        xlims = (-1.0, 1.0),
+        ylims = (-1.0, 1.0),
+        zlims = (-1.0, 1.0),
         framestyle = :origin)
 
     coordFig = quiver!(
@@ -67,9 +67,9 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [bodyCoordinate.x[3], bodyCoordinate.y[3], bodyCoordinate.z[3]]),
         color = :blue,
         linewidth = 4,
-        xlims = (-1.2, 1.2),
-        ylims = (-1.2, 1.2),
-        zlims = (-1.2, 1.2),
+        xlims = (-1.0, 1.0),
+        ylims = (-1.0, 1.0),
+        zlims = (-1.0, 1.0),
         framestyle = :origin,
         title = "Time: $time [s]")
 
