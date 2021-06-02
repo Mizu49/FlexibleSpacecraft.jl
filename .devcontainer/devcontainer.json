@@ -7,8 +7,6 @@
     "dockerFile": "Dockerfile",
 
     "settings": { 
-        // use bash as terminal
-        "terminal.integrated.shell.linux": "/bin/bash",
 
         // set path of git
         "git.path": "/usr/bin/git",
