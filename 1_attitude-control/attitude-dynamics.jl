@@ -68,8 +68,13 @@ for loopCounter = 1:simDataNum-1
 end
 println("Simulation is completed!")
 
-fig1 = plt.plotAngularVelocity(time, omegaBA)
-display(fig1)
+# fig1 = plt.plotAngularVelocity(time, omegaBA)
+# display(fig1)
+
 
 fig2 = plt.getCoordinateGif(time, Ts, coordinateA, coordinateB)
 display(fig2)
+
+bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
+fig3 = plt.plotCoordinate(10, coordinateA, bodyCoordinate)
+display(fig3)
