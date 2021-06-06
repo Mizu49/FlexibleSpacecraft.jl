@@ -53,7 +53,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [refCoordinate.x[1]], 
             [refCoordinate.x[2]], 
             [refCoordinate.x[3]]),
-        color = RGBA(colorant"#389826", 0.1),
+        color = RGB(colorant"#FFA5A5"),
         linewidth = 2,)
 
     coordFig = quiver!(
@@ -62,7 +62,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [refCoordinate.y[1]], 
             [refCoordinate.y[2]], 
             [refCoordinate.y[3]]),
-        color = RGBA(colorant"#9668B2", 0.1),
+        color = RGB(colorant"#A5FFA5"),
         linewidth = 2,)
 
     coordFig = quiver!(
@@ -71,7 +71,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [refCoordinate.z[1]], 
             [refCoordinate.z[2]], 
             [refCoordinate.z[3]]),
-        color = RGBA(colorant"#CB3C33", 0.1),
+        color = RGB(colorant"#A5A5FF"),
         linewidth = 2,)
 
     # Plot of spacecraft fixed frame
@@ -81,7 +81,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [bodyCoordinate.x[1]], 
             [bodyCoordinate.x[2]], 
             [bodyCoordinate.x[3]]),
-        color = RGBA(colorant"#389826", 1.0),
+        color = RGB(colorant"#FF0000"),
         linewidth = 4,)
 
     coordFig = quiver!(
@@ -90,7 +90,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [bodyCoordinate.y[1]], 
             [bodyCoordinate.y[2]], 
             [bodyCoordinate.y[3]]),
-        color = RGBA(colorant"#9668B2", 1.0),
+        color = RGB(colorant"#00FF00"),
         linewidth = 4,)
 
     coordFig = quiver!(
@@ -99,7 +99,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [bodyCoordinate.z[1]], 
             [bodyCoordinate.z[2]], 
             [bodyCoordinate.z[3]]),
-        color = RGBA(colorant"#CB3C33", 1.0),
+        color = RGB(colorant"#0000FF"),
         linewidth = 4,
         framestyle = :origin)
 

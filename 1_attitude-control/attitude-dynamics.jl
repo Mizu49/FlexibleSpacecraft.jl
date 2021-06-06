@@ -17,7 +17,7 @@ import .PlotGenerator as plt
 Inertia = diagm([1.0, 1.0, 2.0])
 
 # Disturbance torque
-Torque = [0.0, 0.0, 0.0]
+Torque = [0.05, 0.0, 0.0]
 
 
 # Dynamics model (mutable struct)
