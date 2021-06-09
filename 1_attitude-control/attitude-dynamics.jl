@@ -17,7 +17,7 @@ import .PlotGenerator as plt
 Inertia = diagm([1.0, 1.0, 2.0])
 
 # Disturbance torque
-Torque = [0.05, 0.0, 0.0]
+Torque = [0.0, 0.0, 0.0]
 
 
 # Dynamics model (mutable struct)
@@ -72,9 +72,9 @@ println("Simulation is completed!")
 # display(fig1)
 
 
-# fig2 = plt.getCoordinateGif(time, Ts, coordinateA, coordinateB)
-# display(fig2)
+fig2 = plt.getCoordinateGif(time, Ts, coordinateA, coordinateB)
+display(fig2)
 
-bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
-fig3 = plt.plotCoordinate(10, coordinateA, bodyCoordinate)
-display(fig3)
+# bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
+# fig3 = plt.plotCoordinate(10, coordinateA, bodyCoordinate)
+# display(fig3)
