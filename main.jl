@@ -1,15 +1,15 @@
 using LinearAlgebra
 
 # Include module `AttitudeDynamics`
-include("AttitudeDynamics.jl")
+include("src/AttitudeDynamics.jl")
 import .AttitudeDynamics
 
 # Include module `TimeLine`
-include("TimeLine.jl")
+include("src/TimeLine.jl")
 import .TimeLine as tl
 
 # Include module `PlotGenerator`
-include("PlotGenerator.jl")
+include("src/PlotGenerator.jl")
 import .PlotGenerator as plt
 
 
