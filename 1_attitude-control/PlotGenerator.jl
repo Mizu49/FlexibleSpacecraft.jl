@@ -62,7 +62,7 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
             [refCoordinate.y[1]], 
             [refCoordinate.y[2]], 
             [refCoordinate.y[3]]),
-        color = RGB(colorant"#00E500"),
+        color = RGB(colorant"#CCFECC"),
         linewidth = 2,)
 
     coordFig = quiver!(
