@@ -1,5 +1,6 @@
 # FlexibleSpacecraft.jl
 
+`FlexibleSpacecraft.jl` is an **Open Source Spacecraft Attitude-Structure Coupling Simulator** developed in Julia Language.
 
-## 開発環境
-`devcontainer`にある`Dockerfile`を基にDockerコンテナの中で開発する．
+*This project is quite new and under active initial development for open-source release.*
+
