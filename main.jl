@@ -1,17 +1,5 @@
-using LinearAlgebra
-
-# Include module `AttitudeDynamics`
-include("src/AttitudeDynamics.jl")
-import .AttitudeDynamics
-
-# Include module `TimeLine`
-include("src/TimeLine.jl")
-import .TimeLine as tl
-
-# Include module `PlotGenerator`
-include("src/PlotGenerator.jl")
-import .PlotGenerator as plt
-
+include("src/FlexibleSpacecraft.jl")
+using .FlexibleSpacecraft
 
 # Inertia matrix
 Inertia = diagm([1.0, 1.0, 2.0])
