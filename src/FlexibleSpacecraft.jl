@@ -16,6 +16,6 @@ include("TimeLine.jl")
 
 # Include module `PlotGenerator`
 include("PlotGenerator.jl")
-@reexport using .PlotGenerator as plt
+@reexport using .PlotGenerator
 
 end # module 
