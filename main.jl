@@ -1,17 +1,5 @@
-using LinearAlgebra
-
-# Include module `AttitudeDynamics`
-include("src/AttitudeDynamics.jl")
-import .AttitudeDynamics
-
-# Include module `TimeLine`
-include("src/TimeLine.jl")
-import .TimeLine as tl
-
-# Include module `PlotGenerator`
-include("src/PlotGenerator.jl")
-import .PlotGenerator as plt
-
+include("src/FlexibleSpacecraft.jl")
+using .FlexibleSpacecraft
 
 # Inertia matrix
 Inertia = diagm([1.0, 1.0, 2.0])
@@ -35,18 +23,18 @@ time = 0:Ts:simulationTime
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
 # Coordinate system of a
-coordinateA = tl.CoordinateVector(
+coordinateA = TimeLine.CoordinateVector(
     [1, 0, 0],
     [0, 1, 0],
     [0, 0, 1]
 )
 
 # Coordinate system of b
-coordinateB = tl.initBodyCoordinate(simDataNum, coordinateA)
+coordinateB = TimeLine.initBodyCoordinate(simDataNum, coordinateA)
 
-omegaBA = tl.initAngularVelocity(simDataNum, [0, 0, 1])
+omegaBA = TimeLine.initAngularVelocity(simDataNum, [0, 0, 1])
 
-quaternion = tl.initQuaternion(simDataNum, [0, 0, 0, 1])
+quaternion = TimeLine.initQuaternion(simDataNum, [0, 0, 0, 1])
 
 println("Begin simulation!")
 for loopCounter = 1:simDataNum-1
@@ -68,13 +56,13 @@ for loopCounter = 1:simDataNum-1
 end
 println("Simulation is completed!")
 
-# fig1 = plt.plotAngularVelocity(time, omegaBA)
+# fig1 = PlotGenerator.plotAngularVelocity(time, omegaBA)
 # display(fig1)
 
 
-fig2 = plt.getCoordinateGif(time, Ts, coordinateA, coordinateB)
+fig2 = PlotGenerator.getCoordinateGif(time, Ts, coordinateA, coordinateB)
 display(fig2)
 
 # bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
-# fig3 = plt.plotCoordinate(10, coordinateA, bodyCoordinate)
+# fig3 = PlotGenerator.plotCoordinate(10, coordinateA, bodyCoordinate)
 # display(fig3)
