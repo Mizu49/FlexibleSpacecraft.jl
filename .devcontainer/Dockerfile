@@ -16,3 +16,7 @@ RUN apt-get install -y libxt6 libxrender1 libxext6 libgl1-mesa-glx libqt5widgets
 
 # Install `Plots.jl and precompile it`
 RUN julia -e 'using Pkg; Pkg.REPLMode.pkgstr("add Plots;precompile");using Plots'
+
+# Install `Reexport.jl`
+RUN julia -e 'import Pkg; Pkg.add("Reexport")'
+
