@@ -1,4 +1,7 @@
 using Documenter
+using LiveServer
+
+println("Building documentation!")
 
 makedocs(
     sitename="FlexibleSpacecraft.jl",
@@ -9,3 +12,7 @@ makedocs(
         ]
     ]
 )
+
+
+println("Serve documentation locally!")
+serve(dir = "build/")
