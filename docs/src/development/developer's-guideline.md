@@ -20,6 +20,6 @@ Thank you for your contributions to our project!
 4. コマンドパレットから **Remote-Containers: Open Folder in Container...** を実行
 5. プロジェクトのフォルダがコンテナ内で開かれる．  
    初回ビルドの時は時間がかかる可能性がある．
-6. `main.jl`を開く． 
+6. `main.jl`を開く．
 7. コマンドパレットから **Julia: Execute File in REPL** を実行する．
-8.  プログラムが動けば成功！
+8. プログラムが動けば成功！

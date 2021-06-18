@@ -11,7 +11,7 @@ Don't hesitate to contact me if you have any questions!!
 
 ## Developer's Guideline
 
-See our [Developer's Guideline](..\docs\developer's-guideline.md).
+See our [Developer's Guideline](../docs/src/development/developer's-guideline.md).
 
 ## Bug report
 
