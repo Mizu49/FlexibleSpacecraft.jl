@@ -9,6 +9,7 @@ makedocs(
         "home" => "index.md",
         "Development" => [
             "Developer's Guideline" => "development/developer's-guideline.md",
+            "Environment" => "development/environment.md"
         ]
     ]
 )
