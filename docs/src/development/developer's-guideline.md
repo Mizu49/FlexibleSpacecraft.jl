@@ -23,3 +23,20 @@ Thank you for your contributions to our project!
 6. `main.jl`を開く．
 7. コマンドパレットから **Julia: Execute File in REPL** を実行する．
 8. プログラムが動けば成功！
+
+## Participating development
+### Branching Model
+
+We employ the following branching model. Please try to follow this!
+
+| Branch naming  | Description                                                                      | Merge back into:                               | Branch off from: | 
+| -------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- | ---------------- | 
+| `main`         | Latest stable release with version tag.                                          | None                                           | None             | 
+| `development`  | Latest development build. Newly developed features are merged to this branch.    | `release-****` or `main` with `--no-ff` option | `main`           | 
+| `dev-****`     | Feature development branch. Development of new feature should be on this branch. | `development` with `no-ff` option              | `development`    | 
+| `release-****` | Preparation for next release will be done in this branch.                        | `main` and `develop` with `no-ff` option       | `development`    | 
+| `hotfix-****`  | Bug fix in `main`                                                                | `main` and `development`                       | `main`           |                    | 
+
+`****` in branch naming is a short description about development effort in that branch. Must be Snake Case (e.g. `dev-differential_equation`).
+
+This branching model is inspired by [Vincent Driessen's Branching Model](https://nvie.com/posts/a-successful-git-branching-model/)
