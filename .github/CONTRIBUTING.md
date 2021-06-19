@@ -4,15 +4,19 @@
 
 These guidelines are intended to help make your contributions more effective by explaining how to contribute to our projects.
 
-## Project owner/maintainer
+## Bug report and feature suggestion
 
-**Mizuki ABE** [@Mizu49](https://github.com/Mizu49)  
-Don't hesitate to contact me if you have any questions!!
+`FlexibleSpacecraft.jl` is an Open-Source Project. Your feedback is quite welcome! Feel free to submit issue ing GitHub, but please follow the guidelines.
+
+Issue templates are available. 
+
+- [Bug Report](ISSUE_TEMPLATE/bug_report.md)
+- [Feature Suggestion](ISSUE_TEMPLATE/feature_request.md) 
 
 ## Developer's Guideline
 
-See our [Developer's Guideline](../docs/src/development/developer's-guideline.md).
+Considering to join our development? We really appreciate your help! See our [Developer's Guideline](../docs/src/development/developer's-guideline.md) to get involved!
 
-## Bug report
+## Project owner/maintainer
 
-## Suggesting Enhancements
+[@Mizu49](https://github.com/Mizu49) : Don't hesitate to contact me if you have any questions!!
