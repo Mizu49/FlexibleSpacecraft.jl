@@ -29,13 +29,13 @@ Thank you for your contributions to our project!
 
 We employ the following branching model. Please try to follow this!
 
-| Branch naming  | Description                                                                      | Merge back into:                               | Branch off from: | 
-| -------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- | ---------------- | 
-| `main`         | Latest stable release with version tag.                                          | None                                           | None             | 
-| `development`  | Latest development build. Newly developed features are merged to this branch.    | `release-****` or `main` with `--no-ff` option | `main`           | 
-| `dev-****`     | Feature development branch. Development of new feature should be on this branch. | `development` with `no-ff` option              | `development`    | 
-| `release-****` | Preparation for next release will be done in this branch.                        | `main` and `develop` with `no-ff` option       | `development`    | 
-| `hotfix-****`  | Bug fix in `main`                                                                | `main` and `development`                       | `main`           |                    | 
+| Branch naming  | Description                                                                                                               | Branch off from: | Merge back into:                               | 
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------- | 
+| `main`         | Latest stable release with version tag.                                                                                   | None             | None                                           | 
+| `dev-build`    | Latest development build. Newly developed features are merged to this branch.                                             | `main`           | `release-****` or `main` with `--no-ff` option | 
+| `dev-****`     | Feature development branch. Development of new feature should be on this branch. Contributors are encouraged to use this. | `development`    | `development` with `no-ff` option              | 
+| `release-****` | Preparation for next release will be done in this branch.                                                                 | `development`    | `main` and `develop` with `no-ff` option       | 
+| `hotfix-****`  | Bug fix in `main`                                                                                                         | `main`           | `main` and `development`                       |  | 
 
 `****` in branch naming is a short description about development effort in that branch. Must be Snake Case (e.g. `dev-differential_equation`).
 
