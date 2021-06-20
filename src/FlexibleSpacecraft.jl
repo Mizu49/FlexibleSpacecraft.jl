@@ -18,4 +18,4 @@ include("TimeLine.jl")
 include("PlotGenerator.jl")
 @reexport using .PlotGenerator
 
-end # module 
+end # module

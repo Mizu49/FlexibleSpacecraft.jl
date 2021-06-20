@@ -21,7 +21,7 @@ module AttitudeDynamics
 """
     DynamicsModel(InertiaMatrix::Matrix, DisturbanceTorque::Matrix)
 
-mutable struct of attitude dynamics model  
+mutable struct of attitude dynamics model
 - InertiaMatrix: inertia matrix of a given system
 - DisturbanceTorque: disturbance torque to the system
 """
@@ -43,7 +43,7 @@ Get the differential of equation of dynamics.
 - model::DynamicsModel
 - currentTime: current time of system [s]
 - currentOmega: angular velocity of system [rad/s]
-- currentCoordB: current coordinate matrix [b1 b2 b3] 
+- currentCoordB: current coordinate matrix [b1 b2 b3]
 """
 function diffDynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)
 
@@ -119,7 +119,7 @@ function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
 
     nextQuaternion = currentQuaternion + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4);
 
-    return nextQuaternion    
+    return nextQuaternion
 end
 
 """
