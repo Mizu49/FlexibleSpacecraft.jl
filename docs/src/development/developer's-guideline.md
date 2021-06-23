@@ -37,6 +37,6 @@ We employ the following branching model. Please try to follow this!
 | `release-****` | Preparation for next release will be done in this branch.                                                                 | `development`    | `main` and `develop` with `no-ff` option       | 
 | `hotfix-****`  | Bug fix in `main`                                                                                                         | `main`           | `main` and `development`                       |  | 
 
-`****` in branch naming is a short description about development effort in that branch. Must be Snake Case (e.g. `dev-differential_equation`).
+`****` in branch naming is a short description about development effort in that branch. It should be lower camel case (e.g. `dev-differentialEquation`).
 
 This branching model is inspired by [Vincent Driessen's Branching Model](https://nvie.com/posts/a-successful-git-branching-model/)
