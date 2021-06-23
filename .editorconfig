@@ -1,0 +1,22 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# We employ code formatting guidelines for Julia contribution and style guide in Julia official documentation. See the following link!
+# https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md#code-formatting-guidelines
+# https://docs.julialang.org/en/v1/manual/style-guide/
+[*.jl]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+max_line_length = 92
+
+# Use different settings for Markdown
+[*.md]
+trim_trailing_whitespace = false

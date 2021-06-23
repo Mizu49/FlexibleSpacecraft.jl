@@ -38,9 +38,9 @@ function extractCoordinateVector(time, samplingPeriod, coordinateVectors)
     sampledCoordinate = CoordinateVector(
         coordinateVectors.x[:, sampleStep],
         coordinateVectors.y[:, sampleStep],
-        coordinateVectors.z[:, sampleStep]        
+        coordinateVectors.z[:, sampleStep]
     )
-    
+
     return sampledCoordinate
 end
 
@@ -67,7 +67,7 @@ function initQuaternion(simDataNum, initVector)
 
     quaternion = zeros(4, simDataNum)
     quaternion[:, 1] = initVector;
-    
+
     return quaternion
 end
 

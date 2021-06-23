@@ -25,5 +25,4 @@ Remote-Containersは，Dockerコンテナ内でVS Codeを開いて開発を行�
 
 ## Reference
 
-- [VS Code Remote Containerが良い](https://qiita.com/d0ne1s/items/d2649801c6f804019db7)
 - [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers)

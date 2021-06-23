@@ -1,4 +1,4 @@
-# Get official docker image fo julia 
+# Get official docker image fo julia
 FROM julia
 
 # set username as `root`

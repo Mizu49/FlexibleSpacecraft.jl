@@ -39,8 +39,8 @@ quaternion = TimeLine.initQuaternion(simDataNum, [0, 0, 0, 1])
 println("Begin simulation!")
 for loopCounter = 1:simDataNum-1
 
-    # println(loopCounter)    
-    
+    # println(loopCounter)
+
     currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
 
     omegaBA[:, loopCounter+1] = AttitudeDynamics.updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
@@ -52,7 +52,7 @@ for loopCounter = 1:simDataNum-1
     coordinateB.x[:, loopCounter+1] = C * coordinateA.x
     coordinateB.y[:, loopCounter+1] = C * coordinateA.y
     coordinateB.z[:, loopCounter+1] = C * coordinateA.z
-    
+
 end
 println("Simulation is completed!")
 
