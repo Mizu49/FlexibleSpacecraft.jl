@@ -1,11 +1,8 @@
 # Developer's Guideline
 
-We appreciate your contributions to our project!
+We appreciate your contributions to our project! Please read the guideline for developers.
 
-このガイドラインでは，`FlexibleSpacecraft.jl`の開発の参加方法を共有します．
-
-## Participating development
-### Branching Model
+## Branching Model
 
 We employ the following branching model. Please try to follow this!
 
@@ -21,15 +18,15 @@ We employ the following branching model. Please try to follow this!
 
 This branching model is inspired by [Vincent Driessen's Branching Model](https://nvie.com/posts/a-successful-git-branching-model/)
 
-### Style Guide
+## Style Guide
 
 **Please follow the [official style guide](https://docs.julialang.org/en/v1/manual/style-guide/) of JuliaLang!**
 
 Especially be sure to code using the style guide below:
 
 - Indentation
-  - Use four spaces per indentation level!
+    - Use four spaces per indentation level!
 - Naming conventions
-  - modules and type names use capitalization and camel case: `module SparseArrays`, `struct UnitRange`.
-  - functions are lowercase (`maximum`, `convert`) and, when readable, with multiple words squashed together (`isequal`, `haskey`). When necessary, use underscores as word separators. Underscores are also used to indicate a combination of concepts (`remotecall_fetch` as a more efficient implementation of `fetch(remotecall(...))`) or as modifiers.
-  - conciseness is valued, but avoid abbreviation (`indexin` rather than `indxin`) as it becomes difficult to remember whether and how particular words are abbreviated.
+    - modules and type names use capitalization and camel case: `module SparseArrays`, `struct UnitRange`.
+    - functions are lowercase (`maximum`, `convert`) and, when readable, with multiple words squashed together (`isequal`, `haskey`). When necessary, use underscores as word separators. Underscores are also used to indicate a combination of concepts (`remotecall_fetch` as a more efficient implementation of `fetch(remotecall(...))`) or as modifiers.
+    - conciseness is valued, but avoid abbreviation (`indexin` rather than `indxin`) as it becomes difficult to remember whether and how particular words are abbreviated.
