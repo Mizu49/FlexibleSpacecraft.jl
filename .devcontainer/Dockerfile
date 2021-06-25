@@ -1,4 +1,4 @@
-# Get official docker image fo julia 
+# Get official docker image fo julia
 FROM julia
 
 # set username as `root`
@@ -20,3 +20,8 @@ RUN julia -e 'using Pkg; Pkg.REPLMode.pkgstr("add Plots;precompile");using Plots
 # Install `Reexport.jl`
 RUN julia -e 'import Pkg; Pkg.add("Reexport")'
 
+# Install `Documenter.jl`
+RUN julia -e 'import Pkg; Pkg.add("Documenter")'
+
+# Install `LiveServer.jl` to serve the documentation locally
+RUN julia -e 'import Pkg; Pkg.add("LiveServer")'

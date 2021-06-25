@@ -6,7 +6,7 @@
 
     "dockerFile": "Dockerfile",
 
-    "settings": { 
+    "settings": {
 
         // set path of git
         "git.path": "/usr/bin/git",
@@ -22,5 +22,7 @@
     "extensions": [
         // mandatory for julia development
         "julialang.language-julia",
+        // Recommended to use in order to follow style guide
+        "editorconfig.editorconfig"
     ]
 }
