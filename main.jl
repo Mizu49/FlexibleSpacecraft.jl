@@ -2,7 +2,7 @@ include("src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # Inertia matrix
-Inertia = diagm([1.0, 1.0, 2.0])
+Inertia = diagm([126.23 * 10^6, 90.21 * 10^6, 183.71 * 10^6])
 
 # Disturbance torque
 Torque = [0.02, 0.0, 0.0]
