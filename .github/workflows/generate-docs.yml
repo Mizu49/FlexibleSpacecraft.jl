@@ -8,17 +8,27 @@ on:
   pull_request:
 
 jobs:
-  build:
+  docs:
+    name: 'Documentation: ${{ matrix.makejl }}'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - jlenv: 'docs/'
+            makejl: 'docs/make.jl'
+          - jlenv: 'docs/pdf/'
+            makejl: 'docs/pdf/make.jl'
     steps:
       - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@latest
+      - uses: julia-actions/setup-julia@v1
         with:
-          version: '1.6'
-      - name: Install dependencies
-        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build and deploy
+          version: '1'
+      - run: |
+          julia --project=${{ matrix.jlenv }} -e '
+            using Pkg
+            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.instantiate()'
+      - run: julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
-        run: julia --project=docs/ docs/make.jl
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
