@@ -14,10 +14,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - jlenv: 'docs/'
-            makejl: 'docs/make.jl'
-          - jlenv: 'docs/pdf/'
-            makejl: 'docs/pdf/make.jl'
+          - jlenv: '/docs/'
+            makejl: '/docs/make.jl'
+
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
