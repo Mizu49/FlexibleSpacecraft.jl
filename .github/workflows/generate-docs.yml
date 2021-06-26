@@ -9,25 +9,56 @@ on:
 
 jobs:
   docs:
-    name: 'Documentation: ${{ matrix.makejl }}'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - jlenv: '/docs/'
-            makejl: '/docs/make.jl'
+        julia_version:
+          - 1.6
+        os:
+          - ubuntu-latest
+          # - windows-latest
+        arch:
+          - x64
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+
+      - name: Cancel CI on previous commits
+        uses: styfle/cancel-workflow-action@0.6.0
         with:
-          version: '1'
-      - run: |
-          julia --project=${{ matrix.jlenv }} -e '
-            using Pkg
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()'
-      - run: julia --project=${{ matrix.jlenv }} --color=yes ${{ matrix.makejl }}
+          access_token: ${{ github.token }}
+
+      # Setup environment
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: ${{ matrix.julia_version }}
+
+      - uses: actions/cache@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+          cache-name: cache-artifacts
+        with:
+          path: |
+            ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('Artifacts.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+      - uses: actions/cache@v2
+        env:
+          cache-name: cache-packages
+        with:
+          path: |
+            ~/.julia/packages
+            ~/.julia/compiled
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('test/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+      - name: Install documentation dependencies
+        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.build(verbose=true); Pkg.instantiate()'
+
+      - name: Build and deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
+          GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+        run: |
+          xvfb-run julia --color=yes --project=docs/ -e 'include("docs/make.jl")'
