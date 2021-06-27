@@ -6,6 +6,8 @@ on:
       - dev-docsHosting # for test
     tags: '*'
   pull_request:
+      - dev-docsHosting # for test
+    tags: '*'
 
 jobs:
   build:
