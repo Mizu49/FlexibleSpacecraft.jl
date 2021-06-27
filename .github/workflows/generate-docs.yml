@@ -3,8 +3,12 @@ name: Documentation
 on:
   push:
     branches:
-      - dev-docsHosting # for test
+      - main
+      - dev-build
     tags: '*'
+  pull_request:
+  release:
+    types: [published]
 
 jobs:
   build:

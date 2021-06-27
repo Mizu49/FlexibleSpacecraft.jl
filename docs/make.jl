@@ -15,4 +15,6 @@ makedocs(
 # Deploy documentation to `gh-pages` branch
 deploydocs(
     repo = "github.com/Mizu49/FlexibleSpacecraft.jl.git",
+    devbranch = "dev-build",
+    push_preview = true,
 )
