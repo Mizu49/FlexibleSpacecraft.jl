@@ -3,7 +3,7 @@ name: Documentation
 on:
   push:
     branches:
-      - dev-docsHosting # for test
+      - master
     tags: '*'
   pull_request:
 
