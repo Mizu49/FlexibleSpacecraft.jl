@@ -1,30 +1,28 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/docker-from-docker-compose
 {
-	"name": "Docker from Docker Compose",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
+    "name": "Julia dev container",
 
-	// Use this environment variable if you need to bind mount your local source code into a new container.
-	"remoteEnv": {
-		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
-	},
-	
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
+    // specify your workspace
+    "context": "..",
 
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-azuretools.vscode-docker"
-	],
+    "dockerFile": "Dockerfile",
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+    "settings": {
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "docker --version",
+        // set path of git
+        "git.path": "/usr/bin/git",
 
-	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
+        // save changes automatically
+        "files.autoSave": "afterDelay",
+    },
+
+    // user name of container
+    "remoteUser": "root",
+
+    // specify vs code extensions you will use on remote
+    "extensions": [
+        // mandatory for julia development
+        "julialang.language-julia",
+        // Recommended to use in order to follow style guide
+        "editorconfig.editorconfig"
+    ]
 }
