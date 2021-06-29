@@ -1,8 +1,6 @@
 using Documenter
-using LiveServer
 
-println("Building documentation!")
-
+# Build documentation
 makedocs(
     sitename="FlexibleSpacecraft.jl",
     pages = [
@@ -14,6 +12,9 @@ makedocs(
     ]
 )
 
-
-println("Serve documentation locally!")
-serve(dir = "build/")
+# Deploy documentation to `gh-pages` branch
+deploydocs(
+    repo = "github.com/Mizu49/FlexibleSpacecraft.jl.git",
+    devbranch = "dev-build",
+    push_preview = true,
+)
