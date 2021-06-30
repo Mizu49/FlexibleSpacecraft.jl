@@ -43,11 +43,11 @@ for loopCounter = 1:simDataNum-1
 
     currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
 
-    omegaBA[:, loopCounter+1] = AttitudeDynamics.updateAngularVelocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
+    omegaBA[:, loopCounter+1] = AttitudeDynamics.calc_angular_velocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
 
-    quaternion[:, loopCounter+1] = AttitudeDynamics.updateQuaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
+    quaternion[:, loopCounter+1] = AttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
-    C = AttitudeDynamics.getTransformationMatrix(quaternion[:, loopCounter])
+    C = AttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter])
 
     coordinateB.x[:, loopCounter+1] = C * coordinateA.x
     coordinateB.y[:, loopCounter+1] = C * coordinateA.y
@@ -56,12 +56,12 @@ for loopCounter = 1:simDataNum-1
 end
 println("Simulation is completed!")
 
-# fig1 = PlotGenerator.plotAngularVelocity(time, omegaBA)
-# display(fig1)
+fig1 = PlotGenerator.plotAngularVelocity(time, omegaBA)
+display(fig1)
 
 
-fig2 = PlotGenerator.getCoordinateGif(time, Ts, coordinateA, coordinateB)
-display(fig2)
+# fig2 = PlotGenerator.getCoordinateGif(time, Ts, coordinateA, coordinateB)
+# display(fig2)
 
 # bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
 # fig3 = PlotGenerator.plotCoordinate(10, coordinateA, bodyCoordinate)

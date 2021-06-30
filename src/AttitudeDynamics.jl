@@ -91,11 +91,11 @@ function calc_differential_kinematics(omega, quaternion)
 end
 
 """
-    updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
+    update_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function updateAngularVelocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
+function calc_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
     # Update the angular velocity vector using 4th order runge kutta method
 
     k1 = calc_differential_dynamics(model, currentTime                 , currentOmega                      , currentCoordB)
@@ -111,11 +111,11 @@ end
 
 # Update the quaternion vector (time evolution)
 """
-    updateQuaternion(currentOmega, currentQuaternion, samplingTime)
+    update_quaternion(currentOmega, currentQuaternion, samplingTime)
 
 calculate quaternion at next time step using 4th order Runge-Kutta method.
 """
-function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
+function calc_quaternion(currentOmega, currentQuaternion, samplingTime)
     # Update the quaterion vector using 4th order runge kutta method
 
     k1 = calc_differential_kinematics(currentOmega, currentQuaternion                      );
@@ -129,14 +129,17 @@ function updateQuaternion(currentOmega, currentQuaternion, samplingTime)
 end
 
 """
-    getTransformationMatrix(q)
+    calc_transformation_matrix(q)
 
 Calculate the transformation matrix from coordinate A system (inertial frame) to coordinate B system (spacecraft body fixed frame).
 
 # Arguments
 - `q`: quaternion
+
+# Return
+- `transformation_matrix`: transformation matrix from referential frame to body fixed frame
 """
-function getTransformationMatrix(q)
+function calc_transformation_matrix(q)
 
     # Check if the quaterion satisfies its constraint
     try
@@ -151,13 +154,13 @@ function getTransformationMatrix(q)
         end
     end
 
-    C = [
+    transformation_matrix = [
         q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2  2*(q[1]*q[2] + q[3]*q[4])          2*(q[1]*q[3] - q[2]*q[4])
         2*(q[2]*q[1] - q[3]*q[4])          q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2  2*(q[2]*q[3] + q[1]*q[4])
         2*(q[3]*q[1] + q[2]*q[4])          2*(q[3]*q[2] - q[1]*q[4])          q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
     ]
 
-    return C
+    return transformation_matrix
 end
 
 
