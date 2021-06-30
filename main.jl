@@ -9,7 +9,7 @@ Torque = [0.02, 0.0, 0.0]
 
 
 # Dynamics model (mutable struct)
-dynamicsModel = AttitudeDynamics.DynamicsModel(Inertia, Torque)
+dynamicsModel = RigidBodyAttitudeDynamics.DynamicsModel(Inertia, Torque)
 
 # サンプリング時間
 Ts = 1e-2
@@ -43,11 +43,11 @@ for loopCounter = 1:simDataNum-1
 
     currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
 
-    omegaBA[:, loopCounter+1] = AttitudeDynamics.calc_angular_velocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
+    omegaBA[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_angular_velocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
 
-    quaternion[:, loopCounter+1] = AttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
+    quaternion[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
-    C = AttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter])
+    C = RigidBodyAttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter])
 
     coordinateB.x[:, loopCounter+1] = C * coordinateA.x
     coordinateB.y[:, loopCounter+1] = C * coordinateA.y

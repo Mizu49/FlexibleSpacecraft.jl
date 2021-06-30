@@ -1,21 +1,16 @@
 """
-    module AttitudeDynamics
+    module RigidBodyAttitudeDynamics
 
-module that consists variables and functions needed for the simulation of spacecraft attitude dynamics
+module that consists variables and functions needed for the simulation of rigid body spacecraft attitude dynamics
 
 # Usage
 ```
-# Include module `AttitudeDynamics`
-include("AttitudeDynamics.jl")
-using .AttitudeDynamics
+# Include module `RigidBodyAttitudeDynamics.jl`
+include("RigidBodyAttitudeDynamics.jl")
+using .RigidBodyAttitudeDynamics
 
-...
-
-# Use struct inside module
-AttitudeDynamics.DynamicsModel(Inertia, Torque)
-```
 """
-module AttitudeDynamics
+module RigidBodyAttitudeDynamics
 
 
 """
