@@ -56,13 +56,13 @@ for loopCounter = 1:simDataNum-1
 end
 println("Simulation is completed!")
 
-fig1 = PlotGenerator.plotAngularVelocity(time, omegaBA)
+fig1 = PlotGenerator.angular_velocity(time, omegaBA)
 display(fig1)
 
 
-# fig2 = PlotGenerator.getCoordinateGif(time, Ts, coordinateA, coordinateB)
-# display(fig2)
+fig2 = PlotGenerator.frame_gif(time, Ts, coordinateA, coordinateB)
+display(fig2)
 
-# bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
-# fig3 = PlotGenerator.plotCoordinate(10, coordinateA, bodyCoordinate)
-# display(fig3)
+bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
+fig3 = PlotGenerator.bodyframe(10, coordinateA, bodyCoordinate)
+display(fig3)

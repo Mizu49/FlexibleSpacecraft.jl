@@ -12,9 +12,9 @@ include("TimeLine.jl")
 import .TimeLine
 
 """
-    plotAngularVelocity(time::Matrix, angularVelocity::Matrix)
+    angular_velocity(time::Matrix, angularVelocity::Matrix)
 """
-function plotAngularVelocity(time, angularVelocity)
+function angular_velocity(time, angularVelocity)
 
 
     fig1 = plot(time, angularVelocity[1, :],
@@ -36,15 +36,15 @@ function plotAngularVelocity(time, angularVelocity)
     );
 
     # Graph of the angular velocity
-    figAngularVelocity = plot(fig1, fig2, fig3, layout = (3, 1), legend = true);
+    fig_angular_velocity = plot(fig1, fig2, fig3, layout = (3, 1), legend = true);
 
-    return figAngularVelocity
+    return fig_angular_velocity
 end
 
 """
-    plotCoordinate(timeIndex::Int, refCoordinate, bodyCoordinate)
+    bodyframe(timeIndex::Int, refCoordinate, bodyCoordinate)
 """
-function plotCoordinate(time, refCoordinate, bodyCoordinate)
+function bodyframe(time, refCoordinate, bodyCoordinate)
 
     # Plot of reference frame
     coordFig = quiver(
@@ -112,9 +112,9 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
 end
 
 """
-    function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif, Fps,)
+    function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif, Fps,)
 """
-function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
 
     dataNum = size(time, 1)
     steps = round(Int, Tgif/Tsampling)
@@ -124,7 +124,7 @@ function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, T
 
         bodyCoordinate = TimeLine.extractCoordinateVector(time[index], Tsampling, bodyCoordinateArray)
 
-        plotCoordinate(time[index], refCoordinate, bodyCoordinate)
+        bodyframe(time[index], refCoordinate, bodyCoordinate)
     end every steps
 
     # make gif image
