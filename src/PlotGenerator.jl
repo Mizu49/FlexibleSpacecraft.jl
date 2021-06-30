@@ -1,7 +1,7 @@
 """
     module PlotGenerator
 
-module of functions that deal with plot of attitude dynamics
+module of functions that show us the beautiful figures of spacecraft attitude
 """
 module PlotGenerator
 
@@ -12,7 +12,9 @@ include("TimeLine.jl")
 import .TimeLine
 
 """
-    angular_velocity(time::Matrix, angularVelocity::Matrix)
+    angular_velocity(time, angularVelocity)
+
+Generator plots of angular velocity in each axis
 """
 function angular_velocity(time, angularVelocity)
 
@@ -42,7 +44,9 @@ function angular_velocity(time, angularVelocity)
 end
 
 """
-    bodyframe(timeIndex::Int, refCoordinate, bodyCoordinate)
+    bodyframe(time, refCoordinate, bodyCoordinate)
+
+Generates the 3D figure of body fixed frame
 """
 function bodyframe(time, refCoordinate, bodyCoordinate)
 
@@ -112,7 +116,9 @@ function bodyframe(time, refCoordinate, bodyCoordinate)
 end
 
 """
-    function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif, Fps,)
+    function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+
+Generates animation of frame rotation as GIF figure
 """
 function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
 
