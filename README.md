@@ -10,4 +10,4 @@
 
 ## Contribution guideline
 
-We really appreciate your contribution! See [Contribution Guideline](./github/CONTRIBUTING.md) and Documentation for more information.
+We really appreciate your contribution! See [Contribution Guideline](https://github.com/Mizu49/FlexibleSpacecraft.jl/blob/main/.github/CONTRIBUTING.md) and [Developer's Guideline](https://mizu49.github.io/FlexibleSpacecraft.jl/dev/development/developer's-guideline/) for more information.
