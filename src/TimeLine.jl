@@ -34,7 +34,7 @@ end
 
 get a `sample_coordinate::Coordinate` matching with given `time`
 """
-function get_coordinate(time, sampling_period, coordinates::CoordinateArray)
+function get_coordinate(time, sampling_period, coordinates)
 
     sample_step = floor(Int, time/sampling_period) + 1
 
@@ -52,10 +52,10 @@ end
 
 initialize array that contains time response of angular velocity
 """
-function init_angular_velocity_array(simdata_num, initital_value::Coordinate)
+function init_angular_velocity_array(simdata_num, initial_velocity::Vector)
 
     angular_velocity_array = zeros(3, simdata_num)
-    angular_velocity_array[:,1] = initial_value
+    angular_velocity_array[:,1] = initial_velocity
 
     return angular_velocity_array
 end
@@ -82,7 +82,7 @@ initialize time-variant coordinate vectors
 """
 function init_coordinate_array(simdata_num, initial_coordinate::Coordinate)
 
-    coordinate_array = CoordinateVectors(
+    coordinate_array = CoordinateArray(
         zeros(3, simdata_num),
         zeros(3, simdata_num),
         zeros(3, simdata_num),

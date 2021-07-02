@@ -23,18 +23,18 @@ time = 0:Ts:simulationTime
 simDataNum = round(Int, simulationTime/Ts) + 1;
 
 # Coordinate system of a
-coordinateA = TimeLine.CoordinateVector(
+coordinateA = TimeLine.Coordinate(
     [1, 0, 0],
     [0, 1, 0],
     [0, 0, 1]
 )
 
 # Coordinate system of b
-coordinateB = TimeLine.initBodyCoordinate(simDataNum, coordinateA)
+coordinateB = TimeLine.init_coordinate_array(simDataNum, coordinateA)
 
-omegaBA = TimeLine.initAngularVelocity(simDataNum, [0, 0, 1])
+omegaBA = TimeLine.init_angular_velocity_array(simDataNum, [0, 0, 1])
 
-quaternion = TimeLine.initQuaternion(simDataNum, [0, 0, 0, 1])
+quaternion = TimeLine.init_quaternion_array(simDataNum, [0, 0, 0, 1])
 
 println("Begin simulation!")
 for loopCounter = 1:simDataNum-1
