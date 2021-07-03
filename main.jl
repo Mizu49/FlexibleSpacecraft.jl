@@ -1,26 +1,26 @@
 include("src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
-# Inertia matrix
-Inertia = diagm([1.0, 1.0, 2.0])
+# inertia matrix
+inertia = diagm([1.0, 1.0, 2.0])
 
-# Disturbance torque
-Torque = [0.02, 0.0, 0.0]
+# Disturbance disturbance
+disturbance = [0.02, 0.0, 0.0]
 
 
 # Dynamics model (mutable struct)
-dynamicsModel = RigidBodyAttitudeDynamics.DynamicsModel(Inertia, Torque)
+model = RigidBodyAttitudeDynamics.model(inertia, disturbance)
 
 # サンプリング時間
 Ts = 1e-2
 
-simulationTime = 60
+simulation_time = 60
 
 # 時刻
-time = 0:Ts:simulationTime
+time = 0:Ts:simulation_time
 
 # Numbers of simulation data
-simDataNum = round(Int, simulationTime/Ts) + 1;
+simu_data_num = round(Int, simulation_time/Ts) + 1;
 
 # Coordinate system of a
 coordinateA = TimeLine.Coordinate(
@@ -30,20 +30,20 @@ coordinateA = TimeLine.Coordinate(
 )
 
 # Coordinate system of b
-coordinateB = TimeLine.init_coordinate_array(simDataNum, coordinateA)
+coordinateB = TimeLine.init_coordinate_array(simu_data_num, coordinateA)
 
-omegaBA = TimeLine.init_angular_velocity_array(simDataNum, [0, 0, 1])
+omegaBA = TimeLine.init_angular_velocity_array(simu_data_num, [0, 0, 1])
 
-quaternion = TimeLine.init_quaternion_array(simDataNum, [0, 0, 0, 1])
+quaternion = TimeLine.init_quaternion_array(simu_data_num, [0, 0, 0, 1])
 
 println("Begin simulation!")
-for loopCounter = 1:simDataNum-1
+for loopCounter = 1:simu_data_num-1
 
     # println(loopCounter)
 
     currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
 
-    omegaBA[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_angular_velocity(dynamicsModel, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
+    omegaBA[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
 
     quaternion[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
 
