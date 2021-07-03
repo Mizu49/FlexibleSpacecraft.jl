@@ -9,11 +9,12 @@ disturbance = [0.02, 0.0, 0.0]
 
 
 # Dynamics model (mutable struct)
-model = RigidBodyAttitudeDynamics.model(inertia, disturbance)
+model = RigidBodyAttitudeDynamics.DynamicsModel(inertia, disturbance)
 
-# サンプリング時間
+# Sampling period of simulation (second)
 Ts = 1e-2
 
+# Time length of simulation (second)
 simulation_time = 60
 
 # 時刻
@@ -64,6 +65,6 @@ display(fig1)
 fig2 = PlotGenerator.frame_gif(time, Ts, coordinateA, coordinateB)
 display(fig2)
 
-bodyCoordinate = TimeLine.extractCoordinateVector(10, Ts, coordinateB)
+bodyCoordinate = TimeLine.get_coordinate(10, Ts, coordinateB)
 fig3 = PlotGenerator.bodyframe(10, coordinateA, bodyCoordinate)
 display(fig3)
