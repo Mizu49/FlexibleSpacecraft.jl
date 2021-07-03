@@ -37,21 +37,22 @@ omegaBA = TimeLine.init_angular_velocity_array(simu_data_num, [0, 0, 1])
 quaternion = TimeLine.init_quaternion_array(simu_data_num, [0, 0, 0, 1])
 
 println("Begin simulation!")
-for loopCounter = 1:simu_data_num-1
+for loopCounter = 0:simu_data_num - 2
 
-    # println(loopCounter)
+    # println(loopCounter + 1)
 
-    currentCoordB = hcat(coordinateB.x[:,loopCounter] , coordinateB.y[:,loopCounter], coordinateB.z[:,loopCounter])
+    # Extract body fixed frame at current time step
+    currentCoordB = hcat(coordinateB.x[:,loopCounter + 1] , coordinateB.y[:,loopCounter + 1], coordinateB.z[:,loopCounter + 1])
 
-    omegaBA[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter], omegaBA[:, loopCounter], Ts, currentCoordB)
+    omegaBA[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], omegaBA[:, loopCounter + 1], Ts, currentCoordB)
 
-    quaternion[:, loopCounter+1] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter], quaternion[:, loopCounter], Ts)
+    quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter + 1], quaternion[:, loopCounter + 1], Ts)
 
-    C = RigidBodyAttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter])
+    C = RigidBodyAttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter + 1])
 
-    coordinateB.x[:, loopCounter+1] = C * coordinateA.x
-    coordinateB.y[:, loopCounter+1] = C * coordinateA.y
-    coordinateB.z[:, loopCounter+1] = C * coordinateA.z
+    coordinateB.x[:, loopCounter + 2] = C * coordinateA.x
+    coordinateB.y[:, loopCounter + 2] = C * coordinateA.y
+    coordinateB.z[:, loopCounter + 2] = C * coordinateA.z
 
 end
 println("Simulation is completed!")
