@@ -154,5 +154,12 @@ function calc_transformation_matrix(q)
     return transformation_matrix
 end
 
+function gravity_gradient_torque()
+
+    # Calculate gravity gradient torque
+    torque_vector = [0, 0, 1];
+
+    return torque_vector
+end
 
 end

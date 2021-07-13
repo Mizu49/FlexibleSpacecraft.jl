@@ -43,7 +43,7 @@ for loopCounter = 0:simu_data_num - 2
     currentCoordB = hcat(coordinateB.x[:,loopCounter + 1] , coordinateB.y[:,loopCounter + 1], coordinateB.z[:,loopCounter + 1])
 
     # Disturbance torque
-    disturbance = [0.0, 0.0, 0.03]
+    disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque()
 
     omegaBA[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], omegaBA[:, loopCounter + 1], Ts, currentCoordB, disturbance)
 
