@@ -4,12 +4,9 @@ using .FlexibleSpacecraft
 # inertia matrix
 inertia = diagm([1.0, 1.0, 2.0])
 
-# Disturbance disturbance
-disturbance = [0.02, 0.0, 0.0]
-
 
 # Dynamics model (mutable struct)
-model = RigidBodyAttitudeDynamics.DynamicsModel(inertia, disturbance)
+model = RigidBodyAttitudeDynamics.DynamicsModel(inertia)
 
 # Sampling period of simulation (second)
 Ts = 1e-2
@@ -45,7 +42,10 @@ for loopCounter = 0:simu_data_num - 2
     # Extract body fixed frame at current time step
     currentCoordB = hcat(coordinateB.x[:,loopCounter + 1] , coordinateB.y[:,loopCounter + 1], coordinateB.z[:,loopCounter + 1])
 
-    omegaBA[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], omegaBA[:, loopCounter + 1], Ts, currentCoordB)
+    # Disturbance torque
+    disturbance = [0.0, 0.0, 0.03]
+
+    omegaBA[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], omegaBA[:, loopCounter + 1], Ts, currentCoordB, disturbance)
 
     quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter + 1], quaternion[:, loopCounter + 1], Ts)
 

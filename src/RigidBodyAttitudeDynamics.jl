@@ -14,18 +14,14 @@ module RigidBodyAttitudeDynamics
 
 
 """
-    DynamicsModel(InertiaMatrix::Matrix, DisturbanceTorque::Matrix)
+    DynamicsModel(inertia::Matrix)
 
 mutable struct of attitude dynamics model
-- InertiaMatrix: inertia matrix of a given system
-- DisturbanceTorque: disturbance torque to the system
+- inertia: inertia matrix of a given system
 """
 mutable struct DynamicsModel
-    # 慣性ダイアディック
-    InertiaMatrix::Matrix
-
-    # 外乱トルク
-    DisturbanceTorque::Vector
+    # Inertia Matrix
+    inertia::Matrix
 end
 
 # Equation of dynamics
@@ -43,7 +39,7 @@ Get the differential of equation of dynamics.
 # return
 - differential: differential of equation of motion
 """
-function calc_differential_dynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)
+function calc_differential_dynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB, disturbance)
 
     # skew matrix of angular velocity vector
     skewOmega = [
@@ -52,7 +48,7 @@ function calc_differential_dynamics(model::DynamicsModel, currentTime, currentOm
         -currentOmega[2] currentOmega[1] 0]
 
     # calculate differential of equation of motion
-    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - currentCoordB' * model.InertiaMatrix * skewOmega * currentCoordB * currentCoordB' * currentOmega)
+    differential = inv(model.inertia) * (disturbance - currentCoordB' * model.inertia * skewOmega * currentCoordB * currentCoordB' * currentOmega)
 
     return differential
 end
@@ -90,13 +86,13 @@ end
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
+function calc_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB, disturbance)
     # Update the angular velocity vector using 4th order runge kutta method
 
-    k1 = calc_differential_dynamics(model, currentTime                 , currentOmega                      , currentCoordB)
-    k2 = calc_differential_dynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1, currentCoordB)
-    k3 = calc_differential_dynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2, currentCoordB)
-    k4 = calc_differential_dynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3, currentCoordB)
+    k1 = calc_differential_dynamics(model, currentTime                 , currentOmega                      , currentCoordB, disturbance)
+    k2 = calc_differential_dynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1, currentCoordB, disturbance)
+    k3 = calc_differential_dynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2, currentCoordB, disturbance)
+    k4 = calc_differential_dynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3, currentCoordB, disturbance)
 
     nextOmega = currentOmega + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
 
