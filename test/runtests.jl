@@ -1,7 +1,9 @@
-include("../src/FlexibleSpacecraft.jl")
-using .FlexibleSpacecraft
 using Test
 
+include("../src/FlexibleSpacecraft.jl")
+using .FlexibleSpacecraft
+
+# Module for testing of simulation
 include("SimulationTesting.jl")
 using .SimulationTesting
 
