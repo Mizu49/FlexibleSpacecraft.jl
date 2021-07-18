@@ -12,6 +12,10 @@ using .RigidBodyAttitudeDynamics
 """
 module RigidBodyAttitudeDynamics
 
+using Reexport
+@reexport using LinearAlgebra
+
+
 
 """
     DynamicsModel(inertia::Matrix)
@@ -154,11 +158,27 @@ function calc_transformation_matrix(q)
     return transformation_matrix
 end
 
-function gravity_gradient_torque()
+function gravity_gradient_torque(inertia,q)
 
     # Calculate gravity gradient torque
-    torque_vector = [0, 0, 1];
+    gravitationalConstant = 3.9879e+14
+    orbitalRadius         = 400e+3
 
+    # Assume as a circular orbit
+    orbitAngularVelocity  = sqrt(gravitationalConstant/orbitalRadius)
+
+    # Vector of principal axes of inertia
+    J = diag(inertia)
+
+    # Reference : Y., Ohkami et. al., "Introduction to the Space Station" ver.2, p.173 (6.207)
+    torque_vector = -6*orbitAngularVelocity^2*[
+        (J[2]-J[3]) * (q[2]*q[3] + q[1]*q[4])* (1 - 2*q[1]^2 - 2*q[2]^2)
+        (J[3]-J[1]) * (q[1]*q[3] + q[2]*q[4])* (1 - 2*q[1]^2 - 2*q[2]^2)
+      2*(J[1]-J[2]) * (q[1]*q[3] - q[2]*q[4])* (q[2]*q[3] + q[1]q[4])
+    ]
+
+
+    println("torque_vector   ",norm(torque_vector))
     return torque_vector
 end
 

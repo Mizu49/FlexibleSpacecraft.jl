@@ -2,7 +2,7 @@ include("src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # inertia matrix
-inertia = diagm([1.0, 1.0, 2.0])
+inertia = diagm([1.0, 300.0, 2.0])
 
 
 # Dynamics model (mutable struct)
@@ -43,7 +43,10 @@ for loopCounter = 0:simu_data_num - 2
     currentCoordB = hcat(coordinateB.x[:,loopCounter + 1] , coordinateB.y[:,loopCounter + 1], coordinateB.z[:,loopCounter + 1])
 
     # Disturbance torque
-    disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque()
+    disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, quaternion[:, loopCounter + 1])
+    #if mod(loopCounter,1E2) == 1
+    #    show(disturbance[2])
+    #end
 
     omegaBA[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], omegaBA[:, loopCounter + 1], Ts, currentCoordB, disturbance)
 
@@ -58,6 +61,7 @@ for loopCounter = 0:simu_data_num - 2
 end
 println("Simulation is completed!")
 
+"""
 fig1 = PlotGenerator.angular_velocity(time, omegaBA)
 display(fig1)
 
@@ -68,3 +72,4 @@ display(fig2)
 bodyCoordinate = TimeLine.get_coordinate(10, Ts, coordinateB)
 fig3 = PlotGenerator.bodyframe(10, coordinateA, bodyCoordinate)
 display(fig3)
+"""
