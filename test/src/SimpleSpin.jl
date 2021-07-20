@@ -66,4 +66,15 @@ using .SimulationTesting
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 
+    fig1 = PlotGenerator.angular_velocity(time, omegaBA)
+    display(fig1)
+
+
+    fig2 = PlotGenerator.frame_gif(time, Ts, coordinateA, coordinateB)
+    display(fig2)
+
+    bodyCoordinate = TimeLine.get_coordinate(10, Ts, coordinateB)
+    fig3 = PlotGenerator.bodyframe(10, coordinateA, bodyCoordinate)
+    display(fig3)
+
 end
