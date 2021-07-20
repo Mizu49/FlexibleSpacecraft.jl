@@ -1,16 +1,9 @@
 name = "FlexibleSpacecraft"
-uuid = "8da81392-92b4-4c26-a15d-567704f777c0"
-authors = ["Mizu49"]
-version = "0.0.1"
+uuid = "2c2948cf-05c7-4427-a57b-abbb12bec472"
+authors = ["Mizu49 <mizuki.abe.r4@dc.tohoku.ac.jp>"]
+version = "0.0.0"
 
 [deps]
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-
-[compat]
-Documenter = "0.27"
-
-[extras]
-Test = 4292b7c7-046b-4b62-a8a4-0443c9741e0f
-
-[targets]
-test = ["Test"]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
