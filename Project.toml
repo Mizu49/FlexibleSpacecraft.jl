@@ -8,3 +8,9 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 
 [compat]
 Documenter = "0.27"
+
+[extras]
+Test = 4292b7c7-046b-4b62-a8a4-0443c9741e0f
+
+[targets]
+test = ["Test"]
