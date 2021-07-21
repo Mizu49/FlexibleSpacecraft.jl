@@ -57,6 +57,11 @@ for loopCounter = 0:simu_data_num - 2
     #quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter + 1], quaternion[:, loopCounter + 1], Ts)
     quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion_orbit(omegaBA[:,loopCounter + 1], quaternion[:, loopCounter + 1], Ts, orbitAngularVelocity)
 
+    # Divergence judgement
+    if isnan(quaternion[1, loopCounter + 2]) || isnan(quaternion[2, loopCounter + 2]) || isnan(quaternion[3, loopCounter + 2]) ||isnan(quaternion[4, loopCounter + 2])
+        println("error. quaternion diverged at loopCounter = ",loopCounter)
+        break
+    end
     C = RigidBodyAttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter + 1])
 
     coordinateB.x[:, loopCounter + 2] = C * coordinateA.x
