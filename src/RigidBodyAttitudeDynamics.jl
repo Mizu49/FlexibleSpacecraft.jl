@@ -85,6 +85,23 @@ function calc_differential_kinematics(omega, quaternion)
     return differential
 end
 
+function calc_differential_kinematics_orbit(omega, quaternion,orbitAngularVelocity)
+
+    omegaOrbit1 = omega[2] - orbitAngularVelocity
+    omegaOrbit2 = omega[2] + orbitAngularVelocity
+
+    OMEGA = [
+        0 omega[3] -omegaOrbit1 omega[1]
+        -omega[3] 0 omega[1] omegaOrbit2
+        omegaOrbit1 -omega[1] 0 omega[3]
+        -omega[1] -omegaOrbit2 -omega[3] 0
+    ]
+
+    differential = 1/2 * OMEGA * quaternion
+
+    return differential
+end
+
 """
     update_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
 
@@ -117,6 +134,19 @@ function calc_quaternion(currentOmega, currentQuaternion, samplingTime)
     k2 = calc_differential_kinematics(currentOmega, currentQuaternion + samplingTime/2 * k1);
     k3 = calc_differential_kinematics(currentOmega, currentQuaternion + samplingTime/2 * k2);
     k4 = calc_differential_kinematics(currentOmega, currentQuaternion + samplingTime   * k3);
+
+    nextQuaternion = currentQuaternion + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4);
+
+    return nextQuaternion
+end
+
+function calc_quaternion_orbit(currentOmega, currentQuaternion, samplingTime, orbitAngularVelocity)
+    # Update the quaterion vector using 4th order runge kutta method
+
+    k1 = calc_differential_kinematics_orbit(currentOmega, currentQuaternion                      , orbitAngularVelocity);
+    k2 = calc_differential_kinematics_orbit(currentOmega, currentQuaternion + samplingTime/2 * k1, orbitAngularVelocity);
+    k3 = calc_differential_kinematics_orbit(currentOmega, currentQuaternion + samplingTime/2 * k2, orbitAngularVelocity);
+    k4 = calc_differential_kinematics_orbit(currentOmega, currentQuaternion + samplingTime   * k3, orbitAngularVelocity);
 
     nextQuaternion = currentQuaternion + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4);
 
@@ -158,14 +188,8 @@ function calc_transformation_matrix(q)
     return transformation_matrix
 end
 
-function gravity_gradient_torque(inertia,q)
-
+function gravity_gradient_torque(inertia, orbitAngularVelocity, q)
     # Calculate gravity gradient torque
-    gravitationalConstant = 3.9879e+14
-    orbitalRadius         = 400e+3
-
-    # Assume as a circular orbit
-    orbitAngularVelocity  = sqrt(gravitationalConstant/orbitalRadius)
 
     # Vector of principal axes of inertia
     J = diag(inertia)
@@ -177,8 +201,6 @@ function gravity_gradient_torque(inertia,q)
       2*(J[1]-J[2]) * (q[1]*q[3] - q[2]*q[4])* (q[2]*q[3] + q[1]q[4])
     ]
 
-
-    println("torque_vector   ",norm(torque_vector))
     return torque_vector
 end
 
