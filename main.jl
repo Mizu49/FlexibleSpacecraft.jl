@@ -2,14 +2,14 @@ include("src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # inertia matrix
-inertia = diagm([1, 1, 1000])
+inertia = diagm([1, 1, 1])
 
 # Orbit Radius [m]
-    orbitalRadius = 4e+5
+orbitalRadius = 4e+5
 
 # Assume as a circular orbit
-    gravitationalConstant = 3.9879e+14
-    orbitAngularVelocity  = sqrt(gravitationalConstant/orbitalRadius^3)
+gravitationalConstant = 3.9879e+14
+orbitAngularVelocity  = sqrt(gravitationalConstant/orbitalRadius^3)
 
 
 # Dynamics model (mutable struct)
@@ -37,7 +37,7 @@ coordinateA = TimeLine.Coordinate(
 # Coordinate system of b
 coordinateB = TimeLine.init_coordinate_array(simu_data_num, coordinateA)
 
-omegaBA = TimeLine.init_angular_velocity_array(simu_data_num, [0, 0, 1])
+omegaBA = TimeLine.init_angular_velocity_array(simu_data_num, [0, 0, 0])
 
 quaternion = TimeLine.init_quaternion_array(simu_data_num, [0, 0, 0, 1])
 
