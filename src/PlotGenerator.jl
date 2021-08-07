@@ -44,11 +44,11 @@ function angular_velocity(time, angularVelocity)
 end
 
 """
-    bodyframe(time, refCoordinate, bodyCoordinate)
+    function dispframe(time, refCoordinate, coordinate)
 
 Generates the 3D figure of body fixed frame
 """
-function bodyframe(time, refCoordinate, bodyCoordinate)
+function dispframe(time, refCoordinate, coordinate)
 
     # Plot of reference frame
     coordFig = quiver(
@@ -82,27 +82,27 @@ function bodyframe(time, refCoordinate, bodyCoordinate)
     coordFig = quiver!(
         [0], [0], [0],
         quiver = (
-            [bodyCoordinate.x[1]],
-            [bodyCoordinate.x[2]],
-            [bodyCoordinate.x[3]]),
+            [coordinate.x[1]],
+            [coordinate.x[2]],
+            [coordinate.x[3]]),
         color = RGB(colorant"#FF0000"),
         linewidth = 4,)
 
     coordFig = quiver!(
         [0], [0], [0],
         quiver = (
-            [bodyCoordinate.y[1]],
-            [bodyCoordinate.y[2]],
-            [bodyCoordinate.y[3]]),
+            [coordinate.y[1]],
+            [coordinate.y[2]],
+            [coordinate.y[3]]),
         color = RGB(colorant"#008000"),
         linewidth = 4,)
 
     coordFig = quiver!(
         [0], [0], [0],
         quiver = (
-            [bodyCoordinate.z[1]],
-            [bodyCoordinate.z[2]],
-            [bodyCoordinate.z[3]]),
+            [coordinate.z[1]],
+            [coordinate.z[2]],
+            [coordinate.z[3]]),
         color = RGB(colorant"#0000FF"),
         linewidth = 4,
         framestyle = :origin)
@@ -130,7 +130,7 @@ function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0
 
         bodyCoordinate = TimeLine.get_coordinate(time[index], Tsampling, bodyCoordinateArray)
 
-        bodyframe(time[index], refCoordinate, bodyCoordinate)
+        dispframe(time[index], refCoordinate, bodyCoordinate)
     end every steps
 
     # make gif image

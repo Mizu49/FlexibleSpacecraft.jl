@@ -18,4 +18,8 @@ include("TimeLine.jl")
 include("PlotGenerator.jl")
 @reexport using .PlotGenerator
 
+# Include module `Orbit`
+include("Orbit.jl")
+@reexport using .Orbit
+
 end # module

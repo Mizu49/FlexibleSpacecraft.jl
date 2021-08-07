@@ -8,6 +8,9 @@ makedocs(
         "Development" => [
             "Developer's Guideline" => "development/developer's-guideline.md",
             "Environment" => "development/environment.md"
+        ],
+        "Dynamics" => [
+            "Frames" => "dynamics/frames.md",
         ]
     ]
 )

@@ -13,57 +13,68 @@ using .SimulationTesting
     # inertia matrix
     inertia = diagm([1.0, 1.0, 2.0])
 
-    # Disturbance disturbance
-    disturbance = [0.0, 0.0, 0.0]
+    # Orbit
+    orbit = Orbit.CircularOrbit(4e+5, 3.9879e+14)
 
     # Dynamics model (mutable struct)
-    model = RigidBodyAttitudeDynamics.DynamicsModel(inertia, disturbance)
+    model = RigidBodyAttitudeDynamics.DynamicsModel(inertia)
 
     # Sampling period of simulation (second)
-    Ts = 1e-2
+    Tsampling = 1e-2
 
     # Time length of simulation (second)
     simulation_time = 60
 
-    # 時刻
-    time = 0:Ts:simulation_time
+    # Array of time
+    time = 0:Tsampling:simulation_time
 
     # Numbers of simulation data
-    simu_data_num = round(Int, simulation_time/Ts) + 1;
+    data_num = round(Int, simulation_time/Tsampling) + 1;
 
-    # Coordinate system of a
-    coordinateA = TimeLine.Coordinate(
+    # Earth-Centered frame (constant value)
+    ECI_frame = TimeLine.Coordinate(
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
     )
 
-    # Coordinate system of b
-    coordinateB = TimeLine.init_coordinate_array(simu_data_num, coordinateA)
+    # Spacecraft-fixed frame (Body frame)
+    body_frame = TimeLine.init_coordinate_array(data_num, ECI_frame)
 
-    omegaBA = TimeLine.init_angular_velocity_array(simu_data_num, [0, 0, 1])
+    # Angular velocity of body frame with respect to the ECI frame
+    angular_velocity = TimeLine.init_angular_velocity_array(data_num, [0, 0, 0])
 
-    quaternion = TimeLine.init_quaternion_array(simu_data_num, [0, 0, 0, 1])
+    quaternion = TimeLine.init_quaternion_array(data_num, [0, 0, 0, 1])
 
-    for loopCounter = 0:simu_data_num - 2
-
-        # println(loopCounter + 1)
+    println("Begin simulation!")
+    for loopCounter = 0:data_num - 2
 
         # Extract body fixed frame at current time step
-        currentCoordB = hcat(coordinateB.x[:,loopCounter + 1] , coordinateB.y[:,loopCounter + 1], coordinateB.z[:,loopCounter + 1])
+        currentCoordB = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
 
-        omegaBA[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], omegaBA[:, loopCounter + 1], Ts, currentCoordB)
+        # Disturbance torque
+        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque()
 
-        quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(omegaBA[:,loopCounter + 1], quaternion[:, loopCounter + 1], Ts)
+        angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentCoordB, disturbance)
 
-        C = RigidBodyAttitudeDynamics.calc_transformation_matrix(quaternion[:, loopCounter + 1])
+        quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
 
-        coordinateB.x[:, loopCounter + 2] = C * coordinateA.x
-        coordinateB.y[:, loopCounter + 2] = C * coordinateA.y
-        coordinateB.z[:, loopCounter + 2] = C * coordinateA.z
+        C = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+
+        body_frame.x[:, loopCounter + 2] = C * ECI_frame.x
+        body_frame.y[:, loopCounter + 2] = C * ECI_frame.y
+        body_frame.z[:, loopCounter + 2] = C * ECI_frame.z
 
     end
+    println("Simulation is completed!")
 
     @test SimulationTesting.quaternion_constraint(quaternion)
+
+    fig1 = PlotGenerator.angular_velocity(time, angular_velocity)
+    display(fig1)
+
+
+    fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame)
+    display(fig2)
 
 end

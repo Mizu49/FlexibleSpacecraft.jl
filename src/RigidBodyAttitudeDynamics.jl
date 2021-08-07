@@ -14,45 +14,41 @@ module RigidBodyAttitudeDynamics
 
 
 """
-    DynamicsModel(InertiaMatrix::Matrix, DisturbanceTorque::Matrix)
+    DynamicsModel(inertia::Matrix)
 
 mutable struct of attitude dynamics model
-- InertiaMatrix: inertia matrix of a given system
-- DisturbanceTorque: disturbance torque to the system
+- inertia: inertia matrix of a given system
 """
 mutable struct DynamicsModel
-    # 慣性ダイアディック
-    InertiaMatrix::Matrix
-
-    # 外乱トルク
-    DisturbanceTorque::Vector
+    # Inertia Matrix
+    inertia::Matrix
 end
 
 # Equation of dynamics
 """
-    calc_differential_dynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)
+    calc_differential_dynamics(model::DynamicsModel, currentTime, angular_velocity, current_body_frame)
 
 Get the differential of equation of dynamics.
 
 # Arguments
 - model::DynamicsModel
 - currentTime: current time of system [s]
-- currentOmega: angular velocity of system [rad/s]
-- currentCoordB: current coordinate matrix [b1 b2 b3]
+- angular_velocity: angular velocity of body frame with respect to ECI frame [rad/s]
+- current_body_frame: current body frame [b1 b2 b3]
 
 # return
 - differential: differential of equation of motion
 """
-function calc_differential_dynamics(model::DynamicsModel, currentTime, currentOmega, currentCoordB)
+function calc_differential_dynamics(model::DynamicsModel, currentTime, angular_velocity, current_body_frame, disturbance)
 
     # skew matrix of angular velocity vector
     skewOmega = [
-        0 -currentOmega[3] currentOmega[2]
-        currentOmega[3] 0 -currentOmega[1]
-        -currentOmega[2] currentOmega[1] 0]
+        0 -angular_velocity[3] angular_velocity[2]
+        angular_velocity[3] 0 -angular_velocity[1]
+        -angular_velocity[2] angular_velocity[1] 0]
 
     # calculate differential of equation of motion
-    differential = inv(model.InertiaMatrix) * (model.DisturbanceTorque - currentCoordB' * model.InertiaMatrix * skewOmega * currentCoordB * currentCoordB' * currentOmega)
+    differential = inv(model.inertia) * (disturbance - current_body_frame' * model.inertia * skewOmega * current_body_frame * current_body_frame' * angular_velocity)
 
     return differential
 end
@@ -71,13 +67,13 @@ Get differential of quaternion from equation of kinematics
 # Return
 - differential: differential of equation of kinematics
 """
-function calc_differential_kinematics(omega, quaternion)
+function calc_differential_kinematics(angular_velocity, quaternion)
 
     OMEGA = [
-        0 omega[3] -omega[2] omega[1]
-        -omega[3] 0 omega[1] omega[2]
-        omega[2] -omega[1] 0 omega[3]
-        -omega[1] -omega[2] -omega[3] 0
+        0 angular_velocity[3] -angular_velocity[2] angular_velocity[1]
+        -angular_velocity[3] 0 angular_velocity[1] angular_velocity[2]
+        angular_velocity[2] -angular_velocity[1] 0 angular_velocity[3]
+        -angular_velocity[1] -angular_velocity[2] -angular_velocity[3] 0
     ]
 
     differential = 1/2 * OMEGA * quaternion
@@ -86,19 +82,19 @@ function calc_differential_kinematics(omega, quaternion)
 end
 
 """
-    update_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
+    update_angular_velocity(model::DynamicsModel, currentTime, angular_velocity, Tsampling, current_body_frame)
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, currentOmega, samplingTime, currentCoordB)
+function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, current_body_frame::Matrix, disturbance::Vector)
     # Update the angular velocity vector using 4th order runge kutta method
 
-    k1 = calc_differential_dynamics(model, currentTime                 , currentOmega                      , currentCoordB)
-    k2 = calc_differential_dynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k1, currentCoordB)
-    k3 = calc_differential_dynamics(model, currentTime + samplingTime/2, currentOmega + samplingTime/2 * k2, currentCoordB)
-    k4 = calc_differential_dynamics(model, currentTime + samplingTime  , currentOmega + samplingTime   * k3, currentCoordB)
+    k1 = calc_differential_dynamics(model, currentTime                 , angular_velocity                      , current_body_frame, disturbance)
+    k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, current_body_frame, disturbance)
+    k3 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, current_body_frame, disturbance)
+    k4 = calc_differential_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, current_body_frame, disturbance)
 
-    nextOmega = currentOmega + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4)
+    nextOmega = angular_velocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 
     return nextOmega
 end
@@ -106,35 +102,35 @@ end
 
 # Update the quaternion vector (time evolution)
 """
-    update_quaternion(currentOmega, currentQuaternion, samplingTime)
+    update_quaternion(angular_velocity, currentQuaternion, Tsampling)
 
 calculate quaternion at next time step using 4th order Runge-Kutta method.
 """
-function calc_quaternion(currentOmega, currentQuaternion, samplingTime)
+function calc_quaternion(angular_velocity, quaternion, Tsampling)
     # Update the quaterion vector using 4th order runge kutta method
 
-    k1 = calc_differential_kinematics(currentOmega, currentQuaternion                      );
-    k2 = calc_differential_kinematics(currentOmega, currentQuaternion + samplingTime/2 * k1);
-    k3 = calc_differential_kinematics(currentOmega, currentQuaternion + samplingTime/2 * k2);
-    k4 = calc_differential_kinematics(currentOmega, currentQuaternion + samplingTime   * k3);
+    k1 = calc_differential_kinematics(angular_velocity, quaternion                   );
+    k2 = calc_differential_kinematics(angular_velocity, quaternion + Tsampling/2 * k1);
+    k3 = calc_differential_kinematics(angular_velocity, quaternion + Tsampling/2 * k2);
+    k4 = calc_differential_kinematics(angular_velocity, quaternion + Tsampling   * k3);
 
-    nextQuaternion = currentQuaternion + samplingTime/6 * (k1 + 2*k2 + 2*k3 + k4);
+    nextQuaternion = quaternion + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4);
 
     return nextQuaternion
 end
 
 """
-    calc_transformation_matrix(q)
+    ECI2BodyFrame(q)
 
-Calculate the transformation matrix from coordinate A system (inertial frame) to coordinate B system (spacecraft body fixed frame).
+Calculate the transformation matrix from ECI frame to spacecraft body-fixed frame.
 
 # Arguments
 - `q`: quaternion
 
 # Return
-- `transformation_matrix`: transformation matrix from referential frame to body fixed frame
+- `transformation_matrix`: transformation matrix
 """
-function calc_transformation_matrix(q)
+function ECI2BodyFrame(q)
 
     # Check if the quaterion satisfies its constraint
     try
@@ -158,5 +154,12 @@ function calc_transformation_matrix(q)
     return transformation_matrix
 end
 
+function gravity_gradient_torque()
+
+    # Calculate gravity gradient torque
+    torque_vector = [0, 0, 0.1];
+
+    return torque_vector
+end
 
 end
