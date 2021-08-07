@@ -184,4 +184,24 @@ function ECI2OrbitalPlaneFrame(elements::OrbitalElements)
 
 end
 
+"""
+    function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_velocity, time)
+
+Calculates transformation matrix from OrbitalPlaneFrame to Radial Angle Track frame
+"""
+function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_velocity, time)
+
+    C1 = u -> begin
+        [cos(u) sin(u) 0
+        -sin(u) cos(u) 0
+        0 0 1]
+    end
+
+    # current angle of spacecraft relative to ascending axis of orbital plane frame
+    current_position = deg2rad(elements.true_anomaly) + angular_velocity * time
+
+    return C1(current_position)
+
+end
+
 end

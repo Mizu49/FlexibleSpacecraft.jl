@@ -31,3 +31,19 @@ orbit_frame = TimeLine.Coordinate(
 )
 
 PlotGenerator.dispframe(0, ECI_frame, orbit_frame)
+
+
+time = 0:60:T*60
+data_num = round(Int, T*60/60) + 1;
+spacecraft_RAT = TimeLine.init_coordinate_array(data_num, orbit_frame)
+for loopCounter = 0:data_num - 1
+
+    RAT = Orbit.OrbitalPlaneFrame2RadialAngleTrack(elem, angular_velocity, time[loopCounter + 1])
+    spacecraft_RAT.x[:, loopCounter + 1] = RAT * orbit_frame.x
+    spacecraft_RAT.y[:, loopCounter + 1] = RAT * orbit_frame.y
+    spacecraft_RAT.z[:, loopCounter + 1] = RAT * orbit_frame.z
+
+end
+
+fig2 = PlotGenerator.frame_gif(time, 60, orbit_frame, spacecraft_RAT, 90, 8)
+display(fig2)
