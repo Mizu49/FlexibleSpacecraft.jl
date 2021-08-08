@@ -91,7 +91,7 @@ struct OrbitalElements
             throw(DomainError(a, "Argument `a` should be positive real number."))
         end
 
-        if !(e > 0)
+        if !(e >= 0)
             throw(DomainError(e, "Argument `e` should be positive real number."))
         end
 
