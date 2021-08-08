@@ -185,11 +185,11 @@ function ECI2OrbitalPlaneFrame(elements::OrbitalElements)
 end
 
 """
-    function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_velocity, time)
+    function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
-Calculates transformation matrix from OrbitalPlaneFrame to Radial Angle Track frame
+Calculates transformation matrix from OrbitalPlaneFrame to Radial Along Track frame
 """
-function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_velocity, time)
+function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
     C1 = u -> begin
         [cos(u) sin(u) 0
