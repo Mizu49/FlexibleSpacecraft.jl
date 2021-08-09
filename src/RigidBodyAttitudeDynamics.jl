@@ -163,4 +163,19 @@ function constant_torque()
     return torque_vector
 end
 
+function gravity_gradient_torque(inertia, angular_velocity, nadir)
+
+    # Calculate gravity gradient torque
+
+    skewNadir = [
+         0 -nadir[3]  nadir[2]
+         nadir[3] 0  -nadir[1]
+        -nadir[2]  nadir[1] 0
+    ]
+
+    torque_vector = 3*angular_velocity^2 * skewNadir * inertia * nadir;
+
+    return torque_vector
+end
+
 end
