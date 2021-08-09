@@ -78,12 +78,13 @@ using .SimulationTesting
         RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, orbit_angular_velocity, time[loopCounter + 1])
         LVLH = Orbit.OrbitalPlaneFrame2LVLH(RAT)
 
+
         spacecraft_LVLH.x[:, loopCounter + 1] = LVLH * orbit_frame.x
         spacecraft_LVLH.y[:, loopCounter + 1] = LVLH * orbit_frame.y
         spacecraft_LVLH.z[:, loopCounter + 1] = LVLH * orbit_frame.z
 
         # Disturbance torque
-        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, spacecraft_LVLH.z[:, loopCounter + 1])
+        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, spacecraft_LVLH.z[:, loopCounter + 1], quaternion[:, loopCounter + 1])
 
         body_angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentCoordB, disturbance)
 
