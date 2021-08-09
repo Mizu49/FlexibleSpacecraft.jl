@@ -204,4 +204,18 @@ function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_v
 
 end
 
+"""
+    function OrbitalPlaneFrame2LVLH(OrbitalPlaneFrame2RadialAlongTrack)
+
+Calculates transformation matrix from OrbitalPlaneFrame frame to LVLH
+"""
+function OrbitalPlaneFrame2LVLH(C_OrbitalPlaneFrame2RadialAlongTrack)
+    C = [  C_OrbitalPlaneFrame2RadialAlongTrack[2,:]';
+          -C_OrbitalPlaneFrame2RadialAlongTrack[3,:]';
+          -C_OrbitalPlaneFrame2RadialAlongTrack[1,:]']
+
+    return C
+
+end
+
 end
