@@ -53,7 +53,7 @@ using .SimulationTesting
         currentCoordB = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
 
         # Disturbance torque
-        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque()
+        disturbance = RigidBodyAttitudeDynamics.constant_torque()
 
         angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentCoordB, disturbance)
 
