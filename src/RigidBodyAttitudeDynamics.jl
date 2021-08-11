@@ -154,9 +154,9 @@ function ECI2BodyFrame(q)
     return transformation_matrix
 end
 
-function gravity_gradient_torque()
+function constant_torque()
 
-    # Calculate gravity gradient torque
+    # Calculate constant torque
     torque_vector = [0, 0, 0.1];
 
     return torque_vector
