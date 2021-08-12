@@ -162,13 +162,14 @@ function constant_torque()
     return torque_vector
 end
 
-function gravity_gradient_torque(inertia, angular_velocity, nadir, q)
+function gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)
 
     # Calculate gravity gradient torque
 
-    C = ECI2BodyFrame(q)
+    # ここはECI2BodyFrameではなく，LVLH2Bodyになると思われる
+    C = C_ECI2Body * inv(C_ECI2LVLH)
 
-    nadir_body = C * nadir
+    nadir_body = C * LVLHframe_z
 
     skewNadir = [
          0 -nadir_body[3]  nadir_body[2]
@@ -176,7 +177,7 @@ function gravity_gradient_torque(inertia, angular_velocity, nadir, q)
         -nadir_body[2]  nadir_body[1] 0
     ]
 
-    torque_vector = 3*angular_velocity^2 * skewNadir * inertia * nadir_body;
+    torque_vector = 3*orbit_angular_velocity^2 * skewNadir * inertia * nadir_body;
 
     return torque_vector
 end

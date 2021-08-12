@@ -11,7 +11,11 @@ using .SimulationTesting
 @testset "Gravity-Gradient Torque" begin
 
     # inertia matrix
-    inertia = diagm([1.0, 1.0, 2.0])
+    inertia = [
+        45000 -1000 300
+        -1000 1200 750
+        300 750 50000
+    ]
 
     # define a circular orbit info
     circular_orbit = Orbit.CircularOrbit(6370e+3 + 400e3, 3.986e+14)
@@ -23,16 +27,16 @@ using .SimulationTesting
     T = Orbit.get_timeperiod(circular_orbit, unit = "minute")
 
     # Orbital elements of ISS
-    elem = Orbit.OrbitalElements(111.8195, 51.6433, 421e3, 0.0001239, 241.3032, 212.0072)
+    elem = Orbit.OrbitalElements(0, 0, 6370e+3 + 400e3, 1, 0, 0)
 
     # Dynamics model (mutable struct)
     model = RigidBodyAttitudeDynamics.DynamicsModel(inertia)
 
     # Sampling period of simulation (second)
-    Tsampling = 1e-2
+    Tsampling = 1
 
     # Time length of simulation (second)
-    simulation_time = 60
+    simulation_time = 5400 * 2
 
     # Array of time
     time = 0:Tsampling:simulation_time
@@ -63,7 +67,7 @@ using .SimulationTesting
     spacecraft_LVLH = TimeLine.init_coordinate_array(data_num, orbit_frame)
 
     # Angular velocity of body frame with respect to the ECI frame
-    body_angular_velocity = TimeLine.init_angular_velocity_array(data_num, [0, 0, 0])
+    body_angular_velocity = TimeLine.init_angular_velocity_array(data_num, [0.00, 0, 0])
 
 
     quaternion = TimeLine.init_quaternion_array(data_num, [0, 0, 0, 1])
@@ -74,27 +78,30 @@ using .SimulationTesting
         # Extract body fixed frame at current time step
         currentCoordB = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
 
-        # update current RadialAngleTrack and LVLH frame
-        RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, orbit_angular_velocity, time[loopCounter + 1])
-        LVLH = Orbit.OrbitalPlaneFrame2LVLH(RAT)
+        # update transformation matrix from orbit plane frame to radial along tract frame
+        C_RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, orbit_angular_velocity, time[loopCounter + 1])
 
+        # calculates transformation matrix from orbital plane frame to radial along frame
+        C_ECI2LVLH = Orbit.OrbitalPlaneFrame2LVLH(C_RAT)
 
-        spacecraft_LVLH.x[:, loopCounter + 1] = LVLH * orbit_frame.x
-        spacecraft_LVLH.y[:, loopCounter + 1] = LVLH * orbit_frame.y
-        spacecraft_LVLH.z[:, loopCounter + 1] = LVLH * orbit_frame.z
+        # transfromation matrix from ECI to body frame
+        C_ECI2Body = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+
+        spacecraft_LVLH.x[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.x
+        spacecraft_LVLH.y[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.y
+        spacecraft_LVLH.z[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.z
 
         # Disturbance torque
-        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, spacecraft_LVLH.z[:, loopCounter + 1], quaternion[:, loopCounter + 1])
+        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, spacecraft_LVLH.z[:, loopCounter + 1])
 
+        # Time evolution
         body_angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentCoordB, disturbance)
 
         quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(body_angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
 
-        C = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
-
-        body_frame.x[:, loopCounter + 2] = C * ECI_frame.x
-        body_frame.y[:, loopCounter + 2] = C * ECI_frame.y
-        body_frame.z[:, loopCounter + 2] = C * ECI_frame.z
+        body_frame.x[:, loopCounter + 2] = C_ECI2Body * ECI_frame.x
+        body_frame.y[:, loopCounter + 2] = C_ECI2Body * ECI_frame.y
+        body_frame.z[:, loopCounter + 2] = C_ECI2Body * ECI_frame.z
 
     end
     println("Simulation is completed!")
@@ -105,8 +112,10 @@ using .SimulationTesting
     display(fig1)
 
 
-   # fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame)
-    fig2 = PlotGenerator.frame_gif(time, Tsampling, orbit_frame, spacecraft_LVLH)
+    fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif=20, FPS=20)
     display(fig2)
+
+    fig3 = PlotGenerator.frame_gif(time, Tsampling, orbit_frame, spacecraft_LVLH, Tgif=20, FPS=20)
+    display(fig3)
 
 end
