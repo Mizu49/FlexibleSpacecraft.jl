@@ -120,7 +120,7 @@ end
 
 Generates animation of frame rotation as GIF figure
 """
-function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray; Tgif = 60, FPS = 3)
 
     dataNum = size(time, 1)
     steps = round(Int, Tgif/Tsampling)
