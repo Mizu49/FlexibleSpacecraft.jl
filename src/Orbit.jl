@@ -91,7 +91,7 @@ struct OrbitalElements
             throw(DomainError(a, "Argument `a` should be positive real number."))
         end
 
-        if !(e > 0)
+        if !(e >= 0)
             throw(DomainError(e, "Argument `e` should be positive real number."))
         end
 
@@ -185,11 +185,11 @@ function ECI2OrbitalPlaneFrame(elements::OrbitalElements)
 end
 
 """
-    function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_velocity, time)
+    function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
-Calculates transformation matrix from OrbitalPlaneFrame to Radial Angle Track frame
+Calculates transformation matrix from OrbitalPlaneFrame to Radial Along Track frame
 """
-function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_velocity, time)
+function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
     C1 = u -> begin
         [cos(u) sin(u) 0
@@ -201,6 +201,21 @@ function OrbitalPlaneFrame2RadialAngleTrack(elements::OrbitalElements, angular_v
     current_position = deg2rad(elements.true_anomaly) + angular_velocity * time
 
     return C1(current_position)
+
+end
+
+"""
+    function OrbitalPlaneFrame2LVLH(OrbitalPlaneFrame2RadialAlongTrack)
+
+Calculates transformation matrix from OrbitalPlaneFrame frame to LVLH
+"""
+function OrbitalPlaneFrame2LVLH(C_OrbitalPlaneFrame2RadialAlongTrack)
+
+    C = [  C_OrbitalPlaneFrame2RadialAlongTrack[2,:]';
+          -C_OrbitalPlaneFrame2RadialAlongTrack[3,:]';
+          -C_OrbitalPlaneFrame2RadialAlongTrack[1,:]']
+
+    return C
 
 end
 

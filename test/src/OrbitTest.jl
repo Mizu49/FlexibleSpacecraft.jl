@@ -38,7 +38,7 @@ data_num = round(Int, T*60/60) + 1;
 spacecraft_RAT = TimeLine.init_coordinate_array(data_num, orbit_frame)
 for loopCounter = 0:data_num - 1
 
-    RAT = Orbit.OrbitalPlaneFrame2RadialAngleTrack(elem, angular_velocity, time[loopCounter + 1])
+    RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, angular_velocity, time[loopCounter + 1])
     spacecraft_RAT.x[:, loopCounter + 1] = RAT * orbit_frame.x
     spacecraft_RAT.y[:, loopCounter + 1] = RAT * orbit_frame.y
     spacecraft_RAT.z[:, loopCounter + 1] = RAT * orbit_frame.z
