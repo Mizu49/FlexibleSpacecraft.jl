@@ -86,13 +86,15 @@ end
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, current_body_frame::Matrix, disturbance::Vector)
+function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe, disturbance::Vector)
     # Update the angular velocity vector using 4th order runge kutta method
 
-    k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , current_body_frame, disturbance)
-    k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, current_body_frame, disturbance)
-    k3 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, current_body_frame, disturbance)
-    k4 = calc_differential_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, current_body_frame, disturbance)
+    bodyframematrix = hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z)
+
+    k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , bodyframematrix, disturbance)
+    k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, bodyframematrix, disturbance)
+    k3 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, bodyframematrix, disturbance)
+    k4 = calc_differential_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, bodyframematrix, disturbance)
 
     nextOmega = angular_velocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 

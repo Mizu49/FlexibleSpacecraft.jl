@@ -59,7 +59,6 @@ using .SimulationTesting
         C_ECI2OrbitalPlaneFrame * ECI_frame.z
     )
 
-
     # Spacecraft-fixed frame (Body frame)
     body_frame = TimeLine.initframes(data_num, ECI_frame)
 
@@ -73,38 +72,43 @@ using .SimulationTesting
     quaternion = TimeLine.init_quaternion_array(data_num, [0, 0, 0, 1])
 
     println("Begin simulation!")
-    for loopCounter = 0:data_num - 2
+    for loopCounter = 0:data_num - 1
 
-        # Extract body fixed frame at current time step
-        currentbodyframe = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
+        currenttime = time[loopCounter + 1]
 
         # update transformation matrix from orbit plane frame to radial along tract frame
-        C_RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, orbit_angular_velocity, time[loopCounter + 1])
+        C_RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, orbit_angular_velocity, currenttime)
 
         # calculates transformation matrix from orbital plane frame to radial along frame
         C_ECI2LVLH = Orbit.OrbitalPlaneFrame2LVLH(C_RAT)
-
-        # transfromation matrix from ECI to body frame
-        C_ECI2Body = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
-
         spacecraft_LVLH.x[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.x
         spacecraft_LVLH.y[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.y
         spacecraft_LVLH.z[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.z
+
+        # transfromation matrix from ECI to body frame
+        C_ECI2Body = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+        body_frame.x[:, loopCounter + 1] = C_ECI2Body * ECI_frame.x
+        body_frame.y[:, loopCounter + 1] = C_ECI2Body * ECI_frame.y
+        body_frame.z[:, loopCounter + 1] = C_ECI2Body * ECI_frame.z
+
+        # Extract body fixed frame at current time
+        currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)
 
         # Disturbance torque
         disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, spacecraft_LVLH.z[:, loopCounter + 1])
 
         # Time evolution
-        body_angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
+        if loopCounter != data_num - 1
 
-        quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(body_angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
+            body_angular_velocity[:, loopCounter + 2] =  RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
 
-        body_frame.x[:, loopCounter + 2] = C_ECI2Body * ECI_frame.x
-        body_frame.y[:, loopCounter + 2] = C_ECI2Body * ECI_frame.y
-        body_frame.z[:, loopCounter + 2] = C_ECI2Body * ECI_frame.z
+            quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(body_angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
+
+        end
 
     end
     println("Simulation is completed!")
+    println(quaternion[:, end])
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 

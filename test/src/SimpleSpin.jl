@@ -49,21 +49,27 @@ using .SimulationTesting
     println("Begin simulation!")
     for loopCounter = 0:data_num - 2
 
-        # Extract body fixed frame at current time step
-        currentbodyframe = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
+        # Update current time (second)
+        currenttime = Tsampling * loopCounter
+
+        # Update current attitude
+        C = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+        body_frame.x[:, loopCounter + 1] = C * ECI_frame.x
+        body_frame.y[:, loopCounter + 1] = C * ECI_frame.y
+        body_frame.z[:, loopCounter + 1] = C * ECI_frame.z
+
+        # Extract body fixed frame at current time
+        currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)
 
         # Disturbance torque
         disturbance = RigidBodyAttitudeDynamics.constant_torque()
 
+        ##### Time evolution of the system
+        # Update angular velocity
         angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
 
+        # Update quaternion
         quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
-
-        C = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
-
-        body_frame.x[:, loopCounter + 2] = C * ECI_frame.x
-        body_frame.y[:, loopCounter + 2] = C * ECI_frame.y
-        body_frame.z[:, loopCounter + 2] = C * ECI_frame.z
 
     end
     println("Simulation is completed!")
