@@ -108,7 +108,6 @@ using .SimulationTesting
 
     end
     println("Simulation is completed!")
-    println(quaternion[:, end])
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 

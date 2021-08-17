@@ -47,7 +47,7 @@ using .SimulationTesting
     quaternion = TimeLine.init_quaternion_array(data_num, [0, 0, 0, 1])
 
     println("Begin simulation!")
-    for loopCounter = 0:data_num - 2
+    for loopCounter = 0:data_num - 1
 
         # Update current time (second)
         currenttime = Tsampling * loopCounter
@@ -65,14 +65,19 @@ using .SimulationTesting
         disturbance = RigidBodyAttitudeDynamics.constant_torque()
 
         ##### Time evolution of the system
-        # Update angular velocity
-        angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
+        if loopCounter != data_num - 1
 
-        # Update quaternion
-        quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
+            # Update angular velocity
+            angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
+
+            # Update quaternion
+            quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
+
+        end
 
     end
     println("Simulation is completed!")
+    println(quaternion[:, end])
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 
