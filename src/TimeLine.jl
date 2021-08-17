@@ -8,49 +8,49 @@ module TimeLine
 
 
 """
-    struct Coordinate(x::Vector, y::Vector, z::Vector)
+    struct Frame(x::Vector, y::Vector, z::Vector)
 
-Struct of immutable coordinate vectors. Use this for inertia frame (coordinate system A)
+Struct of immutable vectors that express the coordinate frame of a certain state
 """
-struct Coordinate
+struct Frame
     x::Vector
     y::Vector
     z::Vector
 end
 
 """
-    mutable struct CoordinateArray(x::Matrix, y::Matrix, z::Matrix)
+    mutable struct FrameArray(x::Matrix, y::Matrix, z::Matrix)
 
-Struct of array of time-variant coordinate vectors
+Mutable struct of array of time-variant coordinate frame vectors
 """
-mutable struct CoordinateArray
+mutable struct FrameArray
     x::Matrix
     y::Matrix
     z::Matrix
 end
 
 """
-    function get_coordinate(time, sampling_period, coordinates::CoordinateArray)
+    function getframe(time, sampling_period, coordinates::FrameArray)
 
-get a `sample_coordinate::Coordinate` matching with given `time`
+get a `sampledframe::Frame` matching with given `time`
 """
-function get_coordinate(time, sampling_period, coordinates)
+function getframe(time, sampling_period, frames)
 
     sample_step = floor(Int, time/sampling_period) + 1
 
-    sample_coordinate = Coordinate(
-        coordinates.x[:, sample_step],
-        coordinates.y[:, sample_step],
-        coordinates.z[:, sample_step]
+    sampledframe = Frame(
+        frames.x[:, sample_step],
+        frames.y[:, sample_step],
+        frames.z[:, sample_step]
     )
 
-    return sample_coordinate
+    return sampledframe
 end
 
 """
-    function init_angular_velocity_array(simdata_num, initital_value::Coordinate)
+    function init_angular_velocity_array(simdata_num, initital_value::Vector)
 
-initialize array that contains time response of angular velocity
+Initialize array that contains time response of angular velocity
 """
 function init_angular_velocity_array(simdata_num, initial_velocity::Vector)
 
@@ -76,23 +76,23 @@ end
 
 
 """
-    function init_coordinate_array(simdata_num, initial_coordinate::Coordinate)
+    function initframes(simdata_num, initial_coordinate::Frame)
 
-initialize time-variant coordinate vectors
+initialize time-variant coordinate frame vectors
 """
-function init_coordinate_array(simdata_num, initial_coordinate::Coordinate)
+function initframes(simdata_num, initialframe::Frame)
 
-    coordinate_array = CoordinateArray(
+    frames = FrameArray(
         zeros(3, simdata_num),
         zeros(3, simdata_num),
         zeros(3, simdata_num),
     )
 
-    coordinate_array.x[:, 1] = initial_coordinate.x
-    coordinate_array.y[:, 1] = initial_coordinate.y
-    coordinate_array.z[:, 1] = initial_coordinate.z
+    frames.x[:, 1] = initialframe.x
+    frames.y[:, 1] = initialframe.y
+    frames.z[:, 1] = initialframe.z
 
-    return coordinate_array
+    return frames
 end
 
 end

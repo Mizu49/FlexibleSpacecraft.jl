@@ -128,7 +128,7 @@ function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray; Tgif = 6
     # create animation
     anim = @animate for index in 1:dataNum
 
-        bodyCoordinate = TimeLine.get_coordinate(time[index], Tsampling, bodyCoordinateArray)
+        bodyCoordinate = TimeLine.getframe(time[index], Tsampling, bodyCoordinateArray)
 
         dispframe(time[index], refCoordinate, bodyCoordinate)
     end every steps

@@ -45,7 +45,7 @@ using .SimulationTesting
     data_num = round(Int, simulation_time/Tsampling) + 1;
 
     # Earth-Centered frame (constant value)
-    ECI_frame = TimeLine.Coordinate(
+    ECI_frame = TimeLine.Frame(
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
@@ -53,18 +53,18 @@ using .SimulationTesting
 
     C_ECI2OrbitalPlaneFrame = Orbit.ECI2OrbitalPlaneFrame(elem)
 
-    orbit_frame = TimeLine.Coordinate(
-    C_ECI2OrbitalPlaneFrame * ECI_frame.x,
-    C_ECI2OrbitalPlaneFrame * ECI_frame.y,
-    C_ECI2OrbitalPlaneFrame * ECI_frame.z
+    orbit_frame = TimeLine.Frame(
+        C_ECI2OrbitalPlaneFrame * ECI_frame.x,
+        C_ECI2OrbitalPlaneFrame * ECI_frame.y,
+        C_ECI2OrbitalPlaneFrame * ECI_frame.z
     )
 
 
     # Spacecraft-fixed frame (Body frame)
-    body_frame = TimeLine.init_coordinate_array(data_num, ECI_frame)
+    body_frame = TimeLine.initframes(data_num, ECI_frame)
 
     # Spacecraft-LVLH frame
-    spacecraft_LVLH = TimeLine.init_coordinate_array(data_num, orbit_frame)
+    spacecraft_LVLH = TimeLine.initframes(data_num, orbit_frame)
 
     # Angular velocity of body frame with respect to the ECI frame
     body_angular_velocity = TimeLine.init_angular_velocity_array(data_num, [0.00, 0, 0])
@@ -76,7 +76,7 @@ using .SimulationTesting
     for loopCounter = 0:data_num - 2
 
         # Extract body fixed frame at current time step
-        currentCoordB = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
+        currentbodyframe = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
 
         # update transformation matrix from orbit plane frame to radial along tract frame
         C_RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, orbit_angular_velocity, time[loopCounter + 1])
@@ -95,7 +95,7 @@ using .SimulationTesting
         disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, spacecraft_LVLH.z[:, loopCounter + 1])
 
         # Time evolution
-        body_angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentCoordB, disturbance)
+        body_angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
 
         quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(body_angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
 

@@ -32,14 +32,14 @@ using .SimulationTesting
     data_num = round(Int, simulation_time/Tsampling) + 1;
 
     # Earth-Centered frame (constant value)
-    ECI_frame = TimeLine.Coordinate(
+    ECI_frame = TimeLine.Frame(
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
     )
 
     # Spacecraft-fixed frame (Body frame)
-    body_frame = TimeLine.init_coordinate_array(data_num, ECI_frame)
+    body_frame = TimeLine.initframes(data_num, ECI_frame)
 
     # Angular velocity of body frame with respect to the ECI frame
     angular_velocity = TimeLine.init_angular_velocity_array(data_num, [0, 0, 0])
@@ -50,12 +50,12 @@ using .SimulationTesting
     for loopCounter = 0:data_num - 2
 
         # Extract body fixed frame at current time step
-        currentCoordB = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
+        currentbodyframe = hcat(body_frame.x[:,loopCounter + 1] , body_frame.y[:,loopCounter + 1], body_frame.z[:,loopCounter + 1])
 
         # Disturbance torque
         disturbance = RigidBodyAttitudeDynamics.constant_torque()
 
-        angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentCoordB, disturbance)
+        angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
 
         quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
 
@@ -74,7 +74,7 @@ using .SimulationTesting
     display(fig1)
 
 
-    fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame)
+    fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif = 0.4, FPS = 10)
     display(fig2)
 
 end
