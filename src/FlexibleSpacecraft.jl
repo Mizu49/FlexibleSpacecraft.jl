@@ -22,4 +22,8 @@ include("PlotGenerator.jl")
 include("Orbit.jl")
 @reexport using .Orbit
 
+# Inculde module `Disturbance`
+include("Disturbance.jl")
+@reexport using .Disturbance
+
 end # module

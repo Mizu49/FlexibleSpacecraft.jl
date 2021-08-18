@@ -62,7 +62,7 @@ using .SimulationTesting
         currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)
 
         # Disturbance torque
-        disturbance = RigidBodyAttitudeDynamics.constant_torque()
+        disturbance = Disturbance.constant_torque([0,0,0.02])
 
         ##### Time evolution of the system
         if loopCounter != data_num - 1
@@ -77,7 +77,6 @@ using .SimulationTesting
 
     end
     println("Simulation is completed!")
-    println(quaternion[:, end])
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 

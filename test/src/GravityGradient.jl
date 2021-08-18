@@ -95,7 +95,7 @@ using .SimulationTesting
         currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)
 
         # Disturbance torque
-        disturbance = RigidBodyAttitudeDynamics.gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, spacecraft_LVLH.z[:, loopCounter + 1])
+        disturbance = Disturbance.gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, spacecraft_LVLH.z[:, loopCounter + 1])
 
         # Time evolution
         if loopCounter != data_num - 1
