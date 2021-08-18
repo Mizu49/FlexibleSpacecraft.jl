@@ -111,14 +111,14 @@ using .SimulationTesting
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 
-    fig1 = PlotGenerator.angular_velocity(time, body_angular_velocity)
+    fig1 = PlotRecipe.angular_velocity(time, body_angular_velocity)
     display(fig1)
 
 
-    fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif=20, FPS=20)
+    fig2 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif=20, FPS=20)
     display(fig2)
 
-    fig3 = PlotGenerator.frame_gif(time, Tsampling, orbit_frame, spacecraft_LVLH, Tgif=20, FPS=20)
+    fig3 = PlotRecipe.frame_gif(time, Tsampling, orbit_frame, spacecraft_LVLH, Tgif=20, FPS=20)
     display(fig3)
 
 end

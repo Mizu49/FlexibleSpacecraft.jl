@@ -16,7 +16,7 @@ T = Orbit.get_timeperiod(circular_orbit, unit = "minute")
 elem = Orbit.OrbitalElements(111.8195, 51.6433, 421e3, 0.0001239, 241.3032, 212.0072)
 
 # Earth-Centered frame (constant value)
-ECI_frame = TimeLine.Coordinate(
+ECI_frame = TimeLine.Frame(
     [1, 0, 0],
     [0, 1, 0],
     [0, 0, 1]
@@ -24,18 +24,18 @@ ECI_frame = TimeLine.Coordinate(
 
 C = Orbit.ECI2OrbitalPlaneFrame(elem)
 
-orbit_frame = TimeLine.Coordinate(
+orbit_frame = TimeLine.Frame(
     C * ECI_frame.x,
     C * ECI_frame.y,
     C * ECI_frame.z
 )
 
-PlotGenerator.dispframe(0, ECI_frame, orbit_frame)
+PlotRecipe.dispframe(0, ECI_frame, orbit_frame)
 
 
 time = 0:60:T*60
 data_num = round(Int, T*60/60) + 1;
-spacecraft_RAT = TimeLine.init_coordinate_array(data_num, orbit_frame)
+spacecraft_RAT = TimeLine.initframes(data_num, orbit_frame)
 for loopCounter = 0:data_num - 1
 
     RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, angular_velocity, time[loopCounter + 1])
@@ -45,5 +45,5 @@ for loopCounter = 0:data_num - 1
 
 end
 
-fig2 = PlotGenerator.frame_gif(time, 60, orbit_frame, spacecraft_RAT, 90, 8)
+fig2 = PlotRecipe.frame_gif(time, 60, orbit_frame, spacecraft_RAT, Tgif = 90, FPS = 8)
 display(fig2)

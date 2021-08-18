@@ -80,11 +80,11 @@ using .SimulationTesting
 
     @test SimulationTesting.quaternion_constraint(quaternion)
 
-    fig1 = PlotGenerator.angular_velocity(time, angular_velocity)
+    fig1 = PlotRecipe.angular_velocity(time, angular_velocity)
     display(fig1)
 
 
-    fig2 = PlotGenerator.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif = 0.4, FPS = 10)
+    fig2 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif = 0.4, FPS = 10)
     display(fig2)
 
 end

@@ -1,9 +1,9 @@
 """
-    module PlotGenerator
+    module PlotRecipe
 
-module of functions that show us the beautiful figures of spacecraft attitude
+module of functions that show us the beautiful figures of spacecraft attitude dynamics
 """
-module PlotGenerator
+module PlotRecipe
 
 using Plots
 
@@ -17,7 +17,6 @@ import .TimeLine
 Generator plots of angular velocity in each axis
 """
 function angular_velocity(time, angularVelocity)
-
 
     fig1 = plot(time, angularVelocity[1, :],
         xlabel ="Time [s]",

@@ -14,9 +14,9 @@ include("RigidBodyAttitudeDynamics.jl")
 include("TimeLine.jl")
 @reexport using .TimeLine
 
-# Include module `PlotGenerator`
-include("PlotGenerator.jl")
-@reexport using .PlotGenerator
+# Include module `PlotRecipe`
+include("PlotRecipe.jl")
+@reexport using .PlotRecipe
 
 # Include module `Orbit`
 include("Orbit.jl")
