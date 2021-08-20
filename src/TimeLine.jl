@@ -1,94 +1,98 @@
 """
     module TimeLine
 
-module of time-variable values.
+module of time line of the physical quantity of spacecraft attitude dynamics
+
 """
 module TimeLine
 
 
 """
-    CoordinateVector(x::Vector, y::Vector, z::Vector)
+    struct Frame(x::Vector, y::Vector, z::Vector)
 
-Struct of immutable coordinate vectors. Use this for inertia frame (coordinate system A)
+Struct of immutable vectors that express the coordinate frame of a certain state
 """
-struct CoordinateVector
+struct Frame
     x::Vector
     y::Vector
     z::Vector
 end
 
 """
-    mutable struct CoordinateVectors(x::Matrix, y::Matrix, z::Matrix)
+    mutable struct FrameArray(x::Matrix, y::Matrix, z::Matrix)
 
-Struct of array of time-variant coordinate vectors
+Mutable struct of array of time-variant coordinate frame vectors
 """
-mutable struct CoordinateVectors
+mutable struct FrameArray
     x::Matrix
     y::Matrix
     z::Matrix
 end
 
 """
-    function extractCoordinateVector(time, samplingPeriod, coordinateVectors)
+    function getframe(time, sampling_period, coordinates::FrameArray)
+
+get a `sampledframe::Frame` matching with given `time`
 """
-function extractCoordinateVector(time, samplingPeriod, coordinateVectors)
+function getframe(time, sampling_period, frames)
 
-    sampleStep = floor(Int, time/samplingPeriod) + 1
+    sample_step = floor(Int, time/sampling_period) + 1
 
-    sampledCoordinate = CoordinateVector(
-        coordinateVectors.x[:, sampleStep],
-        coordinateVectors.y[:, sampleStep],
-        coordinateVectors.z[:, sampleStep]
+    sampledframe = Frame(
+        frames.x[:, sample_step],
+        frames.y[:, sample_step],
+        frames.z[:, sample_step]
     )
 
-    return sampledCoordinate
+    return sampledframe
 end
 
 """
-    initAngularVelocity(simDataNum, initVector)
+    function init_angular_velocity_array(simdata_num, initital_value::Vector)
 
-Time response of angular velocity
+Initialize array that contains time response of angular velocity
 """
-function initAngularVelocity(simDataNum, initVector)
+function init_angular_velocity_array(simdata_num, initial_velocity::Vector)
 
-    angularVelocityArray = zeros(3, simDataNum)
-    angularVelocityArray[:,1] = initVector;
+    angular_velocity_array = zeros(3, simdata_num)
+    angular_velocity_array[:,1] = initial_velocity
 
-    return angularVelocityArray
-end
-
-
-"""
-    initQuaternion(simDataNum, initVector)
-
-Initialize quaternion array for simulation
-"""
-function initQuaternion(simDataNum, initVector)
-
-    quaternion = zeros(4, simDataNum)
-    quaternion[:, 1] = initVector;
-
-    return quaternion
+    return angular_velocity_array
 end
 
 
 """
-    initBodyCoordinate(simDataNum, initVectors)
+    function init_quaternion_array(simdata_num, initial_value::Vector[4])
 
-Initialize time-variant coordinate vectors
+initialize array that contains time response of quaternion
 """
-function initBodyCoordinate(simDataNum, initVector)
-    coordinate = CoordinateVectors(
-        zeros(3, simDataNum),
-        zeros(3, simDataNum),
-        zeros(3, simDataNum),
+function init_quaternion_array(simdata_num, initial_value::Vector)
+
+    quaternion_array = zeros(4, simdata_num)
+    quaternion_array[:, 1] = initial_value
+
+    return quaternion_array
+end
+
+
+"""
+    function initframes(simdata_num, initial_coordinate::Frame)
+
+initialize time-variant coordinate frame vectors
+"""
+function initframes(simdata_num, initialframe::Frame)
+
+    frames = FrameArray(
+        zeros(3, simdata_num),
+        zeros(3, simdata_num),
+        zeros(3, simdata_num),
     )
 
-    coordinate.x[:, 1] = initVector.x
-    coordinate.y[:, 1] = initVector.y
-    coordinate.z[:, 1] = initVector.z
+    frames.x[:, 1] = initialframe.x
+    frames.y[:, 1] = initialframe.y
+    frames.z[:, 1] = initialframe.z
 
-    return coordinate
+    return frames
 end
 
 end

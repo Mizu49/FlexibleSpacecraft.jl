@@ -1,9 +1,9 @@
 """
-    module PlotGenerator
+    module PlotRecipe
 
-module of functions that deal with plot of attitude dynamics
+module of functions that show us the beautiful figures of spacecraft attitude dynamics
 """
-module PlotGenerator
+module PlotRecipe
 
 using Plots
 
@@ -12,10 +12,11 @@ include("TimeLine.jl")
 import .TimeLine
 
 """
-    plotAngularVelocity(time::Matrix, angularVelocity::Matrix)
-"""
-function plotAngularVelocity(time, angularVelocity)
+    angular_velocity(time, angularVelocity)
 
+Generator plots of angular velocity in each axis
+"""
+function angular_velocity(time, angularVelocity)
 
     fig1 = plot(time, angularVelocity[1, :],
         xlabel ="Time [s]",
@@ -36,15 +37,17 @@ function plotAngularVelocity(time, angularVelocity)
     );
 
     # Graph of the angular velocity
-    figAngularVelocity = plot(fig1, fig2, fig3, layout = (3, 1), legend = true);
+    fig_angular_velocity = plot(fig1, fig2, fig3, layout = (3, 1), legend = true);
 
-    return figAngularVelocity
+    return fig_angular_velocity
 end
 
 """
-    plotCoordinate(timeIndex::Int, refCoordinate, bodyCoordinate)
+    function dispframe(time, refCoordinate, coordinate)
+
+Generates the 3D figure of body fixed frame
 """
-function plotCoordinate(time, refCoordinate, bodyCoordinate)
+function dispframe(time, refCoordinate, coordinate)
 
     # Plot of reference frame
     coordFig = quiver(
@@ -78,27 +81,27 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
     coordFig = quiver!(
         [0], [0], [0],
         quiver = (
-            [bodyCoordinate.x[1]],
-            [bodyCoordinate.x[2]],
-            [bodyCoordinate.x[3]]),
+            [coordinate.x[1]],
+            [coordinate.x[2]],
+            [coordinate.x[3]]),
         color = RGB(colorant"#FF0000"),
         linewidth = 4,)
 
     coordFig = quiver!(
         [0], [0], [0],
         quiver = (
-            [bodyCoordinate.y[1]],
-            [bodyCoordinate.y[2]],
-            [bodyCoordinate.y[3]]),
+            [coordinate.y[1]],
+            [coordinate.y[2]],
+            [coordinate.y[3]]),
         color = RGB(colorant"#008000"),
         linewidth = 4,)
 
     coordFig = quiver!(
         [0], [0], [0],
         quiver = (
-            [bodyCoordinate.z[1]],
-            [bodyCoordinate.z[2]],
-            [bodyCoordinate.z[3]]),
+            [coordinate.z[1]],
+            [coordinate.z[2]],
+            [coordinate.z[3]]),
         color = RGB(colorant"#0000FF"),
         linewidth = 4,
         framestyle = :origin)
@@ -112,9 +115,11 @@ function plotCoordinate(time, refCoordinate, bodyCoordinate)
 end
 
 """
-    function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif, Fps,)
+    function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+
+Generates animation of frame rotation as GIF figure
 """
-function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray; Tgif = 60, FPS = 3)
 
     dataNum = size(time, 1)
     steps = round(Int, Tgif/Tsampling)
@@ -122,9 +127,9 @@ function getCoordinateGif(time, Tsampling, refCoordinate, bodyCoordinateArray, T
     # create animation
     anim = @animate for index in 1:dataNum
 
-        bodyCoordinate = TimeLine.extractCoordinateVector(time[index], Tsampling, bodyCoordinateArray)
+        bodyCoordinate = TimeLine.getframe(time[index], Tsampling, bodyCoordinateArray)
 
-        plotCoordinate(time[index], refCoordinate, bodyCoordinate)
+        dispframe(time[index], refCoordinate, bodyCoordinate)
     end every steps
 
     # make gif image
