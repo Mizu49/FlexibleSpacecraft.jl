@@ -8,8 +8,7 @@ module PlotRecipe
 using Plots
 
 # Include module `TimeLine`
-include("TimeLine.jl")
-import .TimeLine
+import ..TimeLine
 
 """
     angular_velocity(time, angularVelocity)
