@@ -30,7 +30,7 @@ using .SimulationTesting
     elem = Orbit.OrbitalElements(0, 0, 6370e+3 + 400e3, 1, 0, 0)
 
     # Dynamics model (mutable struct)
-    model = RigidBodyAttitudeDynamics.DynamicsModel(inertia)
+    model = RigidBody.DynamicsModel(inertia)
 
     # Sampling period of simulation (second)
     Tsampling = 1
@@ -86,7 +86,7 @@ using .SimulationTesting
         spacecraft_LVLH.z[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.z
 
         # transfromation matrix from ECI to body frame
-        C_ECI2Body = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+        C_ECI2Body = RigidBody.ECI2BodyFrame(quaternion[:, loopCounter + 1])
         body_frame.x[:, loopCounter + 1] = C_ECI2Body * ECI_frame.x
         body_frame.y[:, loopCounter + 1] = C_ECI2Body * ECI_frame.y
         body_frame.z[:, loopCounter + 1] = C_ECI2Body * ECI_frame.z
@@ -100,9 +100,9 @@ using .SimulationTesting
         # Time evolution
         if loopCounter != data_num - 1
 
-            body_angular_velocity[:, loopCounter + 2] =  RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
+            body_angular_velocity[:, loopCounter + 2] =  RigidBody.calc_angular_velocity(model, time[loopCounter + 1], body_angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
 
-            quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(body_angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
+            quaternion[:, loopCounter + 2] = RigidBody.calc_quaternion(body_angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
 
         end
 

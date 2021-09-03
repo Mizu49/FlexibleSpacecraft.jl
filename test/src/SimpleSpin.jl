@@ -17,7 +17,7 @@ using .SimulationTesting
     orbit = Orbit.CircularOrbit(4e+5, 3.9879e+14)
 
     # Dynamics model (mutable struct)
-    model = RigidBodyAttitudeDynamics.DynamicsModel(inertia)
+    model = RigidBody.DynamicsModel(inertia)
 
     # Sampling period of simulation (second)
     Tsampling = 1e-2
@@ -53,7 +53,7 @@ using .SimulationTesting
         currenttime = Tsampling * loopCounter
 
         # Update current attitude
-        C = RigidBodyAttitudeDynamics.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+        C = RigidBody.ECI2BodyFrame(quaternion[:, loopCounter + 1])
         body_frame.x[:, loopCounter + 1] = C * ECI_frame.x
         body_frame.y[:, loopCounter + 1] = C * ECI_frame.y
         body_frame.z[:, loopCounter + 1] = C * ECI_frame.z
@@ -68,10 +68,10 @@ using .SimulationTesting
         if loopCounter != data_num - 1
 
             # Update angular velocity
-            angular_velocity[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
+            angular_velocity[:, loopCounter + 2] = RigidBody.calc_angular_velocity(model, time[loopCounter + 1], angular_velocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
 
             # Update quaternion
-            quaternion[:, loopCounter + 2] = RigidBodyAttitudeDynamics.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
+            quaternion[:, loopCounter + 2] = RigidBody.calc_quaternion(angular_velocity[:,loopCounter + 1], quaternion[:, loopCounter + 1], Tsampling)
 
         end
 
