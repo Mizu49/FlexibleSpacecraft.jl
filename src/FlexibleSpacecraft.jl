@@ -5,9 +5,9 @@ using Reexport
 @reexport using LinearAlgebra
 
 
-# Include module `RigidBodyAttitudeDynamics.jl`
-include("RigidBodyAttitudeDynamics.jl")
-@reexport using .RigidBodyAttitudeDynamics
+# Include module `RigidBody.jl`
+include("RigidBody.jl")
+@reexport using .RigidBody
 
 
 # Include module `TimeLine`

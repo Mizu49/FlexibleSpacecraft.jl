@@ -1,16 +1,16 @@
 """
-    module RigidBodyAttitudeDynamics
+    module RigidBody
 
 module that consists variables and functions needed for the simulation of rigid body spacecraft attitude dynamics
 
 # Usage
 ```
-# Include module `RigidBodyAttitudeDynamics.jl`
-include("RigidBodyAttitudeDynamics.jl")
-using .RigidBodyAttitudeDynamics
+# Include module `RigidBody.jl`
+include("RigidBody.jl")
+using .RigidBody
 
 """
-module RigidBodyAttitudeDynamics
+module RigidBody
 
 
 """
