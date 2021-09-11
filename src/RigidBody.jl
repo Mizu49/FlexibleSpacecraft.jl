@@ -12,6 +12,7 @@ using .RigidBody
 """
 module RigidBody
 
+using ..TimeLine
 
 """
     DynamicsModel(inertia::Matrix)
@@ -82,13 +83,13 @@ function calc_differential_kinematics(angular_velocity, quaternion)
 end
 
 """
-    update_angular_velocity(model::DynamicsModel, currentTime, angular_velocity, Tsampling, current_body_frame)
+    function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Frame, disturbance::Vector)
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe, disturbance::Vector)
-    # Update the angular velocity vector using 4th order runge kutta method
+function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::TimeLine.Frame, disturbance::Vector)
 
+    # define body frame matrix from struct `TimeLine.Frame`
     bodyframematrix = hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z)
 
     k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , bodyframematrix, disturbance)
@@ -101,6 +102,25 @@ function calc_angular_velocity(model::DynamicsModel, currentTime, angular_veloci
     return nextOmega
 end
 
+"""
+    function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
+
+calculate angular velocity at next time step using 4th order Runge-Kutta method
+"""
+function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
+
+    # define body coordinate frame matrix
+    bodyframematrix = hcat(currentbodyframe[1], currentbodyframe[2], currentbodyframe[3])
+
+    k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , bodyframematrix, disturbance)
+    k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, bodyframematrix, disturbance)
+    k3 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, bodyframematrix, disturbance)
+    k4 = calc_differential_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, bodyframematrix, disturbance)
+
+    nextOmega = angular_velocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
+
+    return nextOmega
+end
 
 # Update the quaternion vector (time evolution)
 """

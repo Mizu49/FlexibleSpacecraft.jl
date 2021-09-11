@@ -4,15 +4,13 @@ using Reexport
 
 @reexport using LinearAlgebra
 
+# Include module `TimeLine`
+include("TimeLine.jl")
+@reexport using .TimeLine
 
 # Include module `RigidBody.jl`
 include("RigidBody.jl")
 @reexport using .RigidBody
-
-
-# Include module `TimeLine`
-include("TimeLine.jl")
-@reexport using .TimeLine
 
 # Include module `PlotRecipe`
 include("PlotRecipe.jl")

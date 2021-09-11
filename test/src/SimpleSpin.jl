@@ -54,12 +54,9 @@ using .SimulationTesting
 
         # Update current attitude
         C = RigidBody.ECI2BodyFrame(quaternion[:, loopCounter + 1])
-        body_frame.x[:, loopCounter + 1] = C * ECI_frame.x
-        body_frame.y[:, loopCounter + 1] = C * ECI_frame.y
-        body_frame.z[:, loopCounter + 1] = C * ECI_frame.z
+        currentbodyframe = (C * ECI_frame.x, C * ECI_frame.y, C * ECI_frame.z)
 
-        # Extract body fixed frame at current time
-        currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)
+        body_frame[loopCounter + 1] = currentbodyframe
 
         # Disturbance torque
         disturbance = Disturbance.constant_torque([0,0,0.02])
