@@ -17,7 +17,7 @@ using .SimulationTesting
     orbit = Orbit.CircularOrbit(4e+5, 3.9879e+14)
 
     # Dynamics model (mutable struct)
-    model = RigidBody.DynamicsModel(inertia)
+    model = RigidBody.RigidBodyModel(inertia)
 
     # Sampling period of simulation (second)
     Tsampling = 1e-2

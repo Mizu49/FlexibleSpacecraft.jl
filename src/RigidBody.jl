@@ -15,24 +15,23 @@ module RigidBody
 using ..TimeLine
 
 """
-    DynamicsModel(inertia::Matrix)
+    struct RigidBodyModel
 
-mutable struct of attitude dynamics model
-- inertia: inertia matrix of a given system
+Struct of rigid body spacecraft model
 """
-mutable struct DynamicsModel
+struct RigidBodyModel
     # Inertia Matrix
     inertia::Matrix
 end
 
 # Equation of dynamics
 """
-    calc_differential_dynamics(model::DynamicsModel, currentTime, angular_velocity, current_body_frame)
+    calc_differential_dynamics(model::RigidBodyModel, currentTime, angular_velocity, current_body_frame)
 
 Get the differential of equation of dynamics.
 
 # Arguments
-- model::DynamicsModel
+- model::RigidBodyModel
 - currentTime: current time of system [s]
 - angular_velocity: angular velocity of body frame with respect to ECI frame [rad/s]
 - current_body_frame: current body frame [b1 b2 b3]
@@ -40,7 +39,7 @@ Get the differential of equation of dynamics.
 # return
 - differential: differential of equation of motion
 """
-function calc_differential_dynamics(model::DynamicsModel, currentTime, angular_velocity, current_body_frame, disturbance)
+function calc_differential_dynamics(model::RigidBodyModel, currentTime, angular_velocity, current_body_frame, disturbance)
 
     # skew matrix of angular velocity vector
     skewOmega = [
@@ -83,11 +82,11 @@ function calc_differential_kinematics(angular_velocity, quaternion)
 end
 
 """
-    function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Frame, disturbance::Vector)
+    function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Frame, disturbance::Vector)
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::TimeLine.Frame, disturbance::Vector)
+function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::TimeLine.Frame, disturbance::Vector)
 
     # define body frame matrix from struct `TimeLine.Frame`
     bodyframematrix = hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z)
@@ -103,11 +102,11 @@ function calc_angular_velocity(model::DynamicsModel, currentTime, angular_veloci
 end
 
 """
-    function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
+    function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
+function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
 
     # define body coordinate frame matrix
     bodyframematrix = hcat(currentbodyframe[1], currentbodyframe[2], currentbodyframe[3])
@@ -174,6 +173,12 @@ function ECI2BodyFrame(q)
     ]
 
     return transformation_matrix
+end
+
+"""
+"""
+function run(model::RigidBodyModel)
+
 end
 
 end
