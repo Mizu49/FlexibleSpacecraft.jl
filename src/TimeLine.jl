@@ -148,4 +148,90 @@ function initframes(simdata_num, initialframe::Frame)
     return frames
 end
 
+"""
+    struct InitiData
+
+Struct that consists of the initial state value of the time-variant physical amounts in simulation
+"""
+struct InitData
+
+    # Spacecraft state variable
+    quaternion::Vector{Real}
+    angularvelocity::Vector{Real}
+
+    bodyframes::Frame
+
+end
+
+"""
+    struct DataTimeLine
+
+Struct that consists of the time-variant physical amounts in simulation.
+"""
+struct DataTimeLine
+
+    time::Array{Real, 1}
+
+    # Spacecraft state variable
+    quaternion::Array{Real, 2}
+    angularvelocity::Array{Real, 2}
+    bodyframes::FrameArray
+
+    # Environment
+    disturbance::Array{Real, 2}
+
+    DataTimeLine(initvalues::InitData, samplingtime::Real, datanum::Int64) = begin
+
+        # time (second)
+        time = 0:samplingtime:samplingtime*(datanum-1)
+
+        # Initialize arrays
+        quaternion = init_quaternion_array(datanum, initvalues.quaternion)
+
+        angularvelocity = init_angular_velocity_array(datanum, initvalues.angularvelocity)
+
+        bodyframes = initframes(datanum, initvalues.bodyframes)
+
+        disturbance = zeros(3, datanum)
+
+        new(time, quaternion, angularvelocity, bodyframes, disturbance)
+    end
+
+end
+
+"""
+    struct SimDataSet
+
+Struct that consists of the time-variant physical amounts in simulation at a certain time.
+"""
+struct SimDataSet
+
+    time::Real
+
+    # Spacecraft state variable
+    quaternion::Vector{Real}
+    angularvelocity::Vector{Real}
+    bodyframe::Frame
+
+    # Environment
+    disturbance::Vector{Real}
+
+end
+
+"""
+    function Base.getindex(simdata::DataTimeLine, idx::Int)::SimDataSet
+
+Method that returns the `SimDataSet` from `DataTimeLine` at a certain discrete time index.
+"""
+function Base.getindex(simdata::DataTimeLine, idx::Int)::SimDataSet
+
+    time = simdata.time[idx]
+    angularvelocity = simdata.angularvelocity[:, idx]
+    quaternion = simdata.quaternion[:, idx]
+    bodyframe = simdata.bodyframes[idx]
+    disturbance = simdata.disturbance[:, idx]
+
+    return SimDataSet(time, quaternion, angularvelocity, bodyframe, disturbance)
+end
+
 end
