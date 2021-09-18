@@ -43,7 +43,7 @@ using .SimulationTesting
     simdata = TimeLine.DataTimeLine(initvalue, Tsampling, data_num)
 
     println("Begin simulation!")
-    for loopCounter = 0:data_num - 1
+    @time for loopCounter = 0:data_num - 1
 
         # Update current time (second)
         currenttime = simdata.time[loopCounter + 1]
@@ -77,7 +77,7 @@ using .SimulationTesting
     display(fig1)
 
 
-    fig2 = PlotRecipe.frame_gif(simdata.time, Tsampling, ECI_frame, simdata.bodyframes, Tgif = 0.4, FPS = 10)
+    fig2 = PlotRecipe.frame_gif(simdata.time, Tsampling, ECI_frame, simdata.bodyframes, Tgif = 0.8, FPS = 8)
     display(fig2)
 
 end
