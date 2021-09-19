@@ -38,9 +38,11 @@ using .SimulationTesting
         ECI_frame
     )
 
+    distconfig = DisturbanceConfig()
+
     println("Begin simulation!")
     # run simulation
-    @time simdata = runsimulation(model, ECI_frame, initvalue, simulation_time, Tsampling)
+    @time simdata = runsimulation(model, ECI_frame, initvalue, distconfig, simulation_time, Tsampling)
 
     println("Completed!")
 

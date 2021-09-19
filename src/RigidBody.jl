@@ -185,7 +185,7 @@ Run simulation of spacecraft attitude dynamics with rigid body modeling
 
 ```
 """
-function runsimulation(model::RigidBodyModel, ECI_frame::TimeLine.Frame, initvalue::TimeLine.InitData, simulation_time::Real, Tsampling::Real)::TimeLine.DataTimeLine
+function runsimulation(model::RigidBodyModel, ECI_frame::TimeLine.Frame, initvalue::TimeLine.InitData, distconfig::DisturbanceConfig, simulation_time::Real, Tsampling::Real)::TimeLine.DataTimeLine
 
     # Numbers of simulation data
     datanum = floor(Int, simulation_time/Tsampling) + 1;
@@ -205,7 +205,7 @@ function runsimulation(model::RigidBodyModel, ECI_frame::TimeLine.Frame, initval
         simdata.bodyframes[loopCounter + 1] = currentbodyframe
 
         # Disturbance torque
-        disturbance = Disturbance.constant_torque([0,0,0.02])
+        disturbance = disturbanceinput(distconfig)
 
         # Time evolution of the system
         if loopCounter != datanum - 1

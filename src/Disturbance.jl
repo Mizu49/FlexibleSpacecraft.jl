@@ -21,7 +21,7 @@ struct DisturbanceConfig
 
     # Constructor
     DisturbanceConfig() = begin
-        consttorque = nothing
+        consttorque = [0, 0, 0.02]
         gravitationaltorque = false
 
         return new(consttorque, gravitationaltorque)
