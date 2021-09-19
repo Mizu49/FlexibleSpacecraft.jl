@@ -7,17 +7,41 @@ module Disturbance
 
 using LinearAlgebra:norm
 
-"""
-    function constant_torque(constant_torque::Vector)
+export DisturbanceConfig, disturbanceinput
 
-Function that returns given constant torque vector
 """
-function constant_torque(constant_torque::Vector)
+    struct DisturbanceConfig
 
-    return constant_torque
+Struct that configures disturbance torque to the spacecraft
+"""
+struct DisturbanceConfig
+
+    consttorque::Union{Vector, Nothing}
+    gravitationaltorque::Bool
+
+    # Constructor
+    DisturbanceConfig() = begin
+        consttorque = nothing
+        gravitationaltorque = false
+
+        return new(consttorque, gravitationaltorque)
+    end
 
 end
 
+"""
+    constant_torque(constant_torque::Vector)
+
+Function that returns given constant torque vector
+"""
+constant_torque(constant_torque::Vector)::Vector = constant_torque
+
+"""
+    constant_torque(constant_torque::Nothing)
+
+Function that returns zero vector
+"""
+constant_torque(constant_torque::Nothing)::Vector = zeros(3)
 
 """
     function gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)
@@ -53,6 +77,16 @@ function gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_
     torque_vector = 3*orbit_angular_velocity^2 * nadir_skew * inertia * nadir_vector;
 
     return torque_vector
+end
+
+"""
+
+"""
+function disturbanceinput(distconfig::DisturbanceConfig)::Vector
+
+    disturbance = zeros(3) + constant_torque(distconfig.consttorque)
+
+    return disturbance
 end
 
 end
