@@ -8,14 +8,6 @@ using Reexport
 include("TimeLine.jl")
 @reexport using .TimeLine
 
-# Include module `RigidBody.jl`
-include("RigidBody.jl")
-@reexport using .RigidBody
-
-# Include module `PlotRecipe`
-include("PlotRecipe.jl")
-@reexport using .PlotRecipe
-
 # Include module `Orbit`
 include("Orbit.jl")
 @reexport using .Orbit
@@ -23,5 +15,13 @@ include("Orbit.jl")
 # Inculde module `Disturbance`
 include("Disturbance.jl")
 @reexport using .Disturbance
+
+# Include module `RigidBody.jl`
+include("RigidBody.jl")
+@reexport using .RigidBody
+
+# Include module `PlotRecipe`
+include("PlotRecipe.jl")
+@reexport using .PlotRecipe
 
 end # module
