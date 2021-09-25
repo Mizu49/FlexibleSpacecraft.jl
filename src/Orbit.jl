@@ -221,6 +221,17 @@ function OrbitalPlaneFrame2LVLH(C_OrbitalPlaneFrame2RadialAlongTrack)
 
 end
 
+function calc_orbitalframe(elem::OrbitalElements, ECI_frame::TimeLine.Frame)::TimeLine.Frame
+
+    C = ECI2OrbitalPlaneFrame(elem)
+
+    return TimeLine.Frame(
+        C * ECI_frame.x,
+        C * ECI_frame.y,
+        C * ECI_frame.z
+    )
+end
+
 function update_radial_along_track(orbitframe::TimeLine.Frame, elem::OrbitalElements, time::Real, angularvelocity::Real)::TimeLine.Frame
 
     C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, angularvelocity, time)

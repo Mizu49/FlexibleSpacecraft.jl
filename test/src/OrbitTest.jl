@@ -22,16 +22,9 @@ ECI_frame = TimeLine.Frame(
     [0, 0, 1]
 )
 
-C = Orbit.ECI2OrbitalPlaneFrame(elem)
+orbitframe = Orbit.calc_orbitalframe(elem, ECI_frame)
 
-orbitframe = TimeLine.Frame(
-    C * ECI_frame.x,
-    C * ECI_frame.y,
-    C * ECI_frame.z
-)
-
-PlotRecipe.dispframe(0, ECI_frame, orbitframe)
-
+fig1 = PlotRecipe.dispframe(0, ECI_frame, orbitframe)
 
 time = 0:60:T*60
 data_num = round(Int, T*60/60) + 1;
@@ -44,4 +37,6 @@ for loopCounter = 0:data_num - 1
 end
 
 fig2 = PlotRecipe.frame_gif(time, 60, orbitframe, spacecraft_RAT, Tgif = 90, FPS = 8)
+
+display(fig1)
 display(fig2)
