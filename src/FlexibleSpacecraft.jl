@@ -24,4 +24,10 @@ include("RigidBody.jl")
 include("PlotRecipe.jl")
 @reexport using .PlotRecipe
 
+include("Frame.jl")
+@reexport using .Frame
+
+include("runsimulation.jl")
+export runsimulation
+
 end # module

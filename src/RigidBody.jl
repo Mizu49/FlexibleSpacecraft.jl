@@ -13,9 +13,8 @@ using .RigidBody
 module RigidBody
 
 using ..TimeLine
-using ..Disturbance
 
-export runsimulation
+export calc_angular_velocity, calc_quaternion
 
 """
     struct RigidBodyModel
@@ -141,86 +140,6 @@ function calc_quaternion(angular_velocity, quaternion, Tsampling)
     nextQuaternion = quaternion + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4);
 
     return nextQuaternion
-end
-
-"""
-    ECI2BodyFrame(q)
-
-Calculate the transformation matrix from ECI frame to spacecraft body-fixed frame.
-
-# Arguments
-- `q`: quaternion
-
-# Return
-- `transformation_matrix`: transformation matrix
-"""
-function ECI2BodyFrame(q)
-
-    # Check if the quaterion satisfies its constraint
-    try
-        constraint = q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
-
-    catch constraint
-
-        if constraint < 0.995
-            error("Quaternion does not satisfy constraint")
-        elseif constraint > 1.005
-            error("Quaternion does not satisfy constraint")
-        end
-    end
-
-    transformation_matrix = [
-        q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2  2*(q[1]*q[2] + q[3]*q[4])          2*(q[1]*q[3] - q[2]*q[4])
-        2*(q[2]*q[1] - q[3]*q[4])          q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2  2*(q[2]*q[3] + q[1]*q[4])
-        2*(q[3]*q[1] + q[2]*q[4])          2*(q[3]*q[2] - q[1]*q[4])          q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
-    ]
-
-    return transformation_matrix
-end
-
-"""
-    function runsimulation(model::RigidBodyModel, ECI_frame::TimeLine.Frame, initvalue::TimeLine.InitData, simulation_time::Real, Tsampling::Real)::TimeLine.DataTimeLine
-
-Run simulation of spacecraft attitude dynamics with rigid body modeling
-
-```
-"""
-function runsimulation(model::RigidBodyModel, ECI_frame::TimeLine.Frame, initvalue::TimeLine.InitData, distconfig::DisturbanceConfig, simulation_time::Real, Tsampling::Real)::TimeLine.DataTimeLine
-
-    # Numbers of simulation data
-    datanum = floor(Int, simulation_time/Tsampling) + 1;
-
-    # Initialize data array
-    simdata = TimeLine.DataTimeLine(initvalue, Tsampling, datanum)
-
-    for loopCounter = 0:datanum - 1
-
-        # Update current time (second)
-        currenttime = simdata.time[loopCounter + 1]
-
-        # Update current attitude
-        C = ECI2BodyFrame(simdata.quaternion[:, loopCounter + 1])
-        currentbodyframe = (C * ECI_frame.x, C * ECI_frame.y, C * ECI_frame.z)
-
-        simdata.bodyframes[loopCounter + 1] = currentbodyframe
-
-        # Disturbance torque
-        disturbance = disturbanceinput(distconfig)
-
-        # Time evolution of the system
-        if loopCounter != datanum - 1
-
-            # Update angular velocity
-            simdata.angularvelocity[:, loopCounter + 2] = calc_angular_velocity(model, simdata.time[loopCounter + 1], simdata.angularvelocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
-
-            # Update quaternion
-            simdata.quaternion[:, loopCounter + 2] = calc_quaternion(simdata.angularvelocity[:,loopCounter + 1], simdata.quaternion[:, loopCounter + 1], Tsampling)
-
-        end
-
-    end
-
-    return simdata
 end
 
 end
