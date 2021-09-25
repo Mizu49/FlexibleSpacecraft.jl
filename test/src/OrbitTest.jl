@@ -24,26 +24,24 @@ ECI_frame = TimeLine.Frame(
 
 C = Orbit.ECI2OrbitalPlaneFrame(elem)
 
-orbit_frame = TimeLine.Frame(
+orbitframe = TimeLine.Frame(
     C * ECI_frame.x,
     C * ECI_frame.y,
     C * ECI_frame.z
 )
 
-PlotRecipe.dispframe(0, ECI_frame, orbit_frame)
+PlotRecipe.dispframe(0, ECI_frame, orbitframe)
 
 
 time = 0:60:T*60
 data_num = round(Int, T*60/60) + 1;
-spacecraft_RAT = TimeLine.initframes(data_num, orbit_frame)
+spacecraft_RAT = TimeLine.initframes(data_num, orbitframe)
+
 for loopCounter = 0:data_num - 1
 
-    RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(elem, angular_velocity, time[loopCounter + 1])
-    spacecraft_RAT.x[:, loopCounter + 1] = RAT * orbit_frame.x
-    spacecraft_RAT.y[:, loopCounter + 1] = RAT * orbit_frame.y
-    spacecraft_RAT.z[:, loopCounter + 1] = RAT * orbit_frame.z
+    spacecraft_RAT[loopCounter + 1] = Orbit.update_radial_along_track(orbitframe, elem, time[loopCounter + 1], angular_velocity)
 
 end
 
-fig2 = PlotRecipe.frame_gif(time, 60, orbit_frame, spacecraft_RAT, Tgif = 90, FPS = 8)
+fig2 = PlotRecipe.frame_gif(time, 60, orbitframe, spacecraft_RAT, Tgif = 90, FPS = 8)
 display(fig2)
