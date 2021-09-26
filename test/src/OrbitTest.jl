@@ -30,9 +30,11 @@ time = 0:60:T*60
 data_num = round(Int, T*60/60) + 1;
 spacecraft_RAT = TimeLine.initframes(data_num, orbitframe)
 
-for loopCounter = 0:data_num - 1
+@time for loopCounter = 0:data_num - 1
 
-    spacecraft_RAT[loopCounter + 1] = Orbit.update_radial_along_track(orbitframe, elem, time[loopCounter + 1], angular_velocity)
+    orbitstate = Orbit.updateorbitstate(elem, circular_orbit, time[loopCounter + 1])
+
+    spacecraft_RAT[loopCounter + 1] = Orbit.update_radial_along_track(orbitframe, elem, time[loopCounter + 1], orbitstate)
 
 end
 

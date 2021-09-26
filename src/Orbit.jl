@@ -111,6 +111,18 @@ struct OrbitalElements
 end
 
 """
+    CurrentOrbitState
+
+mutable struct that contains the current state information of orbit
+"""
+mutable struct CurrentOrbitState
+
+    angularposition::Real
+    angularvelocity::Real
+
+end
+
+"""
     function get_angular_velocity(orbit::CircularOrbit)
 
 Calculates orbit angular velocity of a circular orbit
@@ -225,22 +237,25 @@ function calc_orbitalframe(elem::OrbitalElements, ECI_frame::TimeLine.Frame)::Ti
 
     C = ECI2OrbitalPlaneFrame(elem)
 
-    return TimeLine.Frame(
-        C * ECI_frame.x,
-        C * ECI_frame.y,
-        C * ECI_frame.z
-    )
+    return C * ECI_frame
 end
 
-function update_radial_along_track(orbitframe::TimeLine.Frame, elem::OrbitalElements, time::Real, angularvelocity::Real)::TimeLine.Frame
+function update_radial_along_track(orbitframe::TimeLine.Frame, elem::OrbitalElements, time::Real, orbitstate::CurrentOrbitState)::TimeLine.Frame
 
-    C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, angularvelocity, time)
+    C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, orbitstate.angularvelocity, time)
 
-    return TimeLine.Frame(
-        C_RAT * orbitframe.x,
-        C_RAT * orbitframe.y,
-        C_RAT * orbitframe.z
+    return C_RAT * orbitframe
+end
+
+function updateorbitstate(elem::OrbitalElements, orbitmodel::CircularOrbit, time::Real)::CurrentOrbitState
+
+    angularvelocity = get_angular_velocity(orbitmodel)
+
+    return CurrentOrbitState(
+        angularvelocity * time,
+        angularvelocity
     )
+
 end
 
 end
