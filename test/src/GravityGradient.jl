@@ -75,15 +75,11 @@ using .SimulationTesting
 
         # calculates transformation matrix from orbital plane frame to radial along frame
         C_ECI2LVLH = Orbit.OrbitalPlaneFrame2LVLH(C_RAT)
-        spacecraft_LVLH.x[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.x
-        spacecraft_LVLH.y[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.y
-        spacecraft_LVLH.z[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.z
+        spacecraft_LVLH[loopCounter + 1] = C_ECI2LVLH * ECI_frame
 
         # transfromation matrix from ECI to body frame
         C_ECI2Body = Frame.ECI2BodyFrame(quaternion[:, loopCounter + 1])
-        body_frame.x[:, loopCounter + 1] = C_ECI2Body * ECI_frame.x
-        body_frame.y[:, loopCounter + 1] = C_ECI2Body * ECI_frame.y
-        body_frame.z[:, loopCounter + 1] = C_ECI2Body * ECI_frame.z
+        body_frame[loopCounter + 1] = C_ECI2Body * ECI_frame
 
         # Extract body fixed frame at current time
         currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)

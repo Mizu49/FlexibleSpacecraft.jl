@@ -1,5 +1,7 @@
 module Frame
 
+using ..TimeLine
+
 export ECI2BodyFrame
 
 """
@@ -36,5 +38,20 @@ function ECI2BodyFrame(q)
 
     return transformation_matrix
 end
+
+"""
+    Base. :*(C::Matrix, refframe::TimeLine.Frame)::TimeLine.Frame
+
+Calculate the transformed frame with transformation matrix `C` with respect to `refframe`
+"""
+function Base. :*(C::Matrix, refframe::TimeLine.Frame)::TimeLine.Frame
+    return TimeLine.Frame(
+        C * refframe.x,
+        C * refframe.y,
+        C * refframe.z
+    )
+end
+
+transformframe(C::Matrix, refframe::TimeLine.Frame)::TimeLine.Frame = C * refframe
 
 end
