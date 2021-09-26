@@ -103,26 +103,6 @@ function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_veloc
     return nextOmega
 end
 
-"""
-    function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
-
-calculate angular velocity at next time step using 4th order Runge-Kutta method
-"""
-function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
-
-    # define body coordinate frame matrix
-    bodyframematrix = hcat(currentbodyframe[1], currentbodyframe[2], currentbodyframe[3])
-
-    k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , bodyframematrix, disturbance)
-    k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, bodyframematrix, disturbance)
-    k3 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, bodyframematrix, disturbance)
-    k4 = calc_differential_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, bodyframematrix, disturbance)
-
-    nextOmega = angular_velocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return nextOmega
-end
-
 # Update the quaternion vector (time evolution)
 """
     update_quaternion(angular_velocity, currentQuaternion, Tsampling)

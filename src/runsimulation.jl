@@ -16,7 +16,7 @@ function runsimulation(model, ECI_frame::TimeLine.Frame, initvalue::TimeLine.Ini
 
         # Update current attitude
         C = ECI2BodyFrame(simdata.quaternion[:, loopCounter + 1])
-        currentbodyframe = (C * ECI_frame.x, C * ECI_frame.y, C * ECI_frame.z)
+        currentbodyframe = C * ECI_frame
 
         simdata.bodyframes[loopCounter + 1] = currentbodyframe
 
