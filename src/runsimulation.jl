@@ -1,7 +1,7 @@
 """
     function runsimulation
 """
-function runsimulation(model, ECI_frame::TimeLine.Frame, initvalue::TimeLine.InitData, distconfig::DisturbanceConfig, simulation_time::Real, Tsampling::Real)::TimeLine.DataTimeLine
+function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, distconfig::DisturbanceConfig, simulation_time::Real, Tsampling::Real)::TimeLine.DataTimeLine
 
     # Numbers of simulation data
     datanum = floor(Int, simulation_time/Tsampling) + 1;

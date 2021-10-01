@@ -6,17 +6,7 @@ module of time line of the physical quantity of spacecraft attitude dynamics
 """
 module TimeLine
 
-
-"""
-    struct Frame(x::Vector{Real}, y::Vector{Real}, z::Vector{Real})
-
-Struct of immutable vectors that express the coordinate frame of a certain state
-"""
-struct Frame
-    x::Vector{Real}
-    y::Vector{Real}
-    z::Vector{Real}
-end
+using ..Frames
 
 """
     mutable struct FrameArray(x::Array{Real, 2}, y::Array{Real, 2}, z::Array{Real, 2})

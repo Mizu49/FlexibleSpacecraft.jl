@@ -8,7 +8,7 @@ println("Code testing of `TimeLine.jl`")
 initvalue = TimeLine.InitData(
     [0, 0, 0, 1],
     [1, 0, 0],
-    TimeLine.Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
+    Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
 )
 
 samplingtime = 0.02 # second

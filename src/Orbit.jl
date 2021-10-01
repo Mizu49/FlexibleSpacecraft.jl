@@ -5,7 +5,7 @@ Informations about spacecraft orbit
 """
 module Orbit
 
-using ..TimeLine
+using ..Frames
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -233,14 +233,14 @@ function OrbitalPlaneFrame2LVLH(C_OrbitalPlaneFrame2RadialAlongTrack)
 
 end
 
-function calc_orbitalframe(elem::OrbitalElements, ECI_frame::TimeLine.Frame)::TimeLine.Frame
+function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame
 
     C = ECI2OrbitalPlaneFrame(elem)
 
     return C * ECI_frame
 end
 
-function update_radial_along_track(orbitframe::TimeLine.Frame, elem::OrbitalElements, time::Real, orbitstate::CurrentOrbitState)::TimeLine.Frame
+function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, time::Real, orbitstate::CurrentOrbitState)::Frame
 
     C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, orbitstate.angularvelocity, time)
 

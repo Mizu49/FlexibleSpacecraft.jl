@@ -4,6 +4,9 @@ using Reexport
 
 @reexport using LinearAlgebra
 
+include("Frames.jl")
+@reexport using .Frames
+
 # Include module `TimeLine`
 include("TimeLine.jl")
 @reexport using .TimeLine
@@ -23,9 +26,6 @@ include("RigidBody.jl")
 # Include module `PlotRecipe`
 include("PlotRecipe.jl")
 @reexport using .PlotRecipe
-
-include("Frame.jl")
-@reexport using .Frame
 
 include("runsimulation.jl")
 export runsimulation

@@ -16,7 +16,7 @@ T = Orbit.get_timeperiod(circular_orbit, unit = "minute")
 elem = Orbit.OrbitalElements(111.8195, 51.6433, 421e3, 0.0001239, 241.3032, 212.0072)
 
 # Earth-Centered frame (constant value)
-ECI_frame = TimeLine.Frame(
+ECI_frame = Frame(
     [1, 0, 0],
     [0, 1, 0],
     [0, 0, 1]

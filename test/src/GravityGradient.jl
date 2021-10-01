@@ -45,7 +45,7 @@ using .SimulationTesting
     data_num = round(Int, simulation_time/Tsampling) + 1;
 
     # Earth-Centered frame (constant value)
-    ECI_frame = TimeLine.Frame(
+    ECI_frame = Frame(
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
