@@ -1,8 +1,17 @@
-module Frame
+module Frames
 
-using ..TimeLine
+export Frame, ECI2BodyFrame
 
-export ECI2BodyFrame
+"""
+    struct Frame(x::Vector{Real}, y::Vector{Real}, z::Vector{Real})
+
+Struct of immutable vectors that express the coordinate frame of a certain state
+"""
+struct Frame
+    x::Vector{Real}
+    y::Vector{Real}
+    z::Vector{Real}
+end
 
 """
     ECI2BodyFrame(q)
@@ -40,18 +49,18 @@ function ECI2BodyFrame(q)
 end
 
 """
-    Base. :*(C::Matrix, refframe::TimeLine.Frame)::TimeLine.Frame
+    Base. :*(C::Matrix, refframe::Frame)::Frame
 
 Calculate the transformed frame with transformation matrix `C` with respect to `refframe`
 """
-function Base. :*(C::Matrix, refframe::TimeLine.Frame)::TimeLine.Frame
-    return TimeLine.Frame(
+function Base. :*(C::Matrix, refframe::Frame)::Frame
+    return Frame(
         C * refframe.x,
         C * refframe.y,
         C * refframe.z
     )
 end
 
-transformframe(C::Matrix, refframe::TimeLine.Frame)::TimeLine.Frame = C * refframe
+transformframe(C::Matrix, refframe::Frame)::Frame = C * refframe
 
 end
