@@ -78,7 +78,7 @@ using .SimulationTesting
         spacecraft_LVLH[loopCounter + 1] = C_ECI2LVLH * ECI_frame
 
         # transfromation matrix from ECI to body frame
-        C_ECI2Body = Frame.ECI2BodyFrame(quaternion[:, loopCounter + 1])
+        C_ECI2Body = ECI2BodyFrame(quaternion[:, loopCounter + 1])
         body_frame[loopCounter + 1] = C_ECI2Body * ECI_frame
 
         # Extract body fixed frame at current time
