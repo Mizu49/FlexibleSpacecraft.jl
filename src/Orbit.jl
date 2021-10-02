@@ -115,7 +115,20 @@ end
 struct OrbitInfo
     orbitmodel
     orbitalelement
-    initialvalue
+    planeframe
+
+    OrbitInfo(orbitalelement::OrbitalElements, ECIframe::Frame) = begin
+
+        dynamicsmodel = CircularOrbit(6370e+3 + 400e3, 3.986e+14)
+
+        planeframe = calc_orbitalframe(orbitalelement, ECIframe)
+
+        return new(
+            dynamicsmodel,
+            orbitalelement,
+            planeframe,
+        )
+    end
 end
 
 function initorbitdata(datanum::Integer, orbitframe::Frame)
