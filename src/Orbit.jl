@@ -6,6 +6,8 @@ Informations about spacecraft orbit
 module Orbit
 
 using ..Frames
+using ..TimeLine
+using StructArrays
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -110,16 +112,24 @@ struct OrbitalElements
 
 end
 
-"""
-    CurrentOrbitState
+struct OrbitInfo
+    orbitmodel
+    orbitalelement
+    initialvalue
+end
 
-mutable struct that contains the current state information of orbit
-"""
-mutable struct CurrentOrbitState
+function initorbitdata(datanum::Integer, orbitframe::Frame)
 
-    angularposition::Real
-    angularvelocity::Real
+    angularpositionarray = zeros(1, datanum)
+    # angularpositionarray[:,1] = initvalue.angularposition
 
+    angularvelocityarray = zeros(1, datanum)
+    # angularvelocityarray[:, 1] = initvalue.angularvelocity
+
+    return StructArray((
+        angularposition = angularpositionarray,
+        angularvelocity = angularvelocityarray,
+    ))
 end
 
 """
@@ -240,20 +250,20 @@ function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame
     return C * ECI_frame
 end
 
-function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, time::Real, orbitstate::CurrentOrbitState)::Frame
+function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, time::Real, angularvelocity::Real)::Frame
 
-    C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, orbitstate.angularvelocity, time)
+    C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, angularvelocity, time)
 
     return C_RAT * orbitframe
 end
 
-function updateorbitstate(elem::OrbitalElements, orbitmodel::CircularOrbit, time::Real)::CurrentOrbitState
+function updateorbitstate(elem::OrbitalElements, orbitmodel::CircularOrbit, time::Real)::NamedTuple
 
     angularvelocity = get_angular_velocity(orbitmodel)
 
-    return CurrentOrbitState(
-        angularvelocity * time,
-        angularvelocity
+    return (
+        angularposition = angularvelocity * time,
+        angularvelocity = angularvelocity
     )
 
 end
