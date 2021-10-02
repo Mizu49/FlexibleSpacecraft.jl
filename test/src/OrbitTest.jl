@@ -4,13 +4,13 @@ include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define a circular orbit info
-circular_orbit = Orbit.CircularOrbit(6370e+3 + 400e3, 3.986e+14)
+orbitmodel = Orbit.CircularOrbit(6370e+3 + 400e3, 3.986e+14)
 
-angular_velocity = Orbit.get_angular_velocity(circular_orbit)
+angular_velocity = Orbit.get_angular_velocity(orbitmodel)
 
-speed = Orbit.get_velocity(circular_orbit)
+speed = Orbit.get_velocity(orbitmodel)
 
-T = Orbit.get_timeperiod(circular_orbit, unit = "minute")
+T = Orbit.get_timeperiod(orbitmodel, unit = "minute")
 
 # Orbital elements of ISS
 elem = Orbit.OrbitalElements(111.8195, 51.6433, 421e3, 0.0001239, 241.3032, 212.0072)
@@ -32,7 +32,7 @@ spacecraft_RAT = TimeLine.initframes(data_num, orbitframe)
 
 @time for loopCounter = 0:data_num - 1
 
-    orbitstate = Orbit.updateorbitstate(elem, circular_orbit, time[loopCounter + 1])
+    orbitstate = Orbit.updateorbitstate(elem, orbitmodel, time[loopCounter + 1])
 
     spacecraft_RAT[loopCounter + 1] = Orbit.update_radial_along_track(orbitframe, elem, time[loopCounter + 1], orbitstate)
 
