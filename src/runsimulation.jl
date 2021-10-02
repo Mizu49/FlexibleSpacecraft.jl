@@ -11,14 +11,9 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, di
 
     for loopCounter = 0:datanum - 1
 
-        # Update current time (second)
-        currenttime = simdata.time[loopCounter + 1]
-
         # Update current attitude
         C = ECI2BodyFrame(simdata.quaternion[:, loopCounter + 1])
-        currentbodyframe = C * ECI_frame
-
-        simdata.bodyframes[loopCounter + 1] = currentbodyframe
+        simdata.bodyframes[loopCounter + 1] = C * ECI_frame
 
         # Disturbance torque
         disturbance = disturbanceinput(distconfig)
@@ -27,7 +22,7 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, di
         if loopCounter != datanum - 1
 
             # Update angular velocity
-            simdata.angularvelocity[:, loopCounter + 2] = calc_angular_velocity(model, simdata.time[loopCounter + 1], simdata.angularvelocity[:, loopCounter + 1], Tsampling, currentbodyframe, disturbance)
+            simdata.angularvelocity[:, loopCounter + 2] = calc_angular_velocity(model, simdata.time[loopCounter + 1], simdata.angularvelocity[:, loopCounter + 1], Tsampling, simdata.bodyframes[loopCounter + 1], disturbance)
 
             # Update quaternion
             simdata.quaternion[:, loopCounter + 2] = calc_quaternion(simdata.angularvelocity[:,loopCounter + 1], simdata.quaternion[:, loopCounter + 1], Tsampling)
