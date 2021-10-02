@@ -13,9 +13,6 @@ using .SimulationTesting
     # inertia matrix
     inertia = diagm([1.0, 1.0, 2.0])
 
-    # Orbit
-    orbit = Orbit.CircularOrbit(4e+5, 3.9879e+14)
-
     # Dynamics model (mutable struct)
     model = RigidBody.RigidBodyModel(inertia)
 
@@ -38,11 +35,14 @@ using .SimulationTesting
         ECI_frame
     )
 
+    # define a orbit info
+    orbitinfo = Orbit.OrbitInfo(Orbit.OrbitalElements(111.8195, 51.6433, 421e3, 0.0001239, 241.3032, 212.0072), ECI_frame)
+
     distconfig = DisturbanceConfig()
 
     println("Begin simulation!")
     # run simulation
-    @time simdata = runsimulation(model, ECI_frame, initvalue, distconfig, simulation_time, Tsampling)
+    @time (simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simulation_time, Tsampling)
 
     println("Completed!")
 
