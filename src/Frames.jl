@@ -1,5 +1,7 @@
 module Frames
 
+using StaticArrays
+
 export Frame, ECI2BodyFrame
 
 """
@@ -8,9 +10,9 @@ export Frame, ECI2BodyFrame
 Struct of immutable vectors that express the coordinate frame of a certain state
 """
 struct Frame
-    x::Vector{Real}
-    y::Vector{Real}
-    z::Vector{Real}
+    x::SVector{3, Real}
+    y::SVector{3, Real}
+    z::SVector{3, Real}
 end
 
 """
