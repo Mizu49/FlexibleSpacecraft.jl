@@ -1,8 +1,8 @@
 module Frames
 
-using StaticArrays
+using StaticArrays, StructArrays
 
-export Frame, ECI2BodyFrame
+export Frame, initframes, getframe, ECI2BodyFrame
 
 """
     struct Frame(x::Vector{Real}, y::Vector{Real}, z::Vector{Real})
@@ -13,6 +13,35 @@ struct Frame
     x::SVector{3, Real}
     y::SVector{3, Real}
     z::SVector{3, Real}
+end
+
+
+"""
+    initframes(datanum, initial_coordinate::Frame)
+
+initialize `StructArray` of time-variant coordinate frame
+"""
+function initframes(datanum, initialframe::Frame)
+
+    frames = StructArray(
+        Frame(zeros(3), zeros(3), zeros(3)) for _ in 1:datanum
+    )
+
+    frames[1] = initialframe
+
+    return frames
+end
+
+"""
+    getframe(time, sampling_period, coordinates::FrameArray)
+
+get a `sampledframe::Frame` matching with given `time`
+"""
+function getframe(time, sampling_period, frames)
+
+    sample_step = floor(Int, time/sampling_period) + 1
+
+    return frames[sample_step]
 end
 
 """
@@ -51,11 +80,11 @@ function ECI2BodyFrame(q)
 end
 
 """
-    Base. :*(C::Matrix, refframe::Frame)::Frame
+    Base. :*(C::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}}, refframe::Frame)::Frame
 
 Calculate the transformed frame with transformation matrix `C` with respect to `refframe`
 """
-function Base. :*(C::Matrix, refframe::Frame)::Frame
+function Base. :*(C::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}}, refframe::Frame)::Frame
     return Frame(
         C * refframe.x,
         C * refframe.y,
@@ -63,6 +92,6 @@ function Base. :*(C::Matrix, refframe::Frame)::Frame
     )
 end
 
-transformframe(C::Matrix, refframe::Frame)::Frame = C * refframe
+transformframe(C::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}}, refframe::Frame)::Frame = C * refframe
 
 end

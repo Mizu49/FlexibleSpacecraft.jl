@@ -12,6 +12,7 @@ using .RigidBody
 """
 module RigidBody
 
+using StaticArrays
 using ..Frames
 
 export calc_angular_velocity, calc_quaternion
@@ -88,7 +89,7 @@ end
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Frame, disturbance::Vector)
+function calc_angular_velocity(model::RigidBodyModel, currentTime::Real, angular_velocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}})
 
     # define body frame matrix from struct `Frame`
     bodyframematrix = hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z)

@@ -15,6 +15,4 @@ samplingtime = 0.02 # second
 simulation_timelength = 100 # second
 datanum = Int64(floor(simulation_timelength/samplingtime) + 1)
 
-simdata = TimeLine.DataTimeLine(initvalue, samplingtime, datanum)
-
-show(simdata[100])
+simdata = TimeLine.initsimulationdata(datanum, initvalue)

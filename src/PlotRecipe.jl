@@ -17,19 +17,19 @@ Generator plots of angular velocity in each axis
 """
 function angular_velocity(time, angularVelocity)
 
-    fig1 = plot(time, angularVelocity[1, :],
+    fig1 = plot(time, getindex.(angularVelocity, 1),
         xlabel ="Time [s]",
         ylabel ="omega [rad/s]",
         label  ="Angular velocity 1",
     );
 
-    fig2 = plot(time, angularVelocity[2, :],
+    fig2 = plot(time, getindex.(angularVelocity, 2),
         xlabel ="Time [s]",
         ylabel ="omega [rad/s]",
         label  ="Angular velocity 2",
     );
 
-    fig3 = plot(time, angularVelocity[3, :],
+    fig3 = plot(time, getindex.(angularVelocity, 3),
         xlabel ="Time [s]",
         ylabel ="omega [rad/s]",
         label  ="Angular velocity 3",
