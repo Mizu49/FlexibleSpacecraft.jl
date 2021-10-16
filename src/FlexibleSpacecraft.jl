@@ -4,24 +4,30 @@ using Reexport
 
 @reexport using LinearAlgebra
 
+include("DataContainers/Frames.jl")
+@reexport using .Frames
+
 # Include module `TimeLine`
-include("TimeLine.jl")
+include("DataContainers/TimeLine.jl")
 @reexport using .TimeLine
 
-# Include module `RigidBody.jl`
-include("RigidBody.jl")
-@reexport using .RigidBody
-
-# Include module `PlotRecipe`
-include("PlotRecipe.jl")
-@reexport using .PlotRecipe
-
 # Include module `Orbit`
-include("Orbit.jl")
+include("OrbitalDynamics/Orbit.jl")
 @reexport using .Orbit
 
 # Inculde module `Disturbance`
-include("Disturbance.jl")
+include("Disturbances/Disturbance.jl")
 @reexport using .Disturbance
+
+# Include module `RigidBody.jl`
+include("AttitudeDynamics/RigidBody.jl")
+@reexport using .RigidBody
+
+# Include module `PlotRecipe`
+include("PlotRecipes/PlotRecipe.jl")
+@reexport using .PlotRecipe
+
+include("SimulationAPI/runsimulation.jl")
+export runsimulation
 
 end # module

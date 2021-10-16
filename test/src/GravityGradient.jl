@@ -30,7 +30,7 @@ using .SimulationTesting
     elem = Orbit.OrbitalElements(0, 0, 6370e+3 + 400e3, 1, 0, 0)
 
     # Dynamics model (mutable struct)
-    model = RigidBody.DynamicsModel(inertia)
+    model = RigidBody.RigidBodyModel(inertia)
 
     # Sampling period of simulation (second)
     Tsampling = 1
@@ -45,19 +45,13 @@ using .SimulationTesting
     data_num = round(Int, simulation_time/Tsampling) + 1;
 
     # Earth-Centered frame (constant value)
-    ECI_frame = TimeLine.Frame(
+    ECI_frame = Frame(
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
     )
 
-    C_ECI2OrbitalPlaneFrame = Orbit.ECI2OrbitalPlaneFrame(elem)
-
-    orbit_frame = TimeLine.Frame(
-        C_ECI2OrbitalPlaneFrame * ECI_frame.x,
-        C_ECI2OrbitalPlaneFrame * ECI_frame.y,
-        C_ECI2OrbitalPlaneFrame * ECI_frame.z
-    )
+    orbit_frame = Orbit.calc_orbitalframe(elem, ECI_frame)
 
     # Spacecraft-fixed frame (Body frame)
     body_frame = TimeLine.initframes(data_num, ECI_frame)
@@ -81,15 +75,11 @@ using .SimulationTesting
 
         # calculates transformation matrix from orbital plane frame to radial along frame
         C_ECI2LVLH = Orbit.OrbitalPlaneFrame2LVLH(C_RAT)
-        spacecraft_LVLH.x[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.x
-        spacecraft_LVLH.y[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.y
-        spacecraft_LVLH.z[:, loopCounter + 1] = C_ECI2LVLH * orbit_frame.z
+        spacecraft_LVLH[loopCounter + 1] = C_ECI2LVLH * ECI_frame
 
         # transfromation matrix from ECI to body frame
-        C_ECI2Body = RigidBody.ECI2BodyFrame(quaternion[:, loopCounter + 1])
-        body_frame.x[:, loopCounter + 1] = C_ECI2Body * ECI_frame.x
-        body_frame.y[:, loopCounter + 1] = C_ECI2Body * ECI_frame.y
-        body_frame.z[:, loopCounter + 1] = C_ECI2Body * ECI_frame.z
+        C_ECI2Body = ECI2BodyFrame(quaternion[:, loopCounter + 1])
+        body_frame[loopCounter + 1] = C_ECI2Body * ECI_frame
 
         # Extract body fixed frame at current time
         currentbodyframe = TimeLine.getframe(currenttime, Tsampling, body_frame)
@@ -115,10 +105,10 @@ using .SimulationTesting
     display(fig1)
 
 
-    fig2 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif=20, FPS=20)
+    fig2 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, body_frame, Tgif=400, FPS=8)
     display(fig2)
 
-    fig3 = PlotRecipe.frame_gif(time, Tsampling, orbit_frame, spacecraft_LVLH, Tgif=20, FPS=20)
+    fig3 = PlotRecipe.frame_gif(time, Tsampling, orbit_frame, spacecraft_LVLH, Tgif=400, FPS=8)
     display(fig3)
 
 end

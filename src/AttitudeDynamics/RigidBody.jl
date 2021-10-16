@@ -12,27 +12,29 @@ using .RigidBody
 """
 module RigidBody
 
-using ..TimeLine
+using StaticArrays
+using ..Frames
+
+export calc_angular_velocity, calc_quaternion
 
 """
-    DynamicsModel(inertia::Matrix)
+    struct RigidBodyModel
 
-mutable struct of attitude dynamics model
-- inertia: inertia matrix of a given system
+Struct of rigid body spacecraft model
 """
-mutable struct DynamicsModel
+struct RigidBodyModel
     # Inertia Matrix
     inertia::Matrix
 end
 
 # Equation of dynamics
 """
-    calc_differential_dynamics(model::DynamicsModel, currentTime, angular_velocity, current_body_frame)
+    calc_differential_dynamics(model::RigidBodyModel, currentTime, angular_velocity, current_body_frame)
 
 Get the differential of equation of dynamics.
 
 # Arguments
-- model::DynamicsModel
+- model::RigidBodyModel
 - currentTime: current time of system [s]
 - angular_velocity: angular velocity of body frame with respect to ECI frame [rad/s]
 - current_body_frame: current body frame [b1 b2 b3]
@@ -40,7 +42,7 @@ Get the differential of equation of dynamics.
 # return
 - differential: differential of equation of motion
 """
-function calc_differential_dynamics(model::DynamicsModel, currentTime, angular_velocity, current_body_frame, disturbance)
+function calc_differential_dynamics(model::RigidBodyModel, currentTime, angular_velocity, current_body_frame, disturbance)
 
     # skew matrix of angular velocity vector
     skewOmega = [
@@ -83,34 +85,14 @@ function calc_differential_kinematics(angular_velocity, quaternion)
 end
 
 """
-    function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Frame, disturbance::Vector)
+    function calc_angular_velocity(model::RigidBodyModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Frame, disturbance::Vector)
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::TimeLine.Frame, disturbance::Vector)
+function calc_angular_velocity(model::RigidBodyModel, currentTime::Real, angular_velocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}})
 
-    # define body frame matrix from struct `TimeLine.Frame`
+    # define body frame matrix from struct `Frame`
     bodyframematrix = hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z)
-
-    k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , bodyframematrix, disturbance)
-    k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, bodyframematrix, disturbance)
-    k3 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, bodyframematrix, disturbance)
-    k4 = calc_differential_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, bodyframematrix, disturbance)
-
-    nextOmega = angular_velocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return nextOmega
-end
-
-"""
-    function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
-
-calculate angular velocity at next time step using 4th order Runge-Kutta method
-"""
-function calc_angular_velocity(model::DynamicsModel, currentTime, angular_velocity::Vector, Tsampling, currentbodyframe::Tuple{Vector, Vector, Vector}, disturbance::Vector)
-
-    # define body coordinate frame matrix
-    bodyframematrix = hcat(currentbodyframe[1], currentbodyframe[2], currentbodyframe[3])
 
     k1 = calc_differential_dynamics(model, currentTime              , angular_velocity                   , bodyframematrix, disturbance)
     k2 = calc_differential_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, bodyframematrix, disturbance)
@@ -139,41 +121,6 @@ function calc_quaternion(angular_velocity, quaternion, Tsampling)
     nextQuaternion = quaternion + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4);
 
     return nextQuaternion
-end
-
-"""
-    ECI2BodyFrame(q)
-
-Calculate the transformation matrix from ECI frame to spacecraft body-fixed frame.
-
-# Arguments
-- `q`: quaternion
-
-# Return
-- `transformation_matrix`: transformation matrix
-"""
-function ECI2BodyFrame(q)
-
-    # Check if the quaterion satisfies its constraint
-    try
-        constraint = q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
-
-    catch constraint
-
-        if constraint < 0.995
-            error("Quaternion does not satisfy constraint")
-        elseif constraint > 1.005
-            error("Quaternion does not satisfy constraint")
-        end
-    end
-
-    transformation_matrix = [
-        q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2  2*(q[1]*q[2] + q[3]*q[4])          2*(q[1]*q[3] - q[2]*q[4])
-        2*(q[2]*q[1] - q[3]*q[4])          q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2  2*(q[2]*q[3] + q[1]*q[4])
-        2*(q[3]*q[1] + q[2]*q[4])          2*(q[3]*q[2] - q[1]*q[4])          q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
-    ]
-
-    return transformation_matrix
 end
 
 end
