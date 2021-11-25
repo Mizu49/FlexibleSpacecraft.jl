@@ -3,6 +3,7 @@ module FlexibleSpacecraft
 using Reexport
 
 @reexport using LinearAlgebra
+@reexport using Plots
 
 include("DataContainers/Frames.jl")
 @reexport using .Frames

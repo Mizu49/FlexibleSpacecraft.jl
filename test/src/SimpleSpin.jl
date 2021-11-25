@@ -47,10 +47,11 @@ using .SimulationTesting
 
     # @test SimulationTesting.quaternion_constraint(simdata.quaternion)
 
-    fig1 = PlotRecipe.angular_velocity(time, simdata.angularvelocity)
+    fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity)
     display(fig1)
 
-
-    fig2 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, simdata.bodyframe, Tgif = 0.8, FPS = 8)
+    fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
     display(fig2)
 
+    # fig2 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, simdata.bodyframe, Tgif = 0.8, FPS = 8)
+    # display(fig2)

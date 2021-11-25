@@ -10,7 +10,7 @@ using StructArrays
 using StaticArrays
 using ..Frames
 
-export InitData, initsimulationdata
+export InitData, initsimulationdata, timeindex
 
 """
     function init_angular_velocity_array(simdata_num, initital_value::Vector)
@@ -65,6 +65,19 @@ function initsimulationdata(datanum::Int, initialdata::InitData)
         angularvelocity = initangularvelocity(datanum, initialdata.angularvelocity),
         bodyframe = initframes(datanum, initialdata.bodyframe)
     )
+end
+
+"""
+    timeindex(starttime::Real, endtime::Real, samplingtime::Real)::UnitRange{Int64}
+
+get a `dataindex::UnitRange` corresponding to the given time range from `starttime` to `endtime` in sampling period of `samplingtime`
+"""
+function timeindex(starttime::Real, endtime::Real, samplingtime::Real)::UnitRange{Int64}
+
+    startindex = convert(Int64, round(starttime/samplingtime) + 1)
+    endindex = convert(Int64, round(endtime/samplingtime) + 1)
+
+    return startindex:endindex
 end
 
 end
