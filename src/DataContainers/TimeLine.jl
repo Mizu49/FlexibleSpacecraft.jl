@@ -40,6 +40,15 @@ function initquaterniondata(datanum, initialvalue::SVector{4, <:Real})
 end
 
 """
+    Base.getindex(v::Vector{<:SVector}, r::AbstractRange, datarow::Int)
+
+get a 1-D subset of the every `datarow`-th row of `v::Vector{<:SVector}` within `r::AbstractRange`, used for custom data container for `FlexibleSpacecraft.jl`
+"""
+function Base.getindex(v::Vector{<:SVector}, r::Union{AbstractRange, Colon}, datarow::Int)
+    return getindex.(v[r], datarow)
+end
+
+"""
     struct InitiData
 
 Struct that consists of the initial state value of the time-variant physical amounts in simulation

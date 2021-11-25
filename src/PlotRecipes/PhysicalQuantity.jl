@@ -13,12 +13,12 @@ export angularvelocities, quaternions
 
 Plots angular velocity of each axis in one figure
 """
-function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}})::AbstractPlot
+function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, timerange = :)::AbstractPlot
 
     plt = plot();
-    plt = plot!(plt, time, angularvelocity, 1);
-    plt = plot!(plt, time, angularvelocity, 2);
-    plt = plot!(plt, time, angularvelocity, 3);
+    plt = plot!(plt, time, angularvelocity, 1, timerange);
+    plt = plot!(plt, time, angularvelocity, 2, timerange);
+    plt = plot!(plt, time, angularvelocity, 3, timerange);
 
     return plt
 end
@@ -28,18 +28,18 @@ end
 
 Plot quaternions in single plot
 """
-function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}})
+function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, timerange = :)
 
     plt = plot();
-    plt = plot!(plt, time, quaternion, 1);
-    plt = plot!(plt, time, quaternion, 2);
-    plt = plot!(plt, time, quaternion, 3);
-    plt = plot!(plt, time, quaternion, 4);
+    plt = plot!(plt, time, quaternion, 1, timerange);
+    plt = plot!(plt, time, quaternion, 2, timerange);
+    plt = plot!(plt, time, quaternion, 3, timerange);
+    plt = plot!(plt, time, quaternion, 4, timerange);
 
     return plt
 end
 
-@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, index::Integer)
+@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, index::Integer, timerange = :)
     if !(1 <= index <= 4)
         throw(BoundsError(quaternion[1], index))
     end
@@ -59,10 +59,10 @@ end
         throw(ArgumentError("argument `index` is set improperly"))
     end
 
-    return time, getindex.(quaternion, index)
+    return time[timerange], quaternion[timerange, index]
 end
 
-@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, axisindex::Integer)
+@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, axisindex::Integer, timerange = :)
 
     plotlyjs()
 
@@ -79,7 +79,7 @@ end
         throw(ArgumentError("argument `axisindex` is set improperly"))
     end
 
-    return time, getindex.(angularvelocity, axisindex)
+    return time[timerange], angularvelocity[timerange, axisindex]
 end
 
 end
