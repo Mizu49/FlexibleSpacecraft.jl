@@ -49,6 +49,15 @@ function Base.getindex(v::Vector{<:SVector}, r::Union{AbstractRange, Colon}, dat
 end
 
 """
+    Base.getindex(v::Vector{<:SVector}, r::Int, datarow::Int)
+
+get an element of the `v<:SVector`, used for custom data container for `FlexibleSpacecraft.jl`
+"""
+function Base.getindex(v::Vector{<:SVector}, r::Int, datarow::Int)
+    return getindex(v[r], datarow)
+end
+
+"""
     struct InitiData
 
 Struct that consists of the initial state value of the time-variant physical amounts in simulation
