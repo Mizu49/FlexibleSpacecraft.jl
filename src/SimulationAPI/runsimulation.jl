@@ -17,18 +17,26 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
 
     for loopCounter = 0:datanum - 1
 
-        # Update current attitude
-        C = ECI2BodyFrame(simdata.quaternion[loopCounter+1])
-        simdata.bodyframe[loopCounter+1] = C * ECI_frame
-
         # Update orbit state
-        orbitdata[loopCounter+1] = Orbit.updateorbitstate(orbitinfo.orbitalelement, orbitinfo.orbitmodel, time[loopCounter+1])
+        orbitdata.angularvelocity[loopCounter+1] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
+        orbitdata.angularposition[loopCounter+1] = orbitdata.angularvelocity[loopCounter+1] * time[loopCounter+1]
 
+        # update transformation matrix from orbit plane frame to radial along tract frame
+        C_RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[loopCounter+1], time[loopCounter+1])
+
+        # calculates transformation matrix from orbital plane frame to radial along frame
+        C_ECI2LVLH = Orbit.OrbitalPlaneFrame2LVLH(C_RAT)
+        orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * ECI_frame
         # Update spacecraft Radial Along Track (RAT) frame
         RATframe[loopCounter+1] = Orbit.update_radial_along_track(orbitinfo.planeframe, orbitinfo.orbitalelement, time[loopCounter+1], orbitdata.angularvelocity[loopCounter+1])
 
+
+        # Update current attitude
+        C_ECI2Body = ECI2BodyFrame(simdata.quaternion[loopCounter+1])
+        simdata.bodyframe[loopCounter+1] = C_ECI2Body * ECI_frame
+
         # Disturbance torque
-        disturbance = disturbanceinput(distconfig)
+        disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
 
         # Time evolution of the system
         if loopCounter != datanum - 1

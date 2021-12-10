@@ -126,23 +126,18 @@ struct OrbitInfo
         return new(
             dynamicsmodel,
             orbitalelement,
-            planeframe,
+            planeframe
         )
     end
 end
 
-function initorbitdata(datanum::Integer, orbitframe::Frame)
+function initorbitdata(datanum::Integer, orbitalframe::Frame)
 
-    angularpositionarray = zeros(1, datanum)
-    # angularpositionarray[:,1] = initvalue.angularposition
-
-    angularvelocityarray = zeros(1, datanum)
-    # angularvelocityarray[:, 1] = initvalue.angularvelocity
-
-    return StructArray((
-        angularposition = angularpositionarray,
-        angularvelocity = angularvelocityarray,
-    ))
+    return StructArray(
+        angularposition = zeros(datanum),
+        angularvelocity = zeros(datanum),
+        LVLH = initframes(datanum, orbitalframe)
+    )
 end
 
 """
@@ -268,17 +263,6 @@ function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, tim
     C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, angularvelocity, time)
 
     return C_RAT * orbitframe
-end
-
-function updateorbitstate(elem::OrbitalElements, orbitmodel::CircularOrbit, time::Real)::NamedTuple
-
-    angularvelocity = get_angular_velocity(orbitmodel)
-
-    return (
-        angularposition = angularvelocity * time,
-        angularvelocity = angularvelocity
-    )
-
 end
 
 end

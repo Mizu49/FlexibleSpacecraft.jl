@@ -20,11 +20,9 @@ struct DisturbanceConfig
     gravitationaltorque::Bool
 
     # Constructor
-    DisturbanceConfig() = begin
-        consttorque = [0, 0, 0.02]
-        gravitationaltorque = false
+    DisturbanceConfig(; constanttorque = zeros(3), gravitygradient = false) = begin
 
-        return new(consttorque, gravitationaltorque)
+        return new(constanttorque, gravitygradient)
     end
 
 end
@@ -82,9 +80,13 @@ end
 """
 
 """
-function disturbanceinput(distconfig::DisturbanceConfig)::Vector
+function disturbanceinput(distconfig::DisturbanceConfig, inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)::Vector
 
     disturbance = zeros(3) + constant_torque(distconfig.consttorque)
+
+    if distconfig.gravitationaltorque == true
+        disturbance = disturbance + gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)
+    end
 
     return disturbance
 end
