@@ -35,7 +35,7 @@ initvalue = TimeLine.InitData(
 # define a orbit info
 orbitinfo = Orbit.OrbitInfo(Orbit.OrbitalElements(111.8195, 51.6433, 421e3, 0.0001239, 241.3032, 212.0072), ECI_frame)
 
-distconfig = DisturbanceConfig()
+distconfig = DisturbanceConfig(constanttorque = [0, 0, 0.01])
 
 println("Begin simulation!")
 # run simulation
