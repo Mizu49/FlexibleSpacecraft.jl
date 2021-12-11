@@ -1,6 +1,6 @@
 using Test
 
-include("../../src/FlexibleSpacecraft.jl")
+include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # Module for testing of simulation

@@ -1,6 +1,6 @@
 module SimulationTesting
 
-include("../../src/FlexibleSpacecraft.jl")
+include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 using Test
 using StructArrays
