@@ -55,8 +55,10 @@ display(fig1)
 fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
 display(fig2)
 
+# Plot of the body frame with respect to ECI frame
 fig3 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, simdata.bodyframe, Tgif = 30, FPS = 8)
 display(fig3)
 
-fig4 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, orbitdata.LVLH, Tgif = 60, FPS = 8)
-display(fig4)
+# Plot of the animation of LVLH frame
+# fig4 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, orbitdata.LVLH, Tgif = 60, FPS = 8)
+# display(fig4)
