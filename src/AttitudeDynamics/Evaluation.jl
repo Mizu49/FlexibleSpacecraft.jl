@@ -1,8 +1,10 @@
-module SimulationTesting
+"""
+    module Evaluation
 
-include("../src/FlexibleSpacecraft.jl")
-using .FlexibleSpacecraft
-using Test
+Functions and APIs for the evaluation of the simulation result. Checking the constraints and the necessary evaluation on the simulation.
+"""
+module Evaluation
+
 using StructArrays
 using StaticArrays
 
