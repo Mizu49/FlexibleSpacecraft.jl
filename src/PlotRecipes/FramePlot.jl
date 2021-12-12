@@ -90,16 +90,16 @@ Generates animation of frame rotation as GIF figure
 """
 function frame_gif(time::StepRangeLen, Tsampling::Real, refCoordinate::Frame, bodyCoordinateArray::StructArray; Tgif = 60, FPS = 3)
 
-    dataNum = size(time, 1)
+    datanum = size(time, 1)
     steps = round(Int, Tgif/Tsampling)
 
     # create animation
-    anim = @animate for index in 1:dataNum
+    anim = @animate for index = 1:steps:datanum
 
         bodyCoordinate = TimeLine.getframe(time[index], Tsampling, bodyCoordinateArray)
 
         dispframe(time[index], refCoordinate, bodyCoordinate)
-    end every steps
+    end
 
     # make gif image
     gifanime = gif(anim, "attitude.gif", fps = FPS)
