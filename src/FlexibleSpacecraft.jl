@@ -24,6 +24,9 @@ include("Disturbances/Disturbance.jl")
 include("AttitudeDynamics/RigidBody.jl")
 @reexport using .RigidBody
 
+include("AttitudeDynamics/Evaluation.jl")
+@reexport using .Evaluation
+
 # Include module `PlotRecipe`
 include("PlotRecipes/PlotRecipe.jl")
 @reexport using .PlotRecipe

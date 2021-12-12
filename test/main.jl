@@ -3,10 +3,6 @@ using Test
 include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
-# Module for testing of simulation
-include("SimulationTesting.jl")
-using .SimulationTesting
-
 # inertia matrix
 inertia = [
     45000 -300 300
@@ -47,7 +43,7 @@ println("Begin simulation!")
 
 println("Completed!")
 
-@test SimulationTesting.quaternion_constraint(simdata.quaternion)
+@test Evaluation.quaternion_constraint(simdata.quaternion)
 
 fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity)
 display(fig1)
