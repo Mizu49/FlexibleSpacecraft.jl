@@ -31,6 +31,9 @@ include("AttitudeDynamics/Evaluation.jl")
 include("PlotRecipes/PlotRecipe.jl")
 @reexport using .PlotRecipe
 
+include("SimulationAPI/ParameterSetting.jl")
+@reexport using .ParameterSetting
+
 include("SimulationAPI/runsimulation.jl")
 export runsimulation
 
