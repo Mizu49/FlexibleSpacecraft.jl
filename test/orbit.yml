@@ -1,0 +1,11 @@
+OrbitData: Test orbit parameters
+
+OrbitalElements:
+    right ascention: 111.8195
+    inclination: 51.6433
+    semimajor axis: 421e3
+    eccentricity: 0.0001239
+    argument of perigee: 241.3032
+    true anomaly at epoch: 212.0072
+
+DynamicsModel: CircularOrbit
