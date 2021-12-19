@@ -1,4 +1,4 @@
-OrbitData: Test orbit parameters
+OrbitInfo: Test orbit parameters # Text information about this parameter setting
 
 OrbitalElements:
     right ascention: 111.8195

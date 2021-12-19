@@ -113,17 +113,19 @@ struct OrbitalElements
 end
 
 struct OrbitInfo
+    info
     orbitmodel
     orbitalelement
     planeframe
 
-    OrbitInfo(orbitalelement::OrbitalElements, ECIframe::Frame) = begin
+    OrbitInfo(orbitalelement::OrbitalElements, ECIframe::Frame, info::String) = begin
 
         dynamicsmodel = CircularOrbit(6370e+3 + 400e3, 3.986e+14)
 
         planeframe = calc_orbitalframe(orbitalelement, ECIframe)
 
         return new(
+            info,
             dynamicsmodel,
             orbitalelement,
             planeframe

@@ -22,7 +22,8 @@ function initorbitinfo(filepath::String, ECI::Frames.Frame)
             lawdata["OrbitalElements"]["argument of perigee"],
             lawdata["OrbitalElements"]["true anomaly at epoch"]
         ),
-        ECI
+        ECI,
+        lawdata["OrbitInfo"]
     )
 
     return orbitinfo
