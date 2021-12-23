@@ -3,20 +3,13 @@ using Test
 include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
-# inertia matrix
-inertia = [
-    45000 -300 300
-    -300 1200 300
-    300 300 50000
-]
-
-# Dynamics model (mutable struct)
-model = RigidBody.RigidBodyModel(inertia)
-
 # Sampling period of simulation (second)
 Tsampling = 1e-2
 # Time length of simulation (second)
 simulation_time = 5400
+
+# Set the dynamics model
+model = setdynamicsmodel("./test/spacecraft.yml",)
 
 # Earth-Centered frame (constant value)
 ECI_frame = Frame(
