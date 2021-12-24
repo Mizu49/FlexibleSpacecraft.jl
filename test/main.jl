@@ -11,12 +11,7 @@ simulation_time = 5400
 # Set the dynamics model
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
-# Earth-Centered frame (constant value)
-ECI_frame = Frame(
-    [1, 0, 0],
-    [0, 1, 0],
-    [0, 0, 1]
-)
+(simconfig, ECI_frame) = initsimulation(simulation_time, Tsampling)
 
 # Initialize data array
 initvalue = TimeLine.InitData(
@@ -32,7 +27,7 @@ distconfig = DisturbanceConfig(gravitygradient = true)
 
 println("Begin simulation!")
 # run simulation
-@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simulation_time, Tsampling)
+@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig.simulationtime, simconfig.samplingtime)
 
 println("Completed!")
 
@@ -45,9 +40,9 @@ fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, simdata.bodyframe, Tgif = 30, FPS = 8)
+fig3 = PlotRecipe.frame_gif(time, simconfig.samplingtime, ECI_frame, simdata.bodyframe, Tgif = 30, FPS = 8)
 display(fig3)
 
 # Plot of the animation of LVLH frame
-# fig4 = PlotRecipe.frame_gif(time, Tsampling, ECI_frame, orbitdata.LVLH, Tgif = 60, FPS = 8)
+# fig4 = PlotRecipe.frame_gif(time, simconfig.samplingtime, ECI_frame, orbitdata.LVLH, Tgif = 60, FPS = 8)
 # display(fig4)

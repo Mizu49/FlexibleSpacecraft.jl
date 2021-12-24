@@ -6,7 +6,12 @@ using ..Frames
 using ..Orbit
 using ..RigidBody
 
-export initorbitinfo, setdynamicsmodel
+export initorbitinfo, setdynamicsmodel, initsimulation
+
+struct SimulationConfig
+    simulationtime::Real
+    samplingtime::Real
+end
 
 """
     initorbitinfo(filepath::String, ECI::Frame)
@@ -53,6 +58,23 @@ function setdynamicsmodel(filepath::String)
     end
 
     return model
+end
+
+"""
+"""
+function initsimulation(simulationtime::Real, samplingtime::Real)
+
+    # set configurations for simulation
+    simconfig = SimulationConfig(simulationtime, samplingtime)
+
+    # Earth-Centered frame (constant value)
+    ECI_frame = Frame(
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1]
+    )
+
+    return (simconfig, ECI_frame)
 end
 
 end
