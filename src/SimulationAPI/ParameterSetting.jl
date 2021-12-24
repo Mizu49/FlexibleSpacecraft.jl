@@ -2,13 +2,18 @@ module ParameterSetting
 
 using YAML
 
-import ..Frames
-import ..Orbit
-import ..RigidBody
+using ..Frames
+using ..Orbit
+using ..RigidBody
 
 export initorbitinfo, setdynamicsmodel
 
-function initorbitinfo(filepath::String, ECI::Frames.Frame)
+"""
+    initorbitinfo(filepath::String, ECI::Frame)
+
+Load the YAML file configuration and construct the appropriate model for the simulation
+"""
+function initorbitinfo(filepath::String, ECI::Frame)
 
     # Read YAML file
     lawdata = YAML.load_file(filepath)
