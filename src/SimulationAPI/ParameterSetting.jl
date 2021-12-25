@@ -8,6 +8,16 @@ using ..RigidBody
 
 export initorbitinfo, setdynamicsmodel, initsimulation
 
+
+"""
+    struct SimulationConfig
+
+struct that contains the information about the simulation configuration
+
+## fields
+* `simulationtime::Real`: time length of the simulation
+* `samplingtime::Real`: sampling time of the simulation
+"""
 struct SimulationConfig
     simulationtime::Real
     samplingtime::Real
@@ -61,6 +71,13 @@ function setdynamicsmodel(filepath::String)
 end
 
 """
+    initsimulation(simulationtime::Real, samplingtime::Real)
+
+initialize the simulation configurations
+
+## Return value
+* `simconfig::SimulationConfig`
+* `ECI_frame::Frame`
 """
 function initsimulation(simulationtime::Real, samplingtime::Real)
 
