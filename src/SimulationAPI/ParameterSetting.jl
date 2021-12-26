@@ -6,7 +6,7 @@ using ..Frames
 using ..Orbit
 using ..RigidBody
 
-export initorbitinfo, setdynamicsmodel, initsimulation
+export SimulationConfig, initorbitinfo, setdynamicsmodel, initsimulation
 
 
 """

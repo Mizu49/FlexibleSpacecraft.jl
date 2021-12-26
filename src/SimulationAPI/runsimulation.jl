@@ -1,12 +1,34 @@
 """
-    function runsimulation
-"""
-function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simulation_time::Real, Tsampling::Real)::Tuple
+    runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
-    time = 0:Tsampling:simulation_time
+Function that runs simulation of the spacecraft attitude-structure coupling problem
+
+## Arguments
+* `model`: Dynamics model of the system
+* `ECI_frame::Frame`: ECI frame of the system
+* `initvalue::InitData`: Inital value of the simulation physical states
+* `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
+* `simconfig::SimulationConfig`: Simulation configuration ParameterSetting
+
+## Return
+
+Return is tuple of `(time, simdata, orbitdata)`
+
+* `time`: 1-D array of the time
+* `simdata`: StructArray of trajectory of the physical amount states of the spacecraft system
+* `orbitdata`: StructArray of the orbit state trajectory
+
+## Usage
+```
+(time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
+```
+"""
+function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+
+    time = 0:simconfig.samplingtime:simconfig.simulationtime
 
     # Numbers of simulation data
-    datanum = floor(Int, simulation_time/Tsampling) + 1;
+    datanum = floor(Int, simconfig.simulationtime/simconfig.samplingtime) + 1;
 
     # Initialize data array
     simdata = initsimulationdata(datanum, initvalue)
@@ -42,10 +64,10 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
         if loopCounter != datanum - 1
 
             # Update angular velocity
-            simdata.angularvelocity[loopCounter+2] = calc_angular_velocity(model, time[loopCounter + 1], simdata.angularvelocity[loopCounter+1], Tsampling, simdata.bodyframe[loopCounter+1], disturbance)
+            simdata.angularvelocity[loopCounter+2] = calc_angular_velocity(model, time[loopCounter + 1], simdata.angularvelocity[loopCounter+1], simconfig.samplingtime, simdata.bodyframe[loopCounter+1], disturbance)
 
             # Update quaternion
-            simdata.quaternion[loopCounter+2] = calc_quaternion(simdata.angularvelocity[loopCounter+1], simdata.quaternion[loopCounter+1], Tsampling)
+            simdata.quaternion[loopCounter+2] = calc_quaternion(simdata.angularvelocity[loopCounter+1], simdata.quaternion[loopCounter+1], simconfig.samplingtime)
 
         end
 
