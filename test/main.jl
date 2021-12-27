@@ -27,7 +27,7 @@ distconfig = DisturbanceConfig(gravitygradient = true)
 
 println("Begin simulation!")
 # run simulation
-@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig.simulationtime, simconfig.samplingtime)
+@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
 
 println("Completed!")
 
