@@ -6,7 +6,7 @@ using .FlexibleSpacecraft
 # Sampling period of simulation (second)
 Tsampling = 1e-2
 # Time length of simulation (second)
-simulation_time = 5400
+simulation_time = 1000
 
 # Set the dynamics model
 model = setdynamicsmodel("./test/spacecraft.yml",)
@@ -34,13 +34,14 @@ println("Completed!")
 @test Evaluation.quaternion_constraint(simdata.quaternion)
 
 fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity)
+# fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity, timerange = (0, 10))
 display(fig1)
 
 fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.frame_gif(time, simconfig.samplingtime, ECI_frame, simdata.bodyframe, Tgif = 30, FPS = 8)
+fig3 = PlotRecipe.frame_gif(time, simconfig.samplingtime, ECI_frame, simdata.bodyframe, Tgif = 20, FPS = 8)
 display(fig3)
 
 # Plot of the animation of LVLH frame
