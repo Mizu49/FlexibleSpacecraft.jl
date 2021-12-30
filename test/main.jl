@@ -41,7 +41,7 @@ fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.frame_gif(time, simconfig.samplingtime, ECI_frame, simdata.bodyframe, Tgif = 20, FPS = 8)
+fig3 = PlotRecipe.framegif(time, ECI_frame, simdata.bodyframe, Tgif = 20, FPS = 8)
 display(fig3)
 
 # Plot of the animation of LVLH frame
