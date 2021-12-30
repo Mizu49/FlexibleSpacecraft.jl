@@ -95,6 +95,10 @@ function getdataindex(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Uni
     if timerange == (0, 0)
         return :;
     else
+        if timerange[1] >= timerange[2]
+            throw(DomainError(timerange, "setting for `timerange` is invalid"))
+        end
+
         startindex = convert(Int64, round(timerange[1]/samplingtime) + 1)
         endindex = convert(Int64, round(timerange[2]/samplingtime) + 1)
 
