@@ -86,16 +86,24 @@ function initsimulationdata(datanum::Int, initialdata::InitData)
 end
 
 """
-    timeindex(starttime::Real, endtime::Real, samplingtime::Real)::UnitRange{Int64}
+    function getdataindex(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Union{UnitRange{Int64}, Colon}
 
-get a `dataindex::UnitRange` corresponding to the given time range from `starttime` to `endtime` in sampling period of `samplingtime`
+returns an `index::::Union{UnitRange{Int64}, Colon}` that corresponding to the given `timerange::Tuple{<:Real, <:Real}`
 """
-function timeindex(starttime::Real, endtime::Real, samplingtime::Real)::UnitRange{Int64}
+function getdataindex(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Union{UnitRange{Int64}, Colon}
 
-    startindex = convert(Int64, round(starttime/samplingtime) + 1)
-    endindex = convert(Int64, round(endtime/samplingtime) + 1)
+    if timerange == (0, 0)
+        return :;
+    else
+        if timerange[1] >= timerange[2]
+            throw(DomainError(timerange, "setting for `timerange` is invalid"))
+        end
 
-    return startindex:endindex
+        startindex = convert(Int64, round(timerange[1]/samplingtime) + 1)
+        endindex = convert(Int64, round(timerange[2]/samplingtime) + 1)
+
+        return startindex:endindex
+    end
 end
 
 end

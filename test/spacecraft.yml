@@ -1,0 +1,11 @@
+name: example spacecraft
+note: This model is for test purpose
+
+dynamicsmodel: Rigid body
+
+platform:
+    inertia: [
+        45000, -300, 300,
+        -300, 1200, 300,
+        300, 300, 50000
+        ]

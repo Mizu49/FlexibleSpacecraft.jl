@@ -9,37 +9,37 @@ using StaticArrays
 export angularvelocities, quaternions
 
 """
-    angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}})::AbstractPlot
+    function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
 Plots angular velocity of each axis in one figure
 """
-function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, timerange = :)::AbstractPlot
+function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
     plt = plot();
-    plt = plot!(plt, time, angularvelocity, 1, timerange);
-    plt = plot!(plt, time, angularvelocity, 2, timerange);
-    plt = plot!(plt, time, angularvelocity, 3, timerange);
+    plt = plot!(plt, time, angularvelocity, 1, timerange = timerange);
+    plt = plot!(plt, time, angularvelocity, 2, timerange = timerange);
+    plt = plot!(plt, time, angularvelocity, 3, timerange = timerange);
 
     return plt
 end
 
 """
-    quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}})
+function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
 
-Plot quaternions in single plot
+    Plot quaternions in single plot
 """
-function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, timerange = :)
+function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
 
     plt = plot();
-    plt = plot!(plt, time, quaternion, 1, timerange);
-    plt = plot!(plt, time, quaternion, 2, timerange);
-    plt = plot!(plt, time, quaternion, 3, timerange);
-    plt = plot!(plt, time, quaternion, 4, timerange);
+    plt = plot!(plt, time, quaternion, 1, timerange = timerange);
+    plt = plot!(plt, time, quaternion, 2, timerange = timerange);
+    plt = plot!(plt, time, quaternion, 3, timerange = timerange);
+    plt = plot!(plt, time, quaternion, 4, timerange = timerange);
 
     return plt
 end
 
-@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, index::Integer, timerange = :)
+@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, index::Integer; timerange = (0, 0))
     if !(1 <= index <= 4)
         throw(BoundsError(quaternion[1], index))
     end
@@ -59,10 +59,13 @@ end
         throw(ArgumentError("argument `index` is set improperly"))
     end
 
-    return time[timerange], quaternion[timerange, index]
+    # get the index for data
+    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+
+    return time[dataindex], quaternion[dataindex, index]
 end
 
-@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, axisindex::Integer, timerange = :)
+@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, axisindex::Integer; timerange = (0, 0))
 
     plotlyjs()
 
@@ -79,7 +82,10 @@ end
         throw(ArgumentError("argument `axisindex` is set improperly"))
     end
 
-    return time[timerange], angularvelocity[timerange, axisindex]
+    # get the index for data
+    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+
+    return time[dataindex], angularvelocity[dataindex, axisindex]
 end
 
 end

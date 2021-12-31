@@ -6,7 +6,7 @@ import ...TimeLine
 using ...Frames: Frame
 using StructArrays: StructArray
 
-export dispframe, frame_gif
+export dispframe, framegif
 
 """
     function dispframe(time, refCoordinate, coordinate)
@@ -88,17 +88,26 @@ end
 
 Generates animation of frame rotation as GIF figure
 """
-function frame_gif(time::StepRangeLen, Tsampling::Real, refCoordinate::Frame, bodyCoordinateArray::StructArray; Tgif = 60, FPS = 3)
+function framegif(time::StepRangeLen, refframe::Frame, frames::StructArray; Tgif = 60, FPS = 3, timerange = (0, 0))
 
-    datanum = size(time, 1)
+    # get the index for data
+    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+
+    Tsampling = convert(Float64, time.step)
+
     steps = round(Int, Tgif/Tsampling)
 
+    # determine the index for animation for-loop
+    if dataindex == Colon()
+        animindex = 1:steps:size(time[dataindex], 1)
+    else
+        animindex = dataindex[1]:steps:dataindex[end]
+    end
+
     # create animation
-    anim = @animate for index = 1:steps:datanum
-
-        bodyCoordinate = TimeLine.getframe(time[index], Tsampling, bodyCoordinateArray)
-
-        dispframe(time[index], refCoordinate, bodyCoordinate)
+    anim = @animate for idx = animindex
+        frame = TimeLine.getframe(time[idx], Tsampling, frames)
+        dispframe(time[idx], refframe, frame)
     end
 
     # make gif image
