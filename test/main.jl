@@ -8,10 +8,17 @@ Tsampling = 1e-2
 # Time length of simulation (second)
 simulation_time = 1000
 
+# Initialize the simulation configurations
+(simconfig, ECI_frame) = initsimulation(simulation_time, Tsampling)
+
 # Set the dynamics model
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
-(simconfig, ECI_frame) = initsimulation(simulation_time, Tsampling)
+# define a orbit info
+orbitinfo = initorbitinfo("./test/orbit.yml", ECI_frame)
+
+# Set disturbance torque
+distconfig = DisturbanceConfig(gravitygradient = true)
 
 # Initialize data array
 initvalue = TimeLine.InitData(
@@ -20,15 +27,9 @@ initvalue = TimeLine.InitData(
     ECI_frame
 )
 
-# define a orbit info
-orbitinfo = initorbitinfo("./test/orbit.yml", ECI_frame)
-
-distconfig = DisturbanceConfig(gravitygradient = true)
-
-println("Begin simulation!")
 # run simulation
+println("Begin simulation!")
 @time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
-
 println("Completed!")
 
 @test Evaluation.quaternion_constraint(simdata.quaternion)
