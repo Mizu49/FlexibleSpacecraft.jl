@@ -1,16 +1,22 @@
 using Documenter
 
+using FlexibleSpacecraft
+
 # Build documentation
 makedocs(
     sitename="FlexibleSpacecraft.jl",
     pages = [
         "home" => "index.md",
+        "Example" => "example.md",
         "Development" => [
             "Developer's Guideline" => "development/developer's-guideline.md",
             "Environment" => "development/environment.md"
         ],
         "Dynamics" => [
             "Frames" => "dynamics/frames.md",
+        ],
+        "Libraries" => [
+            "Data containers" => "DataContainers/docs-DataContainers.md"
         ]
     ]
 )

@@ -13,7 +13,7 @@ using ..Frames
 export InitData, initsimulationdata, timeindex
 
 """
-    function init_angular_velocity_array(simdata_num, initital_value::Vector)
+    function initangularvelocity(simdata_num, initital_value::Vector)
 
 Initialize array that contains time response of angular velocity
 """
@@ -27,7 +27,7 @@ end
 
 
 """
-    function init_quaternion_array(simdata_num, initial_value::Vector[4])
+    function initquaterniondata(simdata_num, initial_value::Vector[4])
 
 initialize array that contains time response of quaternion
 """
