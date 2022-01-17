@@ -81,7 +81,8 @@ function initsimulationdata(datanum::Int, initialdata::InitData)
     return StructArray(
         quaternion = initquaterniondata(datanum, initialdata.quaternion),
         angularvelocity = initangularvelocity(datanum, initialdata.angularvelocity),
-        bodyframe = initframes(datanum, initialdata.bodyframe)
+        bodyframe = initframes(datanum, initialdata.bodyframe),
+        rollpitchyaw = initframes(datanum, initialdata.bodyframe)
     )
 end
 

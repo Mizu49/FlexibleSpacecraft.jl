@@ -56,9 +56,11 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(simdata.quaternion[loopCounter+1])
         simdata.bodyframe[loopCounter+1] = C_ECI2Body * ECI_frame
+        simdata.rollpitchyaw[loopCounter+1] = C_ECI2LVLH * simdata.bodyframe[loopCounter+1]
 
         # Disturbance torque
-        disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
+        # disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
+        disturbance = transpose(C_ECI2LVLH) * [0.05, 0, 0]
 
         # Time evolution of the system
         if loopCounter != datanum - 1
