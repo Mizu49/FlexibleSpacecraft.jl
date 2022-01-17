@@ -60,7 +60,7 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
 
         # Disturbance torque
         # disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
-        disturbance = transpose(C_ECI2LVLH) * [0.05, 0, 0]
+        disturbance = transpose(C_ECI2Body) * [0.05, 0, 0]
 
         # Time evolution of the system
         if loopCounter != datanum - 1
