@@ -24,6 +24,9 @@ include("Disturbances/Disturbance.jl")
 include("AttitudeDynamics/RigidBody.jl")
 @reexport using .RigidBody
 
+include("AttitudeDynamics/Attitude.jl")
+@reexport using .Attitude
+
 include("AttitudeDynamics/Evaluation.jl")
 @reexport using .Evaluation
 
