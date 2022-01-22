@@ -7,7 +7,7 @@ module Attitude
 
 using StaticArrays
 
-export dcm2quaternion, eular2dcm, quaternion2dcm, dcm2euler, 
+export dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler
 
 """
     dcm2quaternion(dcm::Matrix{Real})::Vector{Real}
@@ -59,7 +59,7 @@ calculate direction cosine matrix from the vector of z-y-x eular angles.
 
 * `euler::Union{SVector{3, <:Real}, Vector{<:Real}}`: each element represents the rotation with z, y, x axis, respectively
 """
-function eular2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3, 3, <:Real}
+function euler2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3, 3, <:Real}
     s1 = sin(euler[1])
     s2 = sin(euler[2])
     s3 = sin(euler[3])
@@ -68,9 +68,9 @@ function eular2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3,
     c3 = cos(euler[3])
 
     dcm = SMatrix{3, 3}([
-        c2*c3, c2*s3, -s2,
-        -c1*s3 + s1*s2*c3, c1*c3 + s1*s2*s3, s1*c2,
-        s1*s3 + c1*s2*c3, -s1*c3 + c1*s2*s3, c1*c2
+        c2*c3 c2*s3 -s2;
+        (-c1*s3 + s1*s2*c3) (c1*c3 + s1*s2*s3) s1*c2;
+        (s1*s3 + c1*s2*c3) (-s1*c3 + c1*s2*s3) c1*c2
     ])
 end
 
@@ -79,14 +79,14 @@ end
 
 calculates direction cosine matrix from quaternion
 """
-function quaternion2dcm(q::Union{Vector{<:Real}, SVector{4, <:Real}})::Matrix
+function quaternion2dcm(q::Union{Vector{<:Real}, SVector{4, <:Real}})::SMatrix{3, 3, <:Real}
     q2 = q.^2;
 
-    dcm = [
-        (q2[1] - q2[2] - q2[3] + q2[4]), 2*(q[1]*q[2] + q[3]*q[4]), 2*(q[1]*q[3] - q[2]*q[4]),
-        2*(q[1]*q[3] - q[3]*q[4]), (q2[2] - q2[1] - q2[3] + q2[4]), 2*(q[2]*q[3] + q[1]*q[4]),
-        2*(q[1]*q[3] + q[2]*q[4]), 2*(q[2]*q[3] - q[1]*q[4]), q2[3] - q2[1] - q2[2] + q2[4]
-    ]
+    dcm = SMatrix{3, 3}([
+        (q2[1] - q2[2] - q2[3] + q2[4]) 2*(q[1]*q[2] + q[3]*q[4]) 2*(q[1]*q[3] - q[2]*q[4]);
+        2*(q[1]*q[3] - q[3]*q[4]) (q2[2] - q2[1] - q2[3] + q2[4]) 2*(q[2]*q[3] + q[1]*q[4]);
+        2*(q[1]*q[3] + q[2]*q[4]) 2*(q[2]*q[3] - q[1]*q[4]) q2[3] - q2[1] - q2[2] + q2[4]
+    ])
 
     return dcm
 end
@@ -96,14 +96,14 @@ end
 
 calculates z-y-x euler rotation angle from direction cosine matrix
 """
-function dcm2euler(dcm::Matrix)::Vector
+function dcm2euler(dcm::Matrix)::SVector{3, <:Real}
     checkdcm(dcm)
 
-    euler = [
+    euler = SVector{3}([
         atan(dcm[2,3], dcm[3,3]),
         atan(-dcm[1,3], sqrt(dcm[2,3]^2 + dcm[3,3]^2)),
         atan(dcm[1,2], dcm[1,1])
-    ]
+    ])
 
     return euler
 end
