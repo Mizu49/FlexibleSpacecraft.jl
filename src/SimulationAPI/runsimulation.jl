@@ -66,10 +66,10 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
         if loopCounter != datanum - 1
 
             # Update angular velocity
-            simdata.angularvelocity[loopCounter+2] = calc_angular_velocity(model, time[loopCounter + 1], simdata.angularvelocity[loopCounter+1], simconfig.samplingtime, simdata.bodyframe[loopCounter+1], disturbance)
+            simdata.angularvelocity[loopCounter+2] = update_angularvelocity(model, time[loopCounter + 1], simdata.angularvelocity[loopCounter+1], simconfig.samplingtime, simdata.bodyframe[loopCounter+1], disturbance)
 
             # Update quaternion
-            simdata.quaternion[loopCounter+2] = calc_quaternion(simdata.angularvelocity[loopCounter+1], simdata.quaternion[loopCounter+1], simconfig.samplingtime)
+            simdata.quaternion[loopCounter+2] = update_quaternion(simdata.angularvelocity[loopCounter+1], simdata.quaternion[loopCounter+1], simconfig.samplingtime)
 
         end
 
