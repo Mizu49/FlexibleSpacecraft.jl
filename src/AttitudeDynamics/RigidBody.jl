@@ -15,7 +15,7 @@ module RigidBody
 using StaticArrays
 using ..Frames
 
-export update_angularvelocity
+export RigidBodyModel, update_angularvelocity
 
 """
     struct RigidBodyModel
@@ -24,7 +24,17 @@ Struct of rigid body spacecraft model
 """
 struct RigidBodyModel
     # Inertia Matrix
-    inertia::Matrix
+    inertia::SMatrix{3, 3, <:Real}
+
+    RigidBodyModel(inertia::Union{Matrix{<:Real}, SMatrix{3, 3, <:Real}}) = begin
+
+        if size(inertia) != (3, 3)
+            throw(DimensionMismatch("dimension of `inertia` is invalid, it should be 3x3."))
+        end
+
+        inertiamat = SMatrix{3, 3}(inertia)
+        return new(inertiamat)
+    end
 end
 
 # Equation of dynamics
