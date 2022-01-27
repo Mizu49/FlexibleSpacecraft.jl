@@ -15,6 +15,12 @@ struct Frame
     z::SVector{3, Real}
 end
 
+"""
+    Base.:-(a::Frame, b::Frame)::Frame
+
+Subtraction operator for struct `Frame`.
+"""
+Base.:-(a::Frame, b::Frame)::Frame = Frame(a.x - b.x, a.y - b.y, a.z - b.z)
 
 """
     initframes(datanum, initial_coordinate::Frame)
