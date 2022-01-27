@@ -1,11 +1,10 @@
 """
     module RigidBody
 
-module that consists variables and functions needed for the simulation of rigid body spacecraft attitude dynamics
+module that consists variables and functions needed for the simulation of rigid body spacecraft attitude dynamics. Internal module for `FlexibleSpacecraft.jl`
 
 # Usage
 ```
-# Include module `RigidBody.jl`
 include("RigidBody.jl")
 using .RigidBody
 
@@ -20,7 +19,11 @@ export RigidBodyModel, update_angularvelocity
 """
     struct RigidBodyModel
 
-Struct of rigid body spacecraft model
+Data container of rigid body spacecraft model. Used to specify and configure the parameter settings for simulation and control model in `FlexibleSpacecraft.jl`
+
+## Fields of struct `RigidBodyModel`
+
+* `inertia::SMatrix{3, 3, <:Real}`: Inertia matrix of spacecraft platform
 """
 struct RigidBodyModel
     # Inertia Matrix
