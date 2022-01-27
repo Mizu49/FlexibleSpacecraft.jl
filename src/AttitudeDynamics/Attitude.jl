@@ -62,7 +62,7 @@ calculate quaternion from direction cosine matrix (DCM) `dcm`
 """
 function dcm2quaternion(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})::SVector{4, Real}
 
-    checkdcm(dcm)
+    _checkdcm(dcm)
 
     q = [
         sqrt(1 + dcm[1,1] - dcm[2,2] - dcm[3,3])/2,
@@ -138,12 +138,12 @@ function quaternion2dcm(q::Union{Vector{<:Real}, SVector{4, <:Real}})::SMatrix{3
 end
 
 """
-    dcm2euler(dcm::Matrix)::Vector
+    dcm2euler(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})::SVector{3, <:Real}
 
 calculates z-y-x euler rotation angle from direction cosine matrix
 """
-function dcm2euler(dcm::Matrix)::SVector{3, <:Real}
-    checkdcm(dcm)
+function dcm2euler(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})::SVector{3, <:Real}
+    _checkdcm(dcm)
 
     euler = SVector{3}([
         atan(dcm[2,3], dcm[3,3]),
@@ -154,7 +154,7 @@ function dcm2euler(dcm::Matrix)::SVector{3, <:Real}
     return euler
 end
 
-function checkdcm(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})
+function _checkdcm(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})
     if size(dcm) != (3, 3)
         throw(ArgumentError("`dcm` should be `3x3` matrix"))
     end
