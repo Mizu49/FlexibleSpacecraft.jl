@@ -225,7 +225,7 @@ Calculates transformation matrix from OrbitalPlaneFrame to Radial Along Track fr
 """
 function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
-    C1 = u -> begin
+    C3 = u -> begin
         [cos(u) sin(u) 0
         -sin(u) cos(u) 0
         0 0 1]
@@ -234,8 +234,7 @@ function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_v
     # current angle of spacecraft relative to ascending axis of orbital plane frame
     current_position = deg2rad(elements.true_anomaly) + angular_velocity * time
 
-    return C1(current_position)
-
+    return C3(current_position)
 end
 
 """
