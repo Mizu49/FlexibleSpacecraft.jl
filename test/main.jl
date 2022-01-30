@@ -15,7 +15,7 @@ simulation_time = 1000
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
 # define a orbit info
-orbitinfo = initorbitinfo("./test/orbit.yml", ECI_frame)
+orbitinfo = initorbitinfo("./test/orbit2.yml", ECI_frame)
 
 # Set disturbance torque
 distconfig = DisturbanceConfig(gravitygradient = true)
