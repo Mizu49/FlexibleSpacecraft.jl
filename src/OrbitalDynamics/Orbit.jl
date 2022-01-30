@@ -8,6 +8,9 @@ module Orbit
 using ..Frames
 using ..TimeLine
 using StructArrays
+using StaticArrays
+
+export C_RAT2LVLH
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -265,5 +268,7 @@ function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, tim
 
     return C_RAT * orbitframe
 end
+
+const C_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
 
 end

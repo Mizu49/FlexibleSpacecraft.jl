@@ -49,7 +49,7 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
         C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
 
         # calculates transformation matrix from orbital plane frame to radial along frame
-        C_ECI2LVLH = [0 1 0; 0 0 -1; 1 0 0] * C_ECI2RAT
+        C_ECI2LVLH = C_RAT2LVLH * C_ECI2RAT
         orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * RefFrame
         # Update spacecraft Radial Along Track (RAT) frame
         RATframe[loopCounter+1] = Orbit.update_radial_along_track(orbitinfo.planeframe, orbitinfo.orbitalelement, time[loopCounter+1], orbitdata.angularvelocity[loopCounter+1])
@@ -60,7 +60,7 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
         simdata.bodyframe[loopCounter+1] = C_ECI2Body * RefFrame
 
         C_LVLH2Body = C_ECI2Body * transpose(C_ECI2LVLH)
-        simdata.rollpitchyawframe[loopCounter+1] = [0 1 0; 0 0 -1; 1 0 0] * C_LVLH2Body * RefFrame
+        simdata.rollpitchyawframe[loopCounter+1] = C_RAT2LVLH * C_LVLH2Body * RefFrame
         simdata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
