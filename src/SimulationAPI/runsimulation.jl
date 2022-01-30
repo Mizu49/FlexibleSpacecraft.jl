@@ -33,6 +33,8 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
     # Initialize data array
     simdata = initsimulationdata(datanum, initvalue)
 
+    C_ECI2OrbitPlane = Orbit.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
+
     # initialize orbit state data array
     orbitdata = Orbit.initorbitdata(datanum, orbitinfo.planeframe)
     RATframe = initframes(datanum, orbitinfo.planeframe)
@@ -44,10 +46,11 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
         orbitdata.angularposition[loopCounter+1] = orbitdata.angularvelocity[loopCounter+1] * time[loopCounter+1]
 
         # update transformation matrix from orbit plane frame to radial along tract frame
-        C_RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[loopCounter+1], time[loopCounter+1])
+        C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[loopCounter+1], time[loopCounter+1])
+        C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
 
         # calculates transformation matrix from orbital plane frame to radial along frame
-        C_ECI2LVLH = Orbit.OrbitalPlaneFrame2LVLH(C_RAT)
+        C_ECI2LVLH = [0 1 0; 0 0 -1; 1 0 0] * C_ECI2RAT
         orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * ECI_frame
         # Update spacecraft Radial Along Track (RAT) frame
         RATframe[loopCounter+1] = Orbit.update_radial_along_track(orbitinfo.planeframe, orbitinfo.orbitalelement, time[loopCounter+1], orbitdata.angularvelocity[loopCounter+1])
@@ -56,11 +59,14 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(simdata.quaternion[loopCounter+1])
         simdata.bodyframe[loopCounter+1] = C_ECI2Body * ECI_frame
-        simdata.rollpitchyaw[loopCounter+1] = C_ECI2LVLH * simdata.bodyframe[loopCounter+1]
+
+        C_LVLH2Body = C_ECI2Body * transpose(C_ECI2LVLH)
+        simdata.rollpitchyawframe[loopCounter+1] = [0 1 0; 0 0 -1; 1 0 0] * C_LVLH2Body * ECI_frame
+        simdata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
         # disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
-        disturbance = transpose(C_ECI2Body) * [0, 0, 0.5]
+        disturbance = transpose(C_ECI2Body) * [0, 0, 0]
 
         # Time evolution of the system
         if loopCounter != datanum - 1
