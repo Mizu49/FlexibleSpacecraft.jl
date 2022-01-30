@@ -29,7 +29,7 @@ initvalue = TimeLine.InitData(
 
 # run simulation
 println("Begin simulation!")
-@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, simdata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
 @test Evaluation.quaternion_constraint(simdata.quaternion)

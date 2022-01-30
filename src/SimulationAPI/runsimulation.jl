@@ -1,11 +1,10 @@
 """
-    runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+    runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
 ## Arguments
 * `model`: Dynamics model of the system
-* `ECI_frame::Frame`: ECI frame of the system
 * `initvalue::InitData`: Inital value of the simulation physical states
 * `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
 * `simconfig::SimulationConfig`: Simulation configuration ParameterSetting
@@ -20,10 +19,10 @@ Return is tuple of `(time, simdata, orbitdata)`
 
 ## Usage
 ```
-(time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
+(time, simdata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 ```
 """
-function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
 
@@ -51,17 +50,17 @@ function runsimulation(model, ECI_frame::Frame, initvalue::TimeLine.InitData, or
 
         # calculates transformation matrix from orbital plane frame to radial along frame
         C_ECI2LVLH = [0 1 0; 0 0 -1; 1 0 0] * C_ECI2RAT
-        orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * ECI_frame
+        orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * RefFrame
         # Update spacecraft Radial Along Track (RAT) frame
         RATframe[loopCounter+1] = Orbit.update_radial_along_track(orbitinfo.planeframe, orbitinfo.orbitalelement, time[loopCounter+1], orbitdata.angularvelocity[loopCounter+1])
 
 
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(simdata.quaternion[loopCounter+1])
-        simdata.bodyframe[loopCounter+1] = C_ECI2Body * ECI_frame
+        simdata.bodyframe[loopCounter+1] = C_ECI2Body * RefFrame
 
         C_LVLH2Body = C_ECI2Body * transpose(C_ECI2LVLH)
-        simdata.rollpitchyawframe[loopCounter+1] = [0 1 0; 0 0 -1; 1 0 0] * C_LVLH2Body * ECI_frame
+        simdata.rollpitchyawframe[loopCounter+1] = [0 1 0; 0 0 -1; 1 0 0] * C_LVLH2Body * RefFrame
         simdata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
