@@ -10,7 +10,7 @@ using ..TimeLine
 using StructArrays
 using StaticArrays
 
-export C_RAT2LVLH
+export T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -269,6 +269,29 @@ function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, tim
     return C_RAT * orbitframe
 end
 
-const C_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
+"""
+    T_RAT2LVLH
+
+Transformation matrix from radial along track frame to LVLH frame
+
+## Dynamics
+
+LVLH frame is defined with the replacement of the coordinate of the radial-along-track frame
+"""
+const T_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
+
+"""
+    T_LVLHref2rollpitchyaw
+
+Transformation matrix from LVLH reference frame to roll-pitch-yaw frame. This transformation matrix converts the reference frame from `UnitFrame` to `LVLHref`.
+"""
+const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
+
+"""
+    LVLHref
+
+Reference unit frame for the LVLH frame
+"""
+const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 
 end
