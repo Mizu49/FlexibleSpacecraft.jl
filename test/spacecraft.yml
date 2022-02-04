@@ -5,7 +5,7 @@ dynamicsmodel: Rigid body
 
 platform:
     inertia: [
-        45000, 0, 0,
-        0, 1200, 0,
+        50000, 0, 0,
+        0, 50000, 0,
         0, 0, 50000
         ]
