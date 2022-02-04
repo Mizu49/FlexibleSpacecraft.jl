@@ -18,7 +18,7 @@ model = setdynamicsmodel("./test/spacecraft.yml",)
 orbitinfo = initorbitinfo("./test/orbit2.yml", ECI_frame)
 
 # Set disturbance torque
-distconfig = DisturbanceConfig(gravitygradient = true)
+distconfig = DisturbanceConfig(constanttorque = [0.05, 0.0, 0])
 
 # Initialize data array
 initvalue = TimeLine.InitData(

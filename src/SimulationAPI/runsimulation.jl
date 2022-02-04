@@ -64,8 +64,7 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
         simdata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
-        # disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
-        disturbance = transpose(C_ECI2Body) * [0, 0, 0]
+        disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
 
         # Time evolution of the system
         if loopCounter != datanum - 1
