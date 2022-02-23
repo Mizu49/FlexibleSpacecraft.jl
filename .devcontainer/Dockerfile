@@ -28,3 +28,5 @@ RUN julia -e 'import Pkg; Pkg.add("Documenter")'
 
 # Install `LiveServer.jl` to serve the documentation locally
 RUN julia -e 'import Pkg; Pkg.add("LiveServer")'
+
+ENV PATH="/root/.julia/bin:$PATH"
