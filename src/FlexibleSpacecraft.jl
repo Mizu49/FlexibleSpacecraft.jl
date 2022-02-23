@@ -37,4 +37,6 @@ include("SimulationAPI/ParameterSetting.jl")
 include("SimulationAPI/runsimulation.jl")
 export runsimulation
 
+include("CLI/CLI.jl")
+
 end # module
