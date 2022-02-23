@@ -3,7 +3,6 @@
 
 using Comonicon
 using Pkg
-using Printf
 
 """
 Run simulation with FlexibleSpacecraft.jl according to given configuration files.
