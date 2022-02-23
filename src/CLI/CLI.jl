@@ -2,7 +2,8 @@
 #   This file should be included at the last of `FlexibleSpacecraft.jl`.
 
 using Comonicon
-
+using Pkg
+using Printf
 
 """
 Run simulation with FlexibleSpacecraft.jl according to given configuration files.
@@ -21,7 +22,7 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
 
 - `--no-gravitygradient`: Disable gravitational torques in the simulation.
 """
-@main function evalspacecraft(
+@cast function run(
     config_model::String,
     config_orbid::String,
     time_simulation::Float64;
@@ -48,3 +49,23 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
         simconfig,
     )
 end
+
+"""
+Update and re-build FlexibleSpacecraft.
+"""
+@cast function update()
+    Pkg.update("FlexibleSpacecraft")
+    Pkg.build("FlexibleSpacecraft")
+end
+
+"""
+Clear FlexibleSpacecraft.
+"""
+@cast function clear()
+    Pkg.rm("FlexibleSpacecraft")
+end
+
+"""
+CLI tool for FlexibleSpacecraft.
+"""
+@main
