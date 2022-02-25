@@ -45,6 +45,6 @@ display(fig2)
 fig3 = PlotRecipe.framegif(time, LVLHref, simdata.rollpitchyawframe, Tgif = 20, FPS = 8)
 display(fig3)
 
-# Plot of the animation of LVLH frame
-# fig4 = PlotRecipe.framegif(time, ECI_frame, orbitdata.LVLH,  Tgif = 20, FPS = 8)
-# display(fig4)
+# Plot of the euler angle
+fig4 = PlotRecipe.eulerangles(time, simdata.eulerangle)
+display(fig4)

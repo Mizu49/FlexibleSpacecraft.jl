@@ -6,7 +6,7 @@ using Plots
 import ...TimeLine
 using StaticArrays
 
-export angularvelocities, quaternions
+export angularvelocities, eulerangles, quaternions
 
 """
     function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
@@ -21,6 +21,24 @@ function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArr
     plt = plot!(plt, time, angularvelocity, 1, timerange = timerange, ylabelname = "Angular velocity (rad/s)");
     plt = plot!(plt, time, angularvelocity, 2, timerange = timerange, ylabelname = "Angular velocity (rad/s)");
     plt = plot!(plt, time, angularvelocity, 3, timerange = timerange, ylabelname = "Angular velocity (rad/s)");
+
+    return plt
+end
+
+"""
+    eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+
+Plots time history of euler angles
+
+"""
+function eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+
+    plotlyjs()
+
+    plt = plot();
+    plt = plot!(plt, time, eulerangle, 1, timerange = timerange, ylabelname = "Euler angle (rad)");
+    plt = plot!(plt, time, eulerangle, 2, timerange = timerange, ylabelname = "Euler angle (rad)");
+    plt = plot!(plt, time, eulerangle, 3, timerange = timerange, ylabelname = "Euler angle (rad)");
 
     return plt
 end
