@@ -5,8 +5,9 @@ using YAML
 using ..Frames
 using ..Orbit
 using ..RigidBody
+using ..TimeLine
 
-export SimulationConfig, initorbitinfo, setdynamicsmodel, initsimulation
+export SimulationConfig, initorbitinfo, setdynamicsmodel, setsimconfig, setinitvalue
 
 
 """
@@ -71,20 +72,36 @@ function setdynamicsmodel(filepath::String)
 end
 
 """
-    initsimulation(simulationtime::Real, samplingtime::Real)
+    setsimconfig(simulationtime::Real, samplingtime::Real)
 
 initialize the simulation configurations
 
 ## Return value
+
 * `simconfig::SimulationConfig`
-* `ECI_frame::Frame`
 """
-function initsimulation(simulationtime::Real, samplingtime::Real)
+function setsimconfig(simulationtime::Real, samplingtime::Real)
 
     # set configurations for simulation
     simconfig = SimulationConfig(simulationtime, samplingtime)
 
     return simconfig
+end
+
+"""
+    setinitvalue
+
+Define the inital value for simulation
+"""
+function setinitvalue()
+
+    initvalue = InitData(
+        [0, 0, 0, 1],
+        [0, 0, 0],
+        ECI_frame
+    )
+
+    return initvalue
 end
 
 end

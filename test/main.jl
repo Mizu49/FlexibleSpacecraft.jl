@@ -8,9 +8,6 @@ Tsampling = 1e-2
 # Time length of simulation (second)
 simulation_time = 1000
 
-# Initialize the simulation configurations
-simconfig = initsimulation(simulation_time, Tsampling)
-
 # Set the dynamics model
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
@@ -20,12 +17,11 @@ orbitinfo = initorbitinfo("./test/orbit2.yml", ECI_frame)
 # Set disturbance torque
 distconfig = DisturbanceConfig(constanttorque = [0.05, 0.0, 0])
 
-# Initialize data array
-initvalue = TimeLine.InitData(
-    [0, 0, 0, 1],
-    [0, 0, 0],
-    ECI_frame
-)
+# Initialize the simulation configuration
+simconfig = setsimconfig(simulation_time, Tsampling)
+
+# Define initial values for simulation
+initvalue = setinitvalue()
 
 # run simulation
 println("Begin simulation!")
