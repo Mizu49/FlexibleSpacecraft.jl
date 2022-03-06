@@ -15,10 +15,10 @@ simulation_time = 1000
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
 # define a orbit info
-orbitinfo = initorbitinfo("./test/orbit.yml", ECI_frame)
+orbitinfo = initorbitinfo("./test/orbit2.yml", ECI_frame)
 
 # Set disturbance torque
-distconfig = DisturbanceConfig(gravitygradient = true)
+distconfig = DisturbanceConfig(constanttorque = [0.05, 0.0, 0])
 
 # Initialize data array
 initvalue = TimeLine.InitData(
@@ -29,7 +29,7 @@ initvalue = TimeLine.InitData(
 
 # run simulation
 println("Begin simulation!")
-@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, simdata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
 @test Evaluation.quaternion_constraint(simdata.quaternion)
@@ -42,9 +42,9 @@ fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.framegif(time, ECI_frame, simdata.bodyframe, Tgif = 20, FPS = 8)
+fig3 = PlotRecipe.framegif(time, LVLHref, simdata.rollpitchyawframe, Tgif = 20, FPS = 8)
 display(fig3)
 
-# Plot of the animation of LVLH frame
-# fig4 = PlotRecipe.frame_gif(time, simconfig.samplingtime, ECI_frame, orbitdata.LVLH, Tgif = 60, FPS = 8)
-# display(fig4)
+# Plot of the euler angle
+fig4 = PlotRecipe.eulerangles(time, simdata.eulerangle)
+display(fig4)

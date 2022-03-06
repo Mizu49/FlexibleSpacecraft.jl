@@ -13,11 +13,11 @@ using ..Frames
 export InitData, initsimulationdata, timeindex
 
 """
-    function initangularvelocity(simdata_num, initital_value::Vector)
+    function _initangularvelocity(simdata_num, initital_value::Vector)
 
 Initialize array that contains time response of angular velocity
 """
-function initangularvelocity(datanum, initialvelocity::SVector{3, <:Real})
+function _initangularvelocity(datanum, initialvelocity::SVector{3, <:Real})
 
     angularvelocitydata = [SVector(0.0, 0.0, 0.0) for _ in 1:datanum]
     angularvelocitydata[1] = initialvelocity
@@ -27,11 +27,11 @@ end
 
 
 """
-    function initquaterniondata(simdata_num, initial_value::Vector[4])
+    function _initquaternion(simdata_num, initial_value::Vector[4])
 
 initialize array that contains time response of quaternion
 """
-function initquaterniondata(datanum, initialvalue::SVector{4, <:Real})
+function _initquaternion(datanum, initialvalue::SVector{4, <:Real})
 
     quaterniondata = [SVector(0.0, 0.0, 0.0, 0.0) for _ in 1:datanum]
     quaterniondata[1] = initialvalue
@@ -58,7 +58,7 @@ function Base.getindex(v::Vector{<:SVector}, r::Int, datarow::Int)
 end
 
 """
-    struct InitiData
+    struct InitData
 
 Struct that consists of the initial state value of the time-variant physical amounts in simulation
 """
@@ -79,9 +79,11 @@ Initialize the data container for the attitude dynamics
 function initsimulationdata(datanum::Int, initialdata::InitData)
 
     return StructArray(
-        quaternion = initquaterniondata(datanum, initialdata.quaternion),
-        angularvelocity = initangularvelocity(datanum, initialdata.angularvelocity),
-        bodyframe = initframes(datanum, initialdata.bodyframe)
+        quaternion = _initquaternion(datanum, initialdata.quaternion),
+        angularvelocity = _initangularvelocity(datanum, initialdata.angularvelocity),
+        bodyframe = initframes(datanum, initialdata.bodyframe),
+        rollpitchyawframe = initframes(datanum, initialdata.bodyframe),
+        eulerangle = [SVector{3}(0.0, 0.0, 0.0) for _ in 1:datanum]
     )
 end
 
