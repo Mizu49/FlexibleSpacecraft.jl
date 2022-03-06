@@ -16,7 +16,7 @@ distconfig = DisturbanceConfig(constanttorque = [0.05, 0.0, 0])
 simconfig = setsimconfig("./test/simconfig.yml")
 
 # Define initial values for simulation
-initvalue = setinitvalue()
+initvalue = setinitvalue("./test/initvalue.yml")
 
 # run simulation
 println("Begin simulation!")

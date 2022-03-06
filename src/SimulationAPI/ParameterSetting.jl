@@ -104,11 +104,17 @@ end
 
 Define the inital value for simulation
 """
-function setinitvalue()
+function setinitvalue(filepath::String)
+
+    lawread = YAML.load_file(filepath)
+
+    if lawread["property"] != "initvalue"
+        throw(AssertionError("`propety` does not match with `initvalue`"))
+    end
 
     initvalue = InitData(
-        [0, 0, 0, 1],
-        [0, 0, 0],
+        lawread["quaternion"],
+        lawread["angular velocity"],
         ECI_frame
     )
 
