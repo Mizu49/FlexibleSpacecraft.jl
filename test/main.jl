@@ -9,7 +9,7 @@ Tsampling = 1e-2
 simulation_time = 1000
 
 # Initialize the simulation configurations
-(simconfig, ECI_frame) = initsimulation(simulation_time, Tsampling)
+simconfig = initsimulation(simulation_time, Tsampling)
 
 # Set the dynamics model
 model = setdynamicsmodel("./test/spacecraft.yml",)

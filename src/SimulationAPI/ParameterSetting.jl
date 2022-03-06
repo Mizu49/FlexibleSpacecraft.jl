@@ -84,14 +84,7 @@ function initsimulation(simulationtime::Real, samplingtime::Real)
     # set configurations for simulation
     simconfig = SimulationConfig(simulationtime, samplingtime)
 
-    # Earth-Centered frame (constant value)
-    ECI_frame = Frame(
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    )
-
-    return (simconfig, ECI_frame)
+    return simconfig
 end
 
 end
