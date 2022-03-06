@@ -80,9 +80,20 @@ initialize the simulation configurations
 
 * `simconfig::SimulationConfig`
 """
-function setsimconfig(simulationtime::Real, samplingtime::Real)
+function setsimconfig(filepath::String)
 
-    # set configurations for simulation
+    # Read configuration file
+    lawread = YAML.load_file(filepath)
+
+    if lawread["property"] != "simconfig"
+        throw(AssertionError("`property` does not match with `simconfig`"))
+    end
+
+    # set values
+    samplingtime = lawread["sampling time"]
+    simulationtime = lawread["simulation time"]
+
+    # struct for configurations of simulation
     simconfig = SimulationConfig(simulationtime, samplingtime)
 
     return simconfig

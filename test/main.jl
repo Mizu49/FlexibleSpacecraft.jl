@@ -3,11 +3,6 @@ using Test
 include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
-# Sampling period of simulation (second)
-Tsampling = 1e-2
-# Time length of simulation (second)
-simulation_time = 1000
-
 # Set the dynamics model
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
@@ -18,7 +13,7 @@ orbitinfo = initorbitinfo("./test/orbit2.yml", ECI_frame)
 distconfig = DisturbanceConfig(constanttorque = [0.05, 0.0, 0])
 
 # Initialize the simulation configuration
-simconfig = setsimconfig(simulation_time, Tsampling)
+simconfig = setsimconfig("./test/simconfig.yml")
 
 # Define initial values for simulation
 initvalue = setinitvalue()
