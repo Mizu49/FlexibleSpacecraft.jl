@@ -115,15 +115,17 @@ function setsimconfig(filepath::String)::SimulationConfig
 end
 
 """
-    setinitvalue
+    setinitvalue(filepath::String)::InitData
 
 Define the inital value for simulation
 """
-function setinitvalue(filepath::String)
+function setinitvalue(filepath::String)::InitData
 
     lawread = YAML.load_file(filepath)
 
-    if lawread["property"] != "initvalue"
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "initvalue"
         throw(AssertionError("`propety` does not match with `initvalue`"))
     end
 
@@ -137,15 +139,17 @@ function setinitvalue(filepath::String)
 end
 
 """
-    setdisturbance(filepath::String)
+    setdisturbance(filepath::String)::DisturbanceConfig
 
 set disturbance configuration from YAML setting file
 """
-function setdisturbance(filepath::String)
+function setdisturbance(filepath::String)::DisturbanceConfig
 
     lawread = YAML.load_file(filepath)
 
-    if lawread["property"] != "distconfig"
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "distconfig"
         throw(AssertionError("`property` deos not match with `distconfig`"))
     end
 
