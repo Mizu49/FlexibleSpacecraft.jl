@@ -6,8 +6,9 @@ using ..Frames
 using ..Orbit
 using ..RigidBody
 using ..TimeLine
+using ..Disturbance
 
-export SimulationConfig, initorbitinfo, setdynamicsmodel, setsimconfig, setinitvalue
+export SimulationConfig, setorbit, setdynamicsmodel, setsimconfig, setinitvalue, setdisturbance
 
 
 """
@@ -25,27 +26,33 @@ struct SimulationConfig
 end
 
 """
-    initorbitinfo(filepath::String, ECI::Frame)
+    setorbit(filepath::String, ECI::Frame)::OrbitInfo
 
 Load the YAML file configuration and construct the appropriate model for the simulation
 """
-function initorbitinfo(filepath::String, ECI::Frame)
+function setorbit(filepath::String, ECI::Frame)::OrbitInfo
 
     # Read YAML file
-    lawdata = YAML.load_file(filepath)
+    lawread = YAML.load_file(filepath)
+
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "orbit"
+        throw(AssertionError("`property` does not match with `orbit`"))
+    end
 
     # Define Orbit.OrbitInfo
-    orbitinfo = Orbit.OrbitInfo(
-        Orbit.OrbitalElements(
-            lawdata["OrbitalElements"]["right ascention"],
-            lawdata["OrbitalElements"]["inclination"],
-            lawdata["OrbitalElements"]["semimajor axis"],
-            lawdata["OrbitalElements"]["eccentricity"],
-            lawdata["OrbitalElements"]["argument of perigee"],
-            lawdata["OrbitalElements"]["true anomaly at epoch"]
+    orbitinfo = OrbitInfo(
+        OrbitalElements(
+            lawread["OrbitalElements"]["right ascention"],
+            lawread["OrbitalElements"]["inclination"],
+            lawread["OrbitalElements"]["semimajor axis"],
+            lawread["OrbitalElements"]["eccentricity"],
+            lawread["OrbitalElements"]["argument of perigee"],
+            lawread["OrbitalElements"]["true anomaly at epoch"]
         ),
         ECI,
-        lawdata["OrbitInfo"]
+        lawread["OrbitInfo"]
     )
 
     return orbitinfo
@@ -60,6 +67,12 @@ function setdynamicsmodel(filepath::String)
 
     lawdata = YAML.load_file(filepath)
 
+    if haskey(lawdata, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawdata["property"] != "dynamics"
+        throw(AssertionError("`property` does not match with `dynamics`"))
+    end
+
     if lawdata["dynamicsmodel"] == "Rigid body"
         inertia = reshape(lawdata["platform"]["inertia"], (3,3))
 
@@ -72,7 +85,7 @@ function setdynamicsmodel(filepath::String)
 end
 
 """
-    setsimconfig(simulationtime::Real, samplingtime::Real)
+    setsimconfig(filepath::String)::SimulationConfig
 
 initialize the simulation configurations
 
@@ -80,12 +93,14 @@ initialize the simulation configurations
 
 * `simconfig::SimulationConfig`
 """
-function setsimconfig(filepath::String)
+function setsimconfig(filepath::String)::SimulationConfig
 
     # Read configuration file
     lawread = YAML.load_file(filepath)
 
-    if lawread["property"] != "simconfig"
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "simconfig"
         throw(AssertionError("`property` does not match with `simconfig`"))
     end
 
@@ -100,15 +115,17 @@ function setsimconfig(filepath::String)
 end
 
 """
-    setinitvalue
+    setinitvalue(filepath::String)::InitData
 
 Define the inital value for simulation
 """
-function setinitvalue(filepath::String)
+function setinitvalue(filepath::String)::InitData
 
     lawread = YAML.load_file(filepath)
 
-    if lawread["property"] != "initvalue"
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "initvalue"
         throw(AssertionError("`propety` does not match with `initvalue`"))
     end
 
@@ -119,6 +136,29 @@ function setinitvalue(filepath::String)
     )
 
     return initvalue
+end
+
+"""
+    setdisturbance(filepath::String)::DisturbanceConfig
+
+set disturbance configuration from YAML setting file
+"""
+function setdisturbance(filepath::String)::DisturbanceConfig
+
+    lawread = YAML.load_file(filepath)
+
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "distconfig"
+        throw(AssertionError("`property` deos not match with `distconfig`"))
+    end
+
+    distconfig = DisturbanceConfig(
+        constanttorque = lawread["constant torque"],
+        gravitygradient = lawread["gravitational torque"]
+    )
+
+    return distconfig
 end
 
 end
