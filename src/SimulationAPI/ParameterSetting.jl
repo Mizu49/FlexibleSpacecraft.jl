@@ -5,8 +5,9 @@ using YAML
 using ..Frames
 using ..Orbit
 using ..RigidBody
+using ..TimeLine
 
-export SimulationConfig, initorbitinfo, setdynamicsmodel, initsimulation
+export SimulationConfig, initorbitinfo, setdynamicsmodel, setsimconfig, setinitvalue
 
 
 """
@@ -71,27 +72,53 @@ function setdynamicsmodel(filepath::String)
 end
 
 """
-    initsimulation(simulationtime::Real, samplingtime::Real)
+    setsimconfig(simulationtime::Real, samplingtime::Real)
 
 initialize the simulation configurations
 
 ## Return value
-* `simconfig::SimulationConfig`
-* `ECI_frame::Frame`
-"""
-function initsimulation(simulationtime::Real, samplingtime::Real)
 
-    # set configurations for simulation
+* `simconfig::SimulationConfig`
+"""
+function setsimconfig(filepath::String)
+
+    # Read configuration file
+    lawread = YAML.load_file(filepath)
+
+    if lawread["property"] != "simconfig"
+        throw(AssertionError("`property` does not match with `simconfig`"))
+    end
+
+    # set values
+    samplingtime = lawread["sampling time"]
+    simulationtime = lawread["simulation time"]
+
+    # struct for configurations of simulation
     simconfig = SimulationConfig(simulationtime, samplingtime)
 
-    # Earth-Centered frame (constant value)
-    ECI_frame = Frame(
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
+    return simconfig
+end
+
+"""
+    setinitvalue
+
+Define the inital value for simulation
+"""
+function setinitvalue(filepath::String)
+
+    lawread = YAML.load_file(filepath)
+
+    if lawread["property"] != "initvalue"
+        throw(AssertionError("`propety` does not match with `initvalue`"))
+    end
+
+    initvalue = InitData(
+        lawread["quaternion"],
+        lawread["angular velocity"],
+        ECI_frame
     )
 
-    return (simconfig, ECI_frame)
+    return initvalue
 end
 
 end
