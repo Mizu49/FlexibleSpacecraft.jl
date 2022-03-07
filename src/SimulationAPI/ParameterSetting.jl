@@ -67,6 +67,12 @@ function setdynamicsmodel(filepath::String)
 
     lawdata = YAML.load_file(filepath)
 
+    if haskey(lawdata, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawdata["property"] != "dynamics"
+        throw(AssertionError("`property` does not match with `dynamics`"))
+    end
+
     if lawdata["dynamicsmodel"] == "Rigid body"
         inertia = reshape(lawdata["platform"]["inertia"], (3,3))
 
