@@ -6,8 +6,9 @@ using ..Frames
 using ..Orbit
 using ..RigidBody
 using ..TimeLine
+using ..Disturbance
 
-export SimulationConfig, initorbitinfo, setdynamicsmodel, setsimconfig, setinitvalue
+export SimulationConfig, initorbitinfo, setdynamicsmodel, setsimconfig, setinitvalue, setdisturbance
 
 
 """
@@ -119,6 +120,27 @@ function setinitvalue(filepath::String)
     )
 
     return initvalue
+end
+
+"""
+    setdisturbance(filepath::String)
+
+set disturbance configuration from YAML setting file
+"""
+function setdisturbance(filepath::String)
+
+    lawread = YAML.load_file(filepath)
+
+    if lawread["property"] != "distconfig"
+        throw(AssertionError("`property` deos not match with `distconfig`"))
+    end
+
+    distconfig = DisturbanceConfig(
+        constanttorque = lawread["constant torque"],
+        gravitygradient = lawread["gravitational torque"]
+    )
+
+    return distconfig
 end
 
 end
