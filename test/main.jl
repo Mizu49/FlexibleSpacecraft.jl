@@ -7,7 +7,7 @@ using .FlexibleSpacecraft
 model = setdynamicsmodel("./test/spacecraft.yml",)
 
 # define a orbit info
-orbitinfo = initorbitinfo("./test/orbit2.yml", ECI_frame)
+orbitinfo = setorbit("./test/orbit2.yml", ECI_frame)
 
 # Set disturbance torque
 distconfig = setdisturbance("./test/disturbance.yml")

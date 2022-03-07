@@ -10,7 +10,7 @@ using ..TimeLine
 using StructArrays
 using StaticArrays
 
-export T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
+export OrbitInfo, OrbitalElements, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)

@@ -1,3 +1,5 @@
+property: orbit
+
 OrbitInfo: Test orbit parameters # Text information about this parameter setting
 
 OrbitalElements:
