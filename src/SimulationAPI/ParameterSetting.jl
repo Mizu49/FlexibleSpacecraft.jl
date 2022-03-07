@@ -85,7 +85,7 @@ function setdynamicsmodel(filepath::String)
 end
 
 """
-    setsimconfig(simulationtime::Real, samplingtime::Real)
+    setsimconfig(filepath::String)::SimulationConfig
 
 initialize the simulation configurations
 
@@ -93,12 +93,14 @@ initialize the simulation configurations
 
 * `simconfig::SimulationConfig`
 """
-function setsimconfig(filepath::String)
+function setsimconfig(filepath::String)::SimulationConfig
 
     # Read configuration file
     lawread = YAML.load_file(filepath)
 
-    if lawread["property"] != "simconfig"
+    if haskey(lawread, "property") == false
+        throw(ErrorException("`property` is not specified in YAML configuration file"))
+    elseif lawread["property"] != "simconfig"
         throw(AssertionError("`property` does not match with `simconfig`"))
     end
 
