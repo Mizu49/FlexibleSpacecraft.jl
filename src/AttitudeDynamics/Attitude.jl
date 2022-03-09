@@ -7,7 +7,7 @@ module Attitude
 
 using StaticArrays
 
-export update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler
+export update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
 
 # Update the quaternion vector (time evolution)
 """
@@ -152,6 +152,32 @@ function dcm2euler(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})::SVector{3
     ])
 
     return euler
+end
+
+"""
+    quaternion2euler(quaternion::Union{Vector{<:Real}, SVector{4, <:Real}})::SVector{3, <:Real}
+
+calculates z-y-x euler rotation angle from quaternion
+"""
+function quaternion2euler(quaternion::Union{Vector{<:Real}, SVector{4, <:Real}})::SVector{3, <:Real}
+
+    # use DCM for the calculation
+    euler = dcm2euler(quaternion2dcm(quaternion))
+
+    return euler
+end
+
+"""
+    euler2quaternion(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SVector{4, Real}
+
+calculates quaternion from z-y-x euler rotation angle
+"""
+function euler2quaternion(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SVector{4, Real}
+
+    # use DCM for the calculation
+    quaternion = dcm2quaternion(euler2dcm(euler))
+
+    return quaternion
 end
 
 function _checkdcm(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})
