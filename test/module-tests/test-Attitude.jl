@@ -3,9 +3,13 @@ using Test
 include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
-dcm_nominal = diagm([1, 1, 1])
-quaternion_nominal = [0, 0, 0, 1]
-euler_nominal = [0, 0, 0]
+dcm_nominal = [
+    0.5003982 -0.1465874  0.8532959
+    0.4999999  0.8535293 -0.1465874
+    -0.7068252  0.4999999  0.5003982
+]
+quaternion_nominal =  [0.1913574, 0.4617177, 0.1913574, 0.8447375]
+euler_nominal = [0.785, 0.785, 0.785] # 45 degree rotation in roll-pitch-yaw axis
 
 @testset "Attitude representation conversions" begin
 
