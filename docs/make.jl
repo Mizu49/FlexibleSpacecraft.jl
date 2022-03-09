@@ -16,7 +16,9 @@ makedocs(
             "Frames" => "dynamics/frames.md",
         ],
         "Libraries" => [
-            "Data containers" => "DataContainers/docs-DataContainers.md"
+            "API" => "docs-module/docs-SimulationAPI.md",
+            "Data containers" => "docs-module/docs-DataContainers.md",
+            "Plot recipe" => "docs-module/docs-PlotRecipe.md"
         ]
     ]
 )
