@@ -187,4 +187,37 @@ function _checkdcm(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})
     return
 end
 
+"""
+    Base.Math.deg2rad(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real})
+
+Convert rotation angle vector in degrees to radians
+"""
+function Base.Math.deg2rad(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real}})
+
+    newangle = SVector{3}([
+        deg2rad(rotationangle[1])
+        deg2rad(rotationangle[2])
+        deg2rad(rotationangle[3])
+    ])
+
+    return newangle
+end
+
+"""
+    Base.Math.rad2deg(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real})
+
+Convert rotation angle vector in radians to degrees
+"""
+function Base.Math.rad2deg(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real}})
+
+    newangle = SVector{3}([
+        rad2deg(rotationangle[1])
+        rad2deg(rotationangle[2])
+        rad2deg(rotationangle[3])
+    ])
+
+    return newangle
+end
+
+
 end
