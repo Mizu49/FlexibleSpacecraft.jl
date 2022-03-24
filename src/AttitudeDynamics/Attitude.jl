@@ -7,7 +7,7 @@ module Attitude
 
 using StaticArrays
 
-export update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler
+export update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
 
 # Update the quaternion vector (time evolution)
 """
@@ -130,7 +130,7 @@ function quaternion2dcm(q::Union{Vector{<:Real}, SVector{4, <:Real}})::SMatrix{3
 
     dcm = SMatrix{3, 3}([
         (q2[1] - q2[2] - q2[3] + q2[4]) 2*(q[1]*q[2] + q[3]*q[4]) 2*(q[1]*q[3] - q[2]*q[4]);
-        2*(q[1]*q[3] - q[3]*q[4]) (q2[2] - q2[1] - q2[3] + q2[4]) 2*(q[2]*q[3] + q[1]*q[4]);
+        2*(q[1]*q[2] - q[3]*q[4]) (q2[2] - q2[1] - q2[3] + q2[4]) 2*(q[2]*q[3] + q[1]*q[4]);
         2*(q[1]*q[3] + q[2]*q[4]) 2*(q[2]*q[3] - q[1]*q[4]) q2[3] - q2[1] - q2[2] + q2[4]
     ])
 
@@ -154,11 +154,70 @@ function dcm2euler(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})::SVector{3
     return euler
 end
 
+"""
+    quaternion2euler(quaternion::Union{Vector{<:Real}, SVector{4, <:Real}})::SVector{3, <:Real}
+
+calculates z-y-x euler rotation angle from quaternion
+"""
+function quaternion2euler(quaternion::Union{Vector{<:Real}, SVector{4, <:Real}})::SVector{3, <:Real}
+
+    # use DCM for the calculation
+    euler = dcm2euler(quaternion2dcm(quaternion))
+
+    return euler
+end
+
+"""
+    euler2quaternion(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SVector{4, Real}
+
+calculates quaternion from z-y-x euler rotation angle
+"""
+function euler2quaternion(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SVector{4, Real}
+
+    # use DCM for the calculation
+    quaternion = dcm2quaternion(euler2dcm(euler))
+
+    return quaternion
+end
+
 function _checkdcm(dcm::Union{SMatrix{3, 3, <:Real}, Matrix{<:Real}})
     if size(dcm) != (3, 3)
         throw(ArgumentError("`dcm` should be `3x3` matrix"))
     end
     return
 end
+
+"""
+    Base.Math.deg2rad(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real})
+
+Convert rotation angle vector in degrees to radians
+"""
+function Base.Math.deg2rad(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real}})
+
+    newangle = SVector{3}([
+        deg2rad(rotationangle[1])
+        deg2rad(rotationangle[2])
+        deg2rad(rotationangle[3])
+    ])
+
+    return newangle
+end
+
+"""
+    Base.Math.rad2deg(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real})
+
+Convert rotation angle vector in radians to degrees
+"""
+function Base.Math.rad2deg(rotationangle::Union{SVector{3, <:Real}, Vector{<:Real}})
+
+    newangle = SVector{3}([
+        rad2deg(rotationangle[1])
+        rad2deg(rotationangle[2])
+        rad2deg(rotationangle[3])
+    ])
+
+    return newangle
+end
+
 
 end
