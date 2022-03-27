@@ -39,3 +39,5 @@ display(fig3)
 # Plot of the euler angle
 fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
 display(fig4)
+
+outputdata = SimData(time, attitudedata, orbitdata)

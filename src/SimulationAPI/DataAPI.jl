@@ -17,8 +17,8 @@ struct of the data frames from simulation results
 """
 struct SimData
 
-    attitude
-    orbit
+    attitude::DataFrame
+    orbit::DataFrame
 
     # Constructor
     SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector) = begin
@@ -49,10 +49,15 @@ function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVect
     return attitude
 end
 
-function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::StructVector)
+function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::StructVector)::DataFrame
 
-    return Nothing
+    orbit = DataFrame(
+        "time" => time,
+        "angular position" => orbitdata.angularposition,
+        "angular velocity" => orbitdata.angularvelocity
+    )
 
+    return orbit
 end
 
 end
