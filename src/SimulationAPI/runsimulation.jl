@@ -11,15 +11,15 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 
 ## Return
 
-Return is tuple of `(time, simdata, orbitdata)`
+Return is tuple of `(time, attitudedata, orbitdata)`
 
 * `time`: 1-D array of the time
-* `simdata`: StructArray of trajectory of the physical amount states of the spacecraft system
+* `attitudedata`: StructArray of trajectory of the physical amount states of the spacecraft system
 * `orbitdata`: StructArray of the orbit state trajectory
 
 ## Usage
 ```
-(time, simdata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+(time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 ```
 """
 function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
@@ -30,7 +30,7 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
     datanum = floor(Int, simconfig.simulationtime/simconfig.samplingtime) + 1;
 
     # Initialize data array
-    simdata = initsimulationdata(datanum, initvalue)
+    attitudedata = initsimulationdata(datanum, initvalue)
 
     C_ECI2OrbitPlane = Orbit.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
 
@@ -56,12 +56,12 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
 
 
         # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(simdata.quaternion[loopCounter+1])
-        simdata.bodyframe[loopCounter+1] = C_ECI2Body * RefFrame
+        C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[loopCounter+1])
+        attitudedata.bodyframe[loopCounter+1] = C_ECI2Body * RefFrame
 
         C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
-        simdata.rollpitchyawframe[loopCounter+1] = C_LVLH2Body * RefFrame
-        simdata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
+        attitudedata.rollpitchyawframe[loopCounter+1] = C_LVLH2Body * RefFrame
+        attitudedata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
         disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
@@ -70,14 +70,14 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
         if loopCounter != datanum - 1
 
             # Update angular velocity
-            simdata.angularvelocity[loopCounter+2] = update_angularvelocity(model, time[loopCounter + 1], simdata.angularvelocity[loopCounter+1], simconfig.samplingtime, simdata.bodyframe[loopCounter+1], disturbance)
+            attitudedata.angularvelocity[loopCounter+2] = update_angularvelocity(model, time[loopCounter + 1], attitudedata.angularvelocity[loopCounter+1], simconfig.samplingtime, attitudedata.bodyframe[loopCounter+1], disturbance)
 
             # Update quaternion
-            simdata.quaternion[loopCounter+2] = update_quaternion(simdata.angularvelocity[loopCounter+1], simdata.quaternion[loopCounter+1], simconfig.samplingtime)
+            attitudedata.quaternion[loopCounter+2] = update_quaternion(attitudedata.angularvelocity[loopCounter+1], attitudedata.quaternion[loopCounter+1], simconfig.samplingtime)
 
         end
 
     end
 
-    return (time, simdata, orbitdata)
+    return (time, attitudedata, orbitdata)
 end
