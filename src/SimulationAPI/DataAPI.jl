@@ -5,7 +5,7 @@ API submodule for handling the `DataFrame` of the simulation results
 """
 module DataAPI
 
-using DataFrames, CSV, StaticArrays, StructArrays
+using DataFrames, CSV, StaticArrays, StructArrays, Dates
 using ..Frames, ..TimeLine
 
 export SimData
@@ -17,6 +17,7 @@ struct of the table data frame from simulation results
 
 # Fields
 
+* `timestamp::String`: time stamp of when the data is generated
 * `attitude::DataFrame`: tabobject for the attitude data
 * `orbit`: `DataFrame` object for the orbit data
 
@@ -31,17 +32,40 @@ use the following constructor:
 """
 struct SimData
 
+    timestamp::String
     attitude::DataFrame
     orbit::DataFrame
 
     # Constructor
     SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector) = begin
 
+        # Get current time stamp in UTC
+        timestamp = Dates.format(Dates.now(), "yyyy-mm-dd--HH-MM-SS")
+
+        # create `DataFrame` objects
         attitude = _convert_attitude(time, attitudedata)
         orbit = _convert_orbit(time, orbitdata)
 
-        new(attitude, orbit)
+        new(timestamp, attitude, orbit)
     end
+end
+
+"""
+    Base.write(path::AbstractString, simdata::SimData)
+
+save simulation result `simdata::SimData` as output files in CSV format
+"""
+function Base.write(path::AbstractString, simdata::SimData)
+
+    print("generating output file...")
+
+    mkdir("$path/$(simdata.timestamp)")
+
+    CSV.write("$path/$(simdata.timestamp)/$(simdata.timestamp)--attitude.csv", simdata.attitude)
+    CSV.write("$path/$(simdata.timestamp)/$(simdata.timestamp)--orbit.csv", simdata.orbit)
+
+    print("done!")
+    return nothing
 end
 
 """
