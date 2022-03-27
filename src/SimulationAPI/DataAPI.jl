@@ -13,7 +13,21 @@ export SimData
 """
     SimData
 
-struct of the data frames from simulation results
+struct of the table data frame from simulation results
+
+# Fields
+
+* `attitude::DataFrame`: tabobject for the attitude data
+* `orbit`: `DataFrame` object for the orbit data
+
+# Usage
+
+use the following constructor:
+`SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector)`
+
+* `time`: time data
+* `attitudedata`: `StructVector` of the attitude data
+* `orbitdata`: `StructVector` of the orbit data
 """
 struct SimData
 
@@ -30,6 +44,11 @@ struct SimData
     end
 end
 
+"""
+    _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVector)::DataFrame
+
+convert internal data container for attitude to the data frame object by mapping each fields
+"""
 function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVector)::DataFrame
 
     attitude = DataFrame(
@@ -49,6 +68,11 @@ function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVect
     return attitude
 end
 
+"""
+    _convert_orbit(time::AbstractRange{<:Real}, orbitdata::StructVector)::DataFrame
+
+convert internal data container for orbital motion to the data frame object by mapping each fields
+"""
 function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::StructVector)::DataFrame
 
     orbit = DataFrame(
