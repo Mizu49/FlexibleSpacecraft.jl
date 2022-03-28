@@ -2,6 +2,31 @@
     DataAPI
 
 API submodule for handling the `DataFrame` of the simulation results
+
+# Usage
+
+Before using any features provided by `DataAPI`, you need to run simulation with `runsimulation()`
+
+```julia
+(time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+```
+
+Then you get your simulation result as `StructVector`. You might want to convert that to the tabular data structure as `DataFrame` object. The following code will generate `DataFrame` object:
+
+```julia
+outputdata = SimData(time, attitudedata, orbitdata)
+```
+
+You can export your simulation result as CSV files. Simply run the following code specifying the directory in which you may want to save:
+
+```julia
+write("output", outputdata)
+```
+
+Here, we specify `output` as an output root directory. The system generates a new directory with time stamp of when the simulation result was generated. The time stamp is with format `yyyy-mm-dd--hh-mm-ss`. Separated files are generated.
+
+* `yyyy-mm-dd--hh-mm-ss--attitude.csv`: CSV file for the attitude tabular data. (time / quaternion / angular velocity / euler angles (roll, pitch, yaw))
+* `yyyy-mm-dd--hh-mm-ss--orbit.csv`: CSV file for the orbita tabular data (time, angular position, angular velocity)
 """
 module DataAPI
 
