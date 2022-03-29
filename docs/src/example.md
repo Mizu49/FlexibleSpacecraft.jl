@@ -65,27 +65,27 @@ Then you are all set! Just run `runsimulation()`. This function is the high-leve
 ```julia
 # run simulation
 println("Begin simulation!")
-@time (time, simdata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, attitudedata, orbitdata) = runsimulation(model, ECI_frame, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 ```
 
 Congrats! You have successfully run your simulation! Let's process your simulation data. We have covered that for you. Run `quaternion_constraint()` to check your result is physically making sense.
 
 ```julia
-@test Evaluation.quaternion_constraint(simdata.quaternion)
+@test Evaluation.quaternion_constraint(attitudedata.quaternion)
 ```
 
 Our visualization feature helps you to process your simulation effectively.
 
 ```julia
-fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity)
-# fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity, timerange = (0, 10))
+fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
+# fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity, timerange = (0, 10))
 display(fig1)
 
-fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
+fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.framegif(time, ECI_frame, simdata.bodyframe, Tgif = 20, FPS = 8)
+fig3 = PlotRecipe.framegif(time, ECI_frame, attitudedata.bodyframe, Tgif = 20, FPS = 8)
 display(fig3)
 ```

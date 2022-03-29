@@ -20,22 +20,25 @@ initvalue = setinitvalue("./test/initvalue.yml")
 
 # run simulation
 println("Begin simulation!")
-@time (time, simdata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
-@test Evaluation.quaternion_constraint(simdata.quaternion)
+@test Evaluation.quaternion_constraint(attitudedata.quaternion)
 
-fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity)
-# fig1 = PlotRecipe.angularvelocities(time, simdata.angularvelocity, timerange = (0, 10))
+fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
+# fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity, timerange = (0, 10))
 display(fig1)
 
-fig2 = PlotRecipe.quaternions(time, simdata.quaternion)
+fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.framegif(time, LVLHref, simdata.rollpitchyawframe, Tgif = 20, FPS = 8)
+fig3 = PlotRecipe.framegif(time, LVLHref, attitudedata.rollpitchyawframe, Tgif = 20, FPS = 8)
 display(fig3)
 
 # Plot of the euler angle
-fig4 = PlotRecipe.eulerangles(time, simdata.eulerangle)
+fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
 display(fig4)
+
+outputdata = SimData(time, attitudedata, orbitdata)
+write("output", outputdata)
