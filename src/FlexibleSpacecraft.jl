@@ -37,6 +37,9 @@ include("PlotRecipes/PlotRecipe.jl")
 include("SimulationAPI/ParameterSetting.jl")
 @reexport using .ParameterSetting
 
+include("Structures/Structures.jl")
+@reexport using .Structures
+
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI
 
