@@ -15,25 +15,20 @@ Representation of the structural system in physical coordinate
 ## Fields
 
 * `dim::Integer`: dimension of the structural system
-* `mass_matrix::AbstractMatrix`: mass matrix in physical coordinate
-* `damping_matrix::AbstractMatrix`: damping matrix in physical coordinate
-* `stiffness_matrix::AbstractMatrix`: stiffness matrix in physical coordinate
+* `mass_matrix::Matrix`: mass matrix in physical coordinate
+* `damping_matrix::Matrix`: damping matrix in physical coordinate
+* `stiffness_matrix::Matrix`: stiffness matrix in physical coordinate
 """
 struct PhysicalSystem
     dim::Integer
 
-    mass_matrix::AbstractMatrix
-    damping_matrix::AbstractMatrix
-    stiffness_matrix::AbstractMatrix
+    mass_matrix::Matrix
+    damping_matrix::Matrix
+    stiffness_matrix::Matrix
 
     # Constructor
-    PhysicalSystem(mass_matrix::AbstractMatrix, damping_matrix::AbstractMatrix, stiffness_matrix::AbstractMatrix) = begin
+    PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix) = begin
         dim = size(mass_matrix, 1)
-        # convert to SMatrix for fast computation
-        mass_matrix = SMatrix{dim, dim}(mass_matrix)
-        damping_matrix = SMatrix{dim, dim}(damping_matrix)
-        stiffness_matrix = SMatrix{dim, dim}(stiffness_matrix)
-
         new(dim, mass_matrix, damping_matrix, stiffness_matrix)
     end
 end
@@ -46,25 +41,20 @@ Representation of the structural system in modal coordinate
 ## Fields
 
 * `dim::Integer`: dimension of the structural system
-* `PHI::AbstractMatrix`: modal transformation matrix
-* `OMEGA::AbstractMatrix`: modal angular velocity matrix
-* `XI::AbstractMatrix`: modal damping matrix
+* `PHI::Matrix`: modal transformation matrix
+* `OMEGA::Matrix`: modal angular velocity matrix
+* `XI::Matrix`: modal damping matrix
 """
 struct ModalSystem
     dim::Integer
 
-    PHI::AbstractMatrix
-    OMEGA::AbstractMatrix
-    XI::AbstractMatrix
+    PHI::Matrix
+    OMEGA::Matrix
+    XI::Matrix
 
     # Constructor
-    ModalSystem(PHI::AbstractMatrix, OMEGA::AbstractMatrix, XI::AbstractMatrix) = begin
+    ModalSystem(PHI::Matrix, OMEGA::Matrix, XI::Matrix) = begin
         dim = size(PHI, 1)
-        # convert to SMatrix for fast computation
-        PHI = SMatrix{dim, dim}(PHI)
-        OMEGA = SMatrix{dim, dim}(OMEGA)
-        XI = SMatrix{dim, dim}(XI)
-
         new(dim, PHI, OMEGA, XI)
     end
 end
