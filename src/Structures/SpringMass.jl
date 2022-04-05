@@ -44,4 +44,53 @@ struct StateSpace
     end
 end
 
+"""
+    _mode_decomposition(𝐌::AbstractMatrix, 𝐂::AbstractMatrix, 𝐊::AbstractMatrix)::Tuple
+
+return tuple of the modal transformation matrix and modal damping matrix for the mass-normalized modal coordinates
+"""
+function _mode_decomposition(𝐌::AbstractMatrix, 𝐂::AbstractMatrix, 𝐊::AbstractMatrix)::Tuple
+
+    # dimension of the structure
+    dim = size(𝐌, 1)
+
+    # Eigen value decomposition
+    # https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.eigvecs
+    𝚽 = eigvecs(𝐌, 𝐊)
+
+    # mass normalization
+    mr = zeros(dim)
+    for ind = 1:dim
+        mr[ind] = 𝚽[:, ind]' * 𝐌 * 𝚽[:, ind]
+        𝚽[:, ind] = sqrt(1/mr[ind])*𝚽[:, ind]
+    end
+
+    # natural angular frequency matrix
+    # 𝛀 is defined to be diagonal matrix of natural angular frequency, not its squared value
+    𝛀 = sqrt(transpose(𝚽) * 𝐊 * 𝚽)
+
+    # calculate modal stiffness matrix Kr = omega^2
+    kr = zeros(dim)
+    for idx = 1:dim
+        kr[idx] = 𝛀[idx, idx]^2
+    end
+
+    # modal damping ratio
+    cr = zeros(dim)
+    xi_r = zeros(dim)
+    for idx = 1:dim
+        cr[idx] = transpose(𝚽[:, idx]) * 𝐂 * 𝚽[:, idx]
+        xi_r[idx] = cr[idx]/(2 * sqrt(mr[idx] * kr[idx]))
+    end
+    𝚵 = diagm(xi_r)
+
+    # sort matrix with natural angular frequency
+    sortidx = sortperm(diag(𝛀))
+    𝛀 = 𝛀[sortidx, sortidx]
+    𝚽 = 𝚽[:, sortidx]
+    𝚵 = 𝚵[sortidx, sortidx]
+
+    return (𝚽, 𝛀, 𝚵)
+end
+
 end
