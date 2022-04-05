@@ -96,17 +96,17 @@ struct StateSpace
     end
 end
 
-function _mode_decomposition(physicalsystem::PhysicalSystem)::ModalSystem
+function physical2modal(physicalsystem::PhysicalSystem)::ModalSystem
 
-    return _mode_decomposition(physicalsystem.mass_matrix, physicalsystem.damping_matrix, physicalsystem.stiffness_matrix)
+    return physical2modal(physicalsystem.mass_matrix, physicalsystem.damping_matrix, physicalsystem.stiffness_matrix)
 end
 
 """
-    _mode_decomposition(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)::ModalSystem
+    physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)::ModalSystem
 
 return tuple of the modal transformation matrix and modal damping matrix for the mass-normalized modal coordinates
 """
-function _mode_decomposition(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)::ModalSystem
+function physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)::ModalSystem
 
     # dimension of the structure
     dim = size(mass_matrix, 1)
