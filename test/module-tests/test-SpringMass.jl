@@ -29,5 +29,7 @@ C_Kb = 50
     0 1 0
 ]
 
+system = SpringMass.PhysicalSystem(𝐌, 𝐂, 𝐊)
+
 modalmat = SpringMass._mode_decomposition(𝐌, 𝐂, 𝐊)
 println(modalmat)
