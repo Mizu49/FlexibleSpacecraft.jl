@@ -5,11 +5,11 @@ using .FlexibleSpacecraft
 
 paramfile = "../solararray.yml"
 
-𝐌 = [
+M = [
     100 0
     0 50
 ]
-𝐊 = [
+K = [
     6e4 -1e4
     -1e4 1e4
 ]
@@ -17,19 +17,20 @@ C_Ma = 0
 C_Mb = 0
 C_Ka = 250
 C_Kb = 50
-𝐂 = [
+C = [
     C_Ma+C_Kb+C_Kb -C_Kb
     -C_Kb C_Mb+C_Kb
 ]
 
-𝐄ctrl = []
-𝐄dist = []
-𝐄coupling = [
+Ectrl = []
+Edist = []
+Ecoupling = [
     1 0 0
     0 1 0
 ]
 
-system = SpringMass.PhysicalSystem(𝐌, 𝐂, 𝐊)
+# Create representation of the system in physical coordinate
+physicalsystem = SpringMass.PhysicalSystem(M, C, K)
 
-modalmat = SpringMass._mode_decomposition(𝐌, 𝐂, 𝐊)
-println(modalmat)
+modalsystem = SpringMass._mode_decomposition(physicalsystem)
+println(modalsystem)
