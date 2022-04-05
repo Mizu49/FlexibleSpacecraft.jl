@@ -5,7 +5,37 @@ submodule that contains all features for spring-mass modeling of flexible append
 """
 module SpringMass
 
-using LinearAlgebra
+using LinearAlgebra, StaticArrays
+
+"""
+    PhysicalSystem
+
+Representation of the structural system in physical coordinate
+
+## Fields
+
+`𝐌::AbstractMatrix`: mass matrix in physical coordinate
+`𝐂::AbstractMatrix`: damping matrix in physical coordinate
+`𝐊::AbstractMatrix`: stiffness matrix in physical coordinate
+"""
+struct PhysicalSystem
+    dim::Integer
+
+    𝐌::AbstractMatrix
+    𝐂::AbstractMatrix
+    𝐊::AbstractMatrix
+
+    # Constructor
+    PhysicalSystem(𝐌::AbstractMatrix, 𝐂::AbstractMatrix, 𝐊::AbstractMatrix) = begin
+        dim = size(𝐌, 1)
+        # convert to SMatrix for fast computation
+        𝐌 = SMatrix{dim, dim}(𝐌)
+        𝐂 = SMatrix{dim, dim}(𝐂)
+        𝐊 = SMatrix{dim, dim}(𝐊)
+
+        new(dim, 𝐌, 𝐂, 𝐊)
+    end
+end
 
 struct SpringMassModel
     # degrees of freedom (DOF) of the structure
