@@ -14,9 +14,10 @@ Representation of the structural system in physical coordinate
 
 ## Fields
 
-`mass_matrix::AbstractMatrix`: mass matrix in physical coordinate
-`damping_matrix::AbstractMatrix`: damping matrix in physical coordinate
-`stiffness_matrix::AbstractMatrix`: stiffness matrix in physical coordinate
+* `dim::Integer`: dimension of the structural system
+* `mass_matrix::AbstractMatrix`: mass matrix in physical coordinate
+* `damping_matrix::AbstractMatrix`: damping matrix in physical coordinate
+* `stiffness_matrix::AbstractMatrix`: stiffness matrix in physical coordinate
 """
 struct PhysicalSystem
     dim::Integer
@@ -34,6 +35,37 @@ struct PhysicalSystem
         stiffness_matrix = SMatrix{dim, dim}(stiffness_matrix)
 
         new(dim, mass_matrix, damping_matrix, stiffness_matrix)
+    end
+end
+
+"""
+    ModalSystem
+
+Representation of the structural system in modal coordinate
+
+## Fields
+
+* `dim::Integer`: dimension of the structural system
+* `PHI::AbstractMatrix`: modal transformation matrix
+* `OMEGA::AbstractMatrix`: modal angular velocity matrix
+* `XI::AbstractMatrix`: modal damping matrix
+"""
+struct ModalSystem
+    dim::Integer
+
+    PHI::AbstractMatrix
+    OMEGA::AbstractMatrix
+    XI::AbstractMatrix
+
+    # Constructor
+    ModalSystem(PHI::AbstractMatrix, OMEGA::AbstractMatrix, XI::AbstractMatrix) = begin
+        dim = size(PHI, 1)
+        # convert to SMatrix for fast computation
+        PHI = SMatrix{dim, dim}(PHI)
+        OMEGA = SMatrix{dim, dim}(OMEGA)
+        XI = SMatrix{dim, dim}(XI)
+
+        new(dim, PHI, OMEGA, XI)
     end
 end
 
