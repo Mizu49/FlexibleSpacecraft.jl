@@ -62,20 +62,17 @@ struct ModalSystem
 end
 
 struct SpringMassModel
-    # degrees of freedom (DOF) of the structure
-    DOF
     # dimension of the control input vector
-    dimcontrolinput
+    dimcontrolinput::Integer
     # dimension of the disturbance input vector
-    dimdistinput
-    # transformation matrix. i.e. x = 𝚽𝛈, modal coordinates are mass-normalized
-    PHI
-    # modal damping matrix
-    XI
+    dimdistinput::Integer
+    # Representation of the structural system
+    system::ModalSystem
+
     # coupling matrix with the attitude dynamics (time derivative of the angular velocity vector)
-    D
+    D::AbstractMatrix
     # disturbance input matrix
-    F
+    F::AbstractMatrix
 end
 
 struct StateSpace
