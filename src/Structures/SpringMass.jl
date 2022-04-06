@@ -7,6 +7,8 @@ module SpringMass
 
 using LinearAlgebra, StaticArrays
 
+export physical2modal
+
 """
     PhysicalSystem
 
