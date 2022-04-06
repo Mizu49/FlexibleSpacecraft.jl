@@ -32,5 +32,5 @@ Ecoupling = [
 # Create representation of the system in physical coordinate
 physicalsystem = SpringMass.PhysicalSystem(M, C, K)
 
-modalsystem = SpringMass._mode_decomposition(physicalsystem)
+modalsystem = physical2modal(physicalsystem)
 println(modalsystem)
