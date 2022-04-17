@@ -7,7 +7,7 @@ module SpringMass
 
 using LinearAlgebra, StaticArrays
 
-export physical2modal
+export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate
 
 """
     PhysicalSystem
@@ -133,9 +133,9 @@ State space representation of the structural system. This representation is main
 * `dimctrlinput::Int`: dimension of the control input vector
 * `dimdistinput::Int`: dimension of the disturbance input vector
 * `sysA::SMatrix`: system matrix
-* `sysB::SMatrix`: control input matrix
+* `sysB::StaticArray`: coefficient matrix or vector for control input
 * `sysEcplg::SMatrix`: input matrix for the coupling part (subscript represents coupling)
-* `sysEdist::SMatrix`: input matrix for the disturbance input (subscript represents disturbance)
+* `sysEdist::StaticArray`: coefficient matrix or vector for the disturbance input (subscript represents disturbance)
 
 # Constructor
 
@@ -152,9 +152,9 @@ struct StateSpace
     dimdistinput::Int
 
     sysA::SMatrix # system matrix
-    sysB::SMatrix # control input matrix
+    sysB::StaticArray # control input matrix
     sysEcplg::SMatrix # input matrix for the coupling part (subscript represents coupling)
-    sysEdist::SMatrix # input matrix for the disturbance input (subscript represents disturbance)
+    sysEdist::StaticArray # input matrix for the disturbance input (subscript represents disturbance)
 
     StateSpace(model::SpringMassModel) = begin
 
@@ -166,12 +166,28 @@ struct StateSpace
             zeros(model.DOF, model.DOF) I
             -model.system.OMEGA^2 -2 * model.system.XI * model.system.PHI
         ])
-        sysB = SMatrix{dimstate, dimctrlinput}([
-            zeros(model.DOF, model.dimcontrolinput)
-            model.Fctrl
-        ])
+
+        # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
+        if dimctrlinput == 1
+            sysB = SVector{dimstate}([
+                zeros(model.DOF)
+                model.Fctrl
+            ])
+        else
+            sysB = SMatrix{dimstate, dimctrlinput}([
+                zeros(model.DOF, model.dimcontrolinput)
+                model.Fctrl
+            ])
+        end
+
         sysEcplg = SMatrix{dimstate, 3}([zeros(model.DOF, 3); model.D])
-        sysEdist = SMatrix{dimstate, dimdistinput}([zeros(model.DOF, model.dimdistinput); model.Fdist])
+
+        # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
+        if dimdistinput == 1
+            sysEdist = SVector{dimstate}([zeros(model.DOF); model.Fdist])
+        else
+            sysEdist = SMatrix{dimstate, dimdistinput}([zeros(model.DOF, model.dimdistinput); model.Fdist])
+        end
 
         new(dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist)
     end
@@ -229,6 +245,30 @@ function physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_m
     XI = XI[sortidx, sortidx]
 
     return ModalSystem(PHI, OMEGA, XI)
+end
+
+"""
+    updatestate(model::StateSpace, Tsampling::Real, currenttime::Real, currentstate::AbstractVector, angularvelocity::AbstractVector, controlinput::Union{AbstractVector, Real}, distinput::Union{AbstractVector, Real})::AbstractVector
+
+Calculates time evolution of the structural system with Runge-Kutta method
+"""
+function updatestate(model::StateSpace, Tsampling::Real, currenttime::Real, currentstate::AbstractVector, angularvelocity::AbstractVector, controlinput::Union{AbstractVector, Real}, distinput::Union{AbstractVector, Real})::AbstractVector
+
+    # Runge-Kutta method
+    k1 = _calc_differential(model, currenttime              , currentstate                   , angularvelocity, controlinput, distinput)
+    k2 = _calc_differential(model, currenttime + Tsampling/2, currentstate + Tsampling/2 * k1, angularvelocity, controlinput, distinput)
+    k3 = _calc_differential(model, currenttime + Tsampling/2, currentstate + Tsampling/2 * k2, angularvelocity, controlinput, distinput)
+    k4 = _calc_differential(model, currenttime + Tsampling  , currentstate + Tsampling   * k3, angularvelocity, controlinput, distinput)
+    nextstate = currentstate + Tsampling/6 *(k1 + 2*k2 + 2*k3 + k4)
+
+    return nextstate
+end
+
+function _calc_differential(model::StateSpace, currenttime::Real, currentstate::AbstractVector, angularvelocity::AbstractVector, controlinput::Union{AbstractVector, Real}, distinput::Union{AbstractVector, Real})::AbstractVector
+
+    diff = model.sysA*currentstate + model.sysB*controlinput + model.sysEcplg*angularvelocity + model.sysEdist*distinput
+
+    return diff
 end
 
 end
