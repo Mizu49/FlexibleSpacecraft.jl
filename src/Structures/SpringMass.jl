@@ -122,23 +122,58 @@ struct SpringMassModel
     end
 end
 
+"""
+    StateSpace
+
+State space representation of the structural system. This representation is mainly used for the time evolution of the structural system
+
+# Fields
+
+* `dimstate::Int`: dimension of the state vector
+* `dimctrlinput::Int`: dimension of the control input vector
+* `dimdistinput::Int`: dimension of the disturbance input vector
+* `sysA::SMatrix`: system matrix
+* `sysB::SMatrix`: control input matrix
+* `sysEcplg::SMatrix`: input matrix for the coupling part (subscript represents coupling)
+* `sysEdist::SMatrix`: input matrix for the disturbance input (subscript represents disturbance)
+
+# Constructor
+
+```julia
+StateSpace(model::SpringMassModel)
+```
+
+"""
 struct StateSpace
-    sysA # system matrix
-    sysB # control input matrix
-    sysEc # input matrix for the coupling part (subscript c represents coupling)
-    sysEd # input matrix for the disturbance input (subscript d represents disturbance)
+
+    # dimension of the state and input vectors
+    dimstate::Int
+    dimctrlinput::Int
+    dimdistinput::Int
+
+    sysA::SMatrix # system matrix
+    sysB::SMatrix # control input matrix
+    sysEcplg::SMatrix # input matrix for the coupling part (subscript represents coupling)
+    sysEdist::SMatrix # input matrix for the disturbance input (subscript represents disturbance)
 
     StateSpace(model::SpringMassModel) = begin
-        sysA = [
-            zeros(model.DOF) I
-            -PHI^2 -2*XI*PHI
-        ]
-        sysB = [
+
+        dimstate = 2 * model.DOF
+        dimctrlinput = model.dimcontrolinput
+        dimdistinput = model.dimdistinput
+
+        sysA = SMatrix{dimstate, dimstate}([
+            zeros(model.DOF, model.DOF) I
+            -model.system.OMEGA^2 -2 * model.system.XI * model.system.PHI
+        ])
+        sysB = SMatrix{dimstate, dimctrlinput}([
             zeros(model.DOF, model.dimcontrolinput)
-            model.controlinputmatrix
-        ]
-        sysEc = [zeros(model.DOF, 3); D]
-        sysEd = [zeros(model.DOF, model.dimdistinput); model.F]
+            model.Fctrl
+        ])
+        sysEcplg = SMatrix{dimstate, 3}([zeros(model.DOF, 3); model.D])
+        sysEdist = SMatrix{dimstate, dimdistinput}([zeros(model.DOF, model.dimdistinput); model.Fdist])
+
+        new(dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist)
     end
 end
 
