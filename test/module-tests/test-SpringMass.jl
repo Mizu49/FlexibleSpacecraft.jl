@@ -34,4 +34,6 @@ physicalsystem = SpringMass.PhysicalSystem(M, C, K)
 # Convert representation of the system in modal coordinate
 modalsystem = SpringMass.physical2modal(physicalsystem)
 
-model = SpringMass.SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
+systemmodel = SpringMass.SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
+
+model = SpringMass.StateSpace(systemmodel)
