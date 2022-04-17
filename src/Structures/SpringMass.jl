@@ -61,7 +61,28 @@ struct ModalSystem
     end
 end
 
+"""
+    SpringMassModel
+
+Spring mass representation of the entire system modeling
+
+```math
+\\ddot{\\mathbf{\\eta}} \\eta + 2 \\boldsymbol{\\Xi \\Omega} \\dot{\\mathbf{\\eta}} + \\boldsymbol{\\Omega}^2 \\mathbf{\\eta}
+```
+
+## Members
+
+* `DOF::Integer`: dimension of the displacement vector of the system
+* `dimcontrolinput::Integer`: dimension of the control input vector
+* `dimdistinput::Integer`: dimension of the disturbance input vector
+* `system::ModalSystem`: mass-normalized modal representation of the system
+* `D::AbstractMatrix`: coupling matrix wiht the attitude motion (time derivative of the angular velocity vector)
+* `Fctrl::AbstractArray`: coefficient matrix or vector of the control input vector
+* `Fdist::AbstractArray`: coefficient matrix or vector of the disturbance input vector
+"""
 struct SpringMassModel
+    # degrees of freedom of the system
+    DOF::Integer
     # dimension of the control input vector
     dimcontrolinput::Integer
     # dimension of the disturbance input vector
@@ -71,8 +92,34 @@ struct SpringMassModel
 
     # coupling matrix with the attitude dynamics (time derivative of the angular velocity vector)
     D::AbstractMatrix
+
+    # control input matrix
+    Fctrl::AbstractArray
     # disturbance input matrix
-    F::AbstractMatrix
+    Fdist::AbstractArray
+
+    # Inner constructor for struct `SpringMassModel`
+    SpringMassModel(system::ModalSystem, D::AbstractMatrix, Fctrl::AbstractArray, Fdist::AbstractArray) = begin
+        # get dimension of the system
+        DOF = system.dim
+        dimcontrolinput = size(Fctrl, 2)
+        dimdistinput = size(Fdist, 2)
+
+        new(DOF, dimcontrolinput, dimdistinput, system, D, Fctrl, Fdist)
+    end
+
+    SpringMassModel(system::PhysicalSystem, D::AbstractMatrix, Fctrl::AbstractArray, Fdist::AbstractArray) = begin
+
+        # convert physical system representation into modal system representation
+        system = physical2modal(system)
+
+        # get dimension of the system
+        DOF = system.dim
+        dimcontrolinput = size(Fctrl, 2)
+        dimdistinput = size(Fdist, 2)
+
+        new(DOF, dimcontrolinput, dimdistinput, system, D, Fctrl, Fdist)
+    end
 end
 
 struct StateSpace

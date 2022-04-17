@@ -22,8 +22,8 @@ C = [
     -C_Kb C_Mb+C_Kb
 ]
 
-Ectrl = []
-Edist = []
+Ectrl = zeros(2)
+Edist = zeros(2)
 Ecoupling = [
     1 0 0
     0 1 0
@@ -31,6 +31,7 @@ Ecoupling = [
 
 # Create representation of the system in physical coordinate
 physicalsystem = SpringMass.PhysicalSystem(M, C, K)
+# Convert representation of the system in modal coordinate
+modalsystem = SpringMass.physical2modal(physicalsystem)
 
-modalsystem = physical2modal(physicalsystem)
-println(modalsystem)
+model = SpringMass.SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
