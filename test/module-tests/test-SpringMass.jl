@@ -30,10 +30,10 @@ Ecoupling = [
 ]
 
 # Create representation of the system in physical coordinate
-physicalsystem = SpringMass.PhysicalSystem(M, C, K)
+physicalsystem = PhysicalSystem(M, C, K)
 # Convert representation of the system in modal coordinate
-modalsystem = SpringMass.physical2modal(physicalsystem)
+modalsystem = physical2modal(physicalsystem)
 
-systemmodel = SpringMass.SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
+systemmodel = SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
 
-model = SpringMass.StateSpace(systemmodel)
+model = StateSpace(systemmodel)
