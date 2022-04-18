@@ -2,6 +2,7 @@ using Test
 
 include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
+using Plots
 
 paramfile = "../solararray.yml"
 
@@ -37,3 +38,18 @@ modalsystem = physical2modal(physicalsystem)
 systemmodel = SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
 
 model = StateSpace(systemmodel)
+
+# Test the simulation feature
+Ts = 1e-3
+times = 0:Ts:50
+
+datanum = size(times, 1)
+
+response = [zeros(4) for _ in 1:datanum]
+response[1] = [10e-3, 10e-3, 0, 0]
+
+for cnt = 1:datanum-1
+    response[cnt+1] = updatestate(model, Ts, times[cnt], response[cnt], zeros(3), 0, 0)
+end
+
+plot(times, getindex.(response, 1))
