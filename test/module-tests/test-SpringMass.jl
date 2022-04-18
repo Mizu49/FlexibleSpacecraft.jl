@@ -2,7 +2,7 @@ using Test
 
 include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
-using Plots
+using Plots, StaticArrays
 
 paramfile = "../solararray.yml"
 
@@ -45,11 +45,12 @@ times = 0:Ts:50
 
 datanum = size(times, 1)
 
-response = [zeros(4) for _ in 1:datanum]
-response[1] = [10e-3, 10e-3, 0, 0]
+response = [zeros(SVector{4}) for _ in 1:datanum]
+response[1] = SVector{4}([10e-3, 10e-3, 0, 0])
 
-for cnt = 1:datanum-1
+@time for cnt = 1:datanum-1
     response[cnt+1] = updatestate(model, Ts, times[cnt], response[cnt], zeros(3), 0, 0)
 end
 
-plot(times, getindex.(response, 1))
+@time plot(times, getindex.(response, 1))
+
