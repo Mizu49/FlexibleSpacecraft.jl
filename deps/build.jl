@@ -1,0 +1,2 @@
+import FlexibleSpacecraft
+FlexibleSpacecraft.comonicon_install()
