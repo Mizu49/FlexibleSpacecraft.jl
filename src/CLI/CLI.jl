@@ -9,44 +9,41 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
 
 # Args
 
-- `config_model`: Path to a configuration file for the dynamics model.
-- `config_orbid`: Path to a configuration file defining orbit information.
-- `time_simulation`: Time length of the simulation.
+- `configfilepath_model`: Path to a configuration file for the dynamics model.
+- `configfilepath_orbit`: Path to a configuration file defining orbit information.
+- `configfilepath_disturbance`: Path to the configuration file for the disturbance input
+- `configfilepath_simulation`: Path to the configuration file for the simulation settings
+- `configfilepath_initvalue`: Path to the configuration file for the initial value of the simulation
 
-# Options
-
-- `--period-sampling`: Sampling period of the simulation (seconds).
-
-# Flags
-
-- `--no-gravitygradient`: Disable gravitational torques in the simulation.
 """
 @cast function run(
-    config_model::String,
-    config_orbid::String,
-    time_simulation::Float64;
-    period_sampling::Float64 = 1e-2,
-    no_gravitygradient::Bool = false,
+    configfilepath_model::String,
+    configfilepath_orbit::String,
+    configfilepath_disturbance::String,
+    configfilepath_simulation::String,
+    configfilepath_initvalue::String
 )
-    (simconfig, ECI_frame) = initsimulation(time_simulation, period_sampling)
-    model = setdynamicsmodel(config_model)
-    orbitinfo = initorbitinfo(config_orbid, ECI_frame)
-    distconfig = DisturbanceConfig(gravitygradient = !no_gravitygradient)
 
-    initvalue = TimeLine.InitData(
-        [0, 0, 0, 1],
-        [0, 0, 0],
-        ECI_frame
-    )
+    println("run simulation ...")
 
-    @time (time, simdata, orbitdata) = runsimulation(
-        model,
-        ECI_frame,
-        initvalue,
-        orbitinfo,
-        distconfig,
-        simconfig,
-    )
+    # Set the dynamics model
+    model = setdynamicsmodel(configfilepath_model,)
+
+    # define a orbit info
+    orbitinfo = setorbit(configfilepath_orbit, ECI_frame)
+
+    # Set disturbance torque
+    distconfig = setdisturbance(configfilepath_disturbance)
+
+    # Initialize the simulation configuration
+    simconfig = setsimconfig(configfilepath_simulation)
+
+    # Define initial values for simulation
+    initvalue = setinitvalue(configfilepath_initvalue)
+
+    (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+
+    println("Simulation completed!")
 end
 
 """
