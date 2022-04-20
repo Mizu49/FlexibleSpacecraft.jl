@@ -3,47 +3,45 @@
 
 using Comonicon
 using Pkg
+using YAML
 
 """
 Run simulation with FlexibleSpacecraft.jl according to given configuration files.
 
 # Args
 
-- `configfilepath_model`: Path to a configuration file for the dynamics model.
-- `configfilepath_orbit`: Path to a configuration file defining orbit information.
-- `configfilepath_disturbance`: Path to the configuration file for the disturbance input
-- `configfilepath_simulation`: Path to the configuration file for the simulation settings
-- `configfilepath_initvalue`: Path to the configuration file for the initial value of the simulation
+* `configfilepath::String`: path for the representative configulation file (YAML)
 
 """
-@cast function run(
-    configfilepath_model::String,
-    configfilepath_orbit::String,
-    configfilepath_disturbance::String,
-    configfilepath_simulation::String,
-    configfilepath_initvalue::String
-)
+@cast function run(configfilepath::String)
 
-    println("run simulation ...")
+    print("loading the simulation configulation files...")
+
+    # Read the YAML file to obtain the pathes for the configulation files
+    configfiles = YAML.load_file(configfilepath)
 
     # Set the dynamics model
-    model = setdynamicsmodel(configfilepath_model,)
+    model = setdynamicsmodel(configfiles["configfiles"]["model"],)
 
     # define a orbit info
-    orbitinfo = setorbit(configfilepath_orbit, ECI_frame)
+    orbitinfo = setorbit(configfiles["configfiles"]["orbit"], ECI_frame)
 
     # Set disturbance torque
-    distconfig = setdisturbance(configfilepath_disturbance)
+    distconfig = setdisturbance(configfiles["configfiles"]["disturbance"])
 
     # Initialize the simulation configuration
-    simconfig = setsimconfig(configfilepath_simulation)
+    simconfig = setsimconfig(configfiles["configfiles"]["simconfig"])
 
     # Define initial values for simulation
-    initvalue = setinitvalue(configfilepath_initvalue)
+    initvalue = setinitvalue(configfiles["configfiles"]["initvalue"])
 
+    println("done!")
+
+    # Execute the simulation
+    print("running simulation ...")
     (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+    println("completed!")
 
-    println("Simulation completed!")
 end
 
 """
