@@ -12,8 +12,12 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
 
 * `configfilepath::String`: path for the representative configulation file (YAML)
 
+# Options
+
+* `-s, --save=<bool>`: an option to save the data, false by default
+
 """
-@cast function run(configfilepath::String)
+@cast function run(configfilepath::String; save::Bool = false)
 
     print("loading the simulation configulation files...")
 
@@ -41,6 +45,13 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
     print("running simulation ...")
     (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
     println("completed!")
+
+    if save == true
+        print("saveing data...")
+
+        outputdata = SimData(time, attitudedata, orbitdata)
+        write("../output", outputdata)
+    end
 
 end
 
