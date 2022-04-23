@@ -33,7 +33,37 @@ configfiles:
 
 Save this file as YAML files like `params.yml`. In the following documentation, we will use `params.yml`.
 
-## Basic commands
+## Commands and basic usage
 
-`evalspacecraft` is the topmost basic CLI command for `FlexibleSpacecraft.jl`.
+`evalspacecraft` is the topmost basic CLI command for `FlexibleSpacecraft.jl`. You need to type the subcommand to specify what you want to do with `FlexibleSpacecraft.jl`.
 
+```text
+$ evalspacecraft <command>
+```
+
+Subcommands are listed as follows:
+
+* `update`: update and rebuild the `FlexibleSpacecraft.jl`. Recommended to use this subcommand at the first time you use `FlexibleSpacecraft.jl`
+* `run <configfilepath>`: run simulation based on the given parameter settings and configurations
+* `clear`: remove package `FlexibleSpacecraft.jl`
+
+You can also use the following flags:
+
+* `-h, --help`: show help
+* `-V, --version`: show version information
+
+### Example
+
+```text
+$ evalspacecraft -V
+```
+
+Suppose you have the parameter setting file `params.yml` in your current working directory. You can run simulation with the predefined parameters with following command. 
+
+```text
+$ evalspacecraft run params.yml --save
+```
+
+`--save` is a flag that specifies wheather to save the simulation data or not. False by default.
+
+To test the CLI system, please try the shellscript `/test/main.sh` in the GitHub repository. This will help you to find out how to use our CLI system.
