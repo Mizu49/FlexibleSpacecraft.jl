@@ -8,6 +8,7 @@ makedocs(
     pages = [
         "home" => "index.md",
         "Example" => "example.md",
+        "CLI" => "docs-CLI/index.md",
         "Development" => [
             "Developer's Guideline" => "development/developer's-guideline.md",
             "Environment" => "development/environment.md"
