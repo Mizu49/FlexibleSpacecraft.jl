@@ -10,11 +10,11 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
 
 # Args
 
-* `configfilepath::String`: path for the representative configulation file (YAML)
+* `configfilepath`: path for the representative configulation file (YAML)
 
-# Options
+# Flags
 
-* `-s, --save=<bool>`: an option to save the data, false by default
+* `--save`: an option to save the data, false by default
 
 """
 @cast function run(configfilepath::String; save::Bool = false)
