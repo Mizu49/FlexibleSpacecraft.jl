@@ -12,6 +12,7 @@ makedocs(
         "CLI" => "docs-CLI/index.md",
         "Dynamics" => [
             "Frames" => "dynamics/frames.md",
+            "Rigid body" => "dynamics/rigid-body.md"
         ],
         "Libraries" => [
             "API" => "docs-module/docs-SimulationAPI.md",

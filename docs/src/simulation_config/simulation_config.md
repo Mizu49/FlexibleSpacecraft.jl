@@ -28,7 +28,7 @@ simulation time: 1000
 
 This files addresses the basic configuration for the dynamics model and its parameters of your spacecraft configurations. This parameters are unique based on what type of model you might want to use. For more detailed information on how to define parameter settings for a specific dynamics model, please visit the docs for each model:
 
-* *Docs to be updated*
+* [Parameter settings for rigid body attitude dynamics](@ref)
 * *Docs to be updated*
 * *Docs to be updated*
 

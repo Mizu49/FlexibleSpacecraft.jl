@@ -7,7 +7,7 @@ module that consists variables and functions needed for the simulation of rigid 
 ```
 include("RigidBody.jl")
 using .RigidBody
-
+```
 """
 module RigidBody
 
