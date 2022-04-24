@@ -8,11 +8,8 @@ makedocs(
     pages = [
         "home" => "index.md",
         "Example" => "examples/example.md",
+        "Simulation configuration" => "simulation_config/simulation_config.md",
         "CLI" => "docs-CLI/index.md",
-        "Development" => [
-            "Developer's Guideline" => "development/developer's-guideline.md",
-            "Environment" => "development/environment.md"
-        ],
         "Dynamics" => [
             "Frames" => "dynamics/frames.md",
         ],
@@ -20,6 +17,10 @@ makedocs(
             "API" => "docs-module/docs-SimulationAPI.md",
             "Data containers" => "docs-module/docs-DataContainers.md",
             "Plot recipe" => "docs-module/docs-PlotRecipe.md"
+        ],
+        "Development" => [
+            "Developer's Guideline" => "development/developer's-guideline.md",
+            "Environment" => "development/environment.md"
         ]
     ]
 )
