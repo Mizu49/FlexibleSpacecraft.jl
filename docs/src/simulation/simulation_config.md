@@ -55,7 +55,7 @@ quaternion: [0, 0, 0, 1]
 angular velocity: [0, 0, 0]
 ```
 
-## Wrapper for all of the configuration files.
+## Wrapper for all of the configuration files
 
 The provided CLI feature uses a YAML file that indicates the relative path for all of the above configuration files:
 
