@@ -8,7 +8,10 @@ makedocs(
     pages = [
         "home" => "index.md",
         "Example" => "examples/example.md",
-        "Simulation configuration" => "simulation_config/simulation_config.md",
+        "Simulation" => [
+            "Core" => "simulation/simulation_core.md",
+            "Configuration" => "simulation/simulation_config.md"
+        ],
         "CLI" => "docs-CLI/index.md",
         "Dynamics" => [
             "Frames" => "dynamics/frames.md",
