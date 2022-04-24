@@ -8,7 +8,7 @@ Example script `main.jl` is found in the `/test` directory. Configuration and pa
 
 You need the following files:
 
-* `main.jl`: the main script
+* `main.jl`: the main script for your simulation
 * `orbit.yml`: main configuration for orbital parameters
 * `spacecraft.yml`: parameter settings for spacecraft configuration
 
