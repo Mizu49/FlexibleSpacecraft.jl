@@ -43,6 +43,8 @@ This files addresses the basic configuration for the dynamics model and its para
 
 `orbit.yml` is a parameter setting file for the orbital dynamics. Please visit the docs for orbital dynamics for the detailed setting and preparation for this file.
 
+* [Parameter settings for orbital simulation](@ref)
+
 ## Initial values (`initvalue.yml`)
 
 `initvalue.yml` is a parameter setting file for the initial value for simulation. You need to define the parameter as follows:
