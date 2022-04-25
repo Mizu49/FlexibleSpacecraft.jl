@@ -16,7 +16,8 @@ makedocs(
         "Dynamics" => [
             "Frames" => "dynamics/frames.md",
             "Attitude dynamics" => "dynamics/attitude.md",
-            "Rigid body" => "dynamics/rigid-body.md"
+            "Rigid body" => "dynamics/rigid-body.md",
+            "Orbit" => "dynamics/orbit.md",
         ],
         "Libraries" => [
             "API" => "docs-module/docs-SimulationAPI.md",
