@@ -18,6 +18,7 @@ makedocs(
             "Attitude dynamics" => "dynamics/attitude.md",
             "Rigid body" => "dynamics/rigid-body.md",
             "Orbit" => "dynamics/orbit.md",
+            "Disturbance input" => "dynamics/disturbance.md"
         ],
         "Libraries" => [
             "API" => "docs-module/docs-SimulationAPI.md",
