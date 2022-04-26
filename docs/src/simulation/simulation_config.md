@@ -34,10 +34,7 @@ This files addresses the basic configuration for the dynamics model and its para
 
 ## Disturbance parameters (`disturbance.yml`) 
 
-`disturbance.yml` is a parameter setting files for disturbance input of the spacecraft. Please visit the docs for disturbance input listed below:
-
-* *Docs to be updated*
-* *Docs to be updated*
+`disturbance.yml` is a parameter setting files for disturbance input of the spacecraft. For more information on the configuraton file, visit [Parameter settings for disturbance input](@ref)
 
 ## Orbital parameters (`orbit.yml`)
 

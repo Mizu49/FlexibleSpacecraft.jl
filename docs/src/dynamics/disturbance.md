@@ -7,7 +7,7 @@ Disturbance input for attitude motion is crucial to model how the spacecraft att
 * Constant torque input
 * Gravitational torque input
 
-## Parameter settings
+## Parameter settings for disturbance input
 
 You need an parameter setting YAML file to configure the disturbance input to the spacecraft. The file is presented as follows:
 
