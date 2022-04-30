@@ -1,0 +1,5 @@
+name = "evalspacecraft"
+
+[application]
+incremental=true
+filter_stdlibs=false

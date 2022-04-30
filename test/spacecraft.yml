@@ -1,0 +1,12 @@
+property: dynamics
+name: example spacecraft
+note: This model is for test purpose
+
+dynamicsmodel: Rigid body
+
+platform:
+    inertia: [
+        50000, 0, 0,
+        0, 50000, 0,
+        0, 0, 50000
+        ]

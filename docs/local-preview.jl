@@ -2,7 +2,7 @@
 
 using LiveServer
 
-println("Build and preview documentation locally!!")
+println("Build and preview documentation locally")
 
 # Build documentation
 println("Building the documentation...")

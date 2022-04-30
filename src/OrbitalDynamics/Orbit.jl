@@ -5,6 +5,13 @@ Informations about spacecraft orbit
 """
 module Orbit
 
+using ..Frames
+using ..TimeLine
+using StructArrays
+using StaticArrays
+
+export OrbitInfo, OrbitalElements, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
+
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
 
@@ -108,6 +115,36 @@ struct OrbitalElements
 
 end
 
+struct OrbitInfo
+    info
+    orbitmodel
+    orbitalelement
+    planeframe
+
+    OrbitInfo(orbitalelement::OrbitalElements, ECIframe::Frame, info::String) = begin
+
+        dynamicsmodel = CircularOrbit(6370e+3 + 400e3, 3.986e+14)
+
+        planeframe = calc_orbitalframe(orbitalelement, ECIframe)
+
+        return new(
+            info,
+            dynamicsmodel,
+            orbitalelement,
+            planeframe
+        )
+    end
+end
+
+function initorbitdata(datanum::Integer, orbitalframe::Frame)
+
+    return StructArray(
+        angularposition = zeros(datanum),
+        angularvelocity = zeros(datanum),
+        LVLH = initframes(datanum, orbitalframe)
+    )
+end
+
 """
     function get_angular_velocity(orbit::CircularOrbit)
 
@@ -191,7 +228,7 @@ Calculates transformation matrix from OrbitalPlaneFrame to Radial Along Track fr
 """
 function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
-    C1 = u -> begin
+    C3 = u -> begin
         [cos(u) sin(u) 0
         -sin(u) cos(u) 0
         0 0 1]
@@ -200,8 +237,7 @@ function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_v
     # current angle of spacecraft relative to ascending axis of orbital plane frame
     current_position = deg2rad(elements.true_anomaly) + angular_velocity * time
 
-    return C1(current_position)
-
+    return C3(current_position)
 end
 
 """
@@ -218,5 +254,44 @@ function OrbitalPlaneFrame2LVLH(C_OrbitalPlaneFrame2RadialAlongTrack)
     return C
 
 end
+
+function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame
+
+    C = ECI2OrbitalPlaneFrame(elem)
+
+    return C * ECI_frame
+end
+
+function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, time::Real, angularvelocity::Real)::Frame
+
+    C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, angularvelocity, time)
+
+    return C_RAT * orbitframe
+end
+
+"""
+    T_RAT2LVLH
+
+Transformation matrix from radial along track frame to LVLH frame
+
+## Dynamics
+
+LVLH frame is defined with the replacement of the coordinate of the radial-along-track frame
+"""
+const T_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
+
+"""
+    T_LVLHref2rollpitchyaw
+
+Transformation matrix from LVLH reference frame to roll-pitch-yaw frame. This transformation matrix converts the reference frame from `UnitFrame` to `LVLHref`.
+"""
+const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
+
+"""
+    LVLHref
+
+Reference unit frame for the LVLH frame
+"""
+const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 
 end

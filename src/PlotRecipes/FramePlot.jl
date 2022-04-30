@@ -1,53 +1,22 @@
-"""
-    module PlotRecipe
-
-module of functions that show us the beautiful figures of spacecraft attitude dynamics
-"""
-module PlotRecipe
+module FramePlot
 
 using Plots
-
 # Include module `TimeLine`
-include("TimeLine.jl")
-import .TimeLine
+import ...TimeLine
+using ...Frames: Frame
+using StructArrays: StructArray
 
-"""
-    angular_velocity(time, angularVelocity)
-
-Generator plots of angular velocity in each axis
-"""
-function angular_velocity(time, angularVelocity)
-
-    fig1 = plot(time, angularVelocity[1, :],
-        xlabel ="Time [s]",
-        ylabel ="omega [rad/s]",
-        label  ="Angular velocity 1",
-    );
-
-    fig2 = plot(time, angularVelocity[2, :],
-        xlabel ="Time [s]",
-        ylabel ="omega [rad/s]",
-        label  ="Angular velocity 2",
-    );
-
-    fig3 = plot(time, angularVelocity[3, :],
-        xlabel ="Time [s]",
-        ylabel ="omega [rad/s]",
-        label  ="Angular velocity 3",
-    );
-
-    # Graph of the angular velocity
-    fig_angular_velocity = plot(fig1, fig2, fig3, layout = (3, 1), legend = true);
-
-    return fig_angular_velocity
-end
+export dispframe, framegif
 
 """
     function dispframe(time, refCoordinate, coordinate)
 
 Generates the 3D figure of body fixed frame
 """
-function dispframe(time, refCoordinate, coordinate)
+function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
+
+    # Use `GR` backend
+    gr()
 
     # Plot of reference frame
     coordFig = quiver(
@@ -119,18 +88,27 @@ end
 
 Generates animation of frame rotation as GIF figure
 """
-function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray; Tgif = 60, FPS = 3)
+function framegif(time::StepRangeLen, refframe::Frame, frames::StructArray; Tgif = 60, FPS = 3, timerange = (0, 0))
 
-    dataNum = size(time, 1)
+    # get the index for data
+    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+
+    Tsampling = convert(Float64, time.step)
+
     steps = round(Int, Tgif/Tsampling)
 
+    # determine the index for animation for-loop
+    if dataindex == Colon()
+        animindex = 1:steps:size(time[dataindex], 1)
+    else
+        animindex = dataindex[1]:steps:dataindex[end]
+    end
+
     # create animation
-    anim = @animate for index in 1:dataNum
-
-        bodyCoordinate = TimeLine.getframe(time[index], Tsampling, bodyCoordinateArray)
-
-        dispframe(time[index], refCoordinate, bodyCoordinate)
-    end every steps
+    anim = @animate for idx = animindex
+        frame = TimeLine.getframe(time[idx], Tsampling, frames)
+        dispframe(time[idx], refframe, frame)
+    end
 
     # make gif image
     gifanime = gif(anim, "attitude.gif", fps = FPS)
