@@ -7,19 +7,27 @@ makedocs(
     sitename="FlexibleSpacecraft.jl",
     pages = [
         "home" => "index.md",
-        "Example" => "example.md",
-        "CLI" => "docs-CLI/index.md",
-        "Development" => [
-            "Developer's Guideline" => "development/developer's-guideline.md",
-            "Environment" => "development/environment.md"
+        "Example" => "examples/example.md",
+        "Simulation" => [
+            "Core" => "simulation/simulation_core.md",
+            "Configuration" => "simulation/simulation_config.md"
         ],
+        "CLI" => "docs-CLI/index.md",
         "Dynamics" => [
             "Frames" => "dynamics/frames.md",
+            "Attitude dynamics" => "dynamics/attitude.md",
+            "Rigid body" => "dynamics/rigid-body.md",
+            "Orbit" => "dynamics/orbit.md",
+            "Disturbance input" => "dynamics/disturbance.md"
         ],
         "Libraries" => [
             "API" => "docs-module/docs-SimulationAPI.md",
             "Data containers" => "docs-module/docs-DataContainers.md",
             "Plot recipe" => "docs-module/docs-PlotRecipe.md"
+        ],
+        "Development" => [
+            "Developer's Guideline" => "development/developer's-guideline.md",
+            "Environment" => "development/environment.md"
         ]
     ]
 )

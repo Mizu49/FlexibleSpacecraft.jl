@@ -1,7 +1,7 @@
 name = "FlexibleSpacecraft"
 uuid = "2c2948cf-05c7-4427-a57b-abbb12bec472"
 authors = ["Mizu49 <mizuki.abe.r4@dc.tohoku.ac.jp>"]
-version = "0.0.0"
+version = "0.0.2"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

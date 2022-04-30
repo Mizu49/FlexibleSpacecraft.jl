@@ -40,5 +40,6 @@ display(fig3)
 fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
 display(fig4)
 
+location = "output" # specify where to save your data
 outputdata = SimData(time, attitudedata, orbitdata)
-write("output", outputdata)
+write(location, outputdata)
