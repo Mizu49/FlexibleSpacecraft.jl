@@ -7,7 +7,7 @@ module SpringMass
 
 using LinearAlgebra, StaticArrays
 
-export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate
+export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate
 
 """
     PhysicalSystem
@@ -156,6 +156,8 @@ struct StateSpace
     sysEcplg::SMatrix # input matrix for the coupling part (subscript represents coupling)
     sysEdist::StaticArray # input matrix for the disturbance input (subscript represents disturbance)
 
+    modalstate2physicalstate::SMatrix
+
     StateSpace(model::SpringMassModel) = begin
 
         dimstate = 2 * model.DOF
@@ -189,7 +191,13 @@ struct StateSpace
             sysEdist = SMatrix{dimstate, dimdistinput}([zeros(model.DOF, model.dimdistinput); model.Fdist])
         end
 
-        new(dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist)
+        # transformation matrix for state vector in modal coordinate to physical coordinate
+        modalstate2physicalstate = SMatrix{dimstate, dimstate, Real}([
+            model.system.PHI zeros(model.DOF, model.DOF)
+            zeros(model.DOF, model.DOF) model.system.PHI
+        ])
+
+        new(dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist, modalstate2physicalstate)
     end
 end
 
@@ -245,6 +253,76 @@ function physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_m
     XI = XI[sortidx, sortidx]
 
     return ModalSystem(PHI, OMEGA, XI)
+end
+
+"""
+    modalstate2physicalstate(model::StateSpace, state::AbstractVector{<:Real})
+
+convert the state vector in modal coordinate into physical coordiniate
+
+# Argument
+
+* `model::StateSpace`: state-space model for simulation
+* `state::AbstractVector{<:Real}`: state vector
+
+# Usage
+
+```julia
+physicalstate = modalstate2physicalstate(model, state)
+```
+"""
+function modalstate2physicalstate(model::StateSpace, state::AbstractVector{<:Real})
+    return model.modalstate2physicalstate * state
+end
+
+"""
+    modalstate2physicalstate(model::StateSpace, modalstates::AbstractVector{<:AbstractVector})
+
+convert the vector of the state vector in modal coordinate into physical coordiniate
+
+# Argument
+
+* `model::StateSpace`: state-space model for simulation
+* `modalstates::AbstractVector{<:AbstractVector}`: vector of state vector, which is a trajectory or time history of the state vector
+
+# Usage
+
+```julia
+physicalstates = modalstate2physicalstate(model, states)
+```
+"""
+function modalstate2physicalstate(model::StateSpace, modalstates::AbstractVector{<:AbstractVector})
+    datanum = size(modalstates, 1)
+    return map(idx -> modalstate2physicalstate(model, modalstates[idx]), 1:datanum)
+end
+
+"""
+    physicalstate2modalstate(model::StateSpace, physicalstate::AbstractVector{<:Real})
+
+convert the state vector in physical coordinate into modal coordinate
+
+# Argument
+
+* `model::StateSpace`: state-space model for simulation
+* `physicalstate::AbstractVector{<:Real}`: state vector
+"""
+function physicalstate2modalstate(model::StateSpace, physicalstate::AbstractVector{<:Real})
+    return inv(model.modalstate2physicalstate) * physicalstate
+end
+
+"""
+    physicalstate2modalstate(model::StateSpace, physicalstates::AbstractVector{<:AbstractVector})
+
+convert the vector of state vector in physical coordinate into modal coordinate
+
+# Argument
+
+* `model::StateSpace`: state-space model for simulation
+* `physicalstates::AbstractVector{<:AbstractVector}`: vector of state vector
+"""
+function physicalstate2modalstate(model::StateSpace, physicalstates::AbstractVector{<:AbstractVector})
+    datanum = size(physicalstates, 1)
+    return map(idx -> physicalstate2modalstate(model, physicalstates[idx]), 1:datanum)
 end
 
 """
