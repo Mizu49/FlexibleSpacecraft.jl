@@ -77,8 +77,8 @@ Spring mass representation of the entire system modeling
 * `dimdistinput::Integer`: dimension of the disturbance input vector
 * `system::ModalSystem`: mass-normalized modal representation of the system
 * `D::AbstractMatrix`: coupling matrix wiht the attitude motion (time derivative of the angular velocity vector)
-* `Fctrl::AbstractArray`: coefficient matrix or vector of the control input vector
-* `Fdist::AbstractArray`: coefficient matrix or vector of the disturbance input vector
+* `Fctrl::AbstractVecOrMat`: coefficient matrix or vector of the control input vector
+* `Fdist::AbstractVecOrMat`: coefficient matrix or vector of the disturbance input vector
 """
 struct SpringMassModel
     # degrees of freedom of the system
@@ -93,13 +93,13 @@ struct SpringMassModel
     # coupling matrix with the attitude dynamics (time derivative of the angular velocity vector)
     D::AbstractMatrix
 
-    # control input matrix
-    Fctrl::AbstractArray
-    # disturbance input matrix
-    Fdist::AbstractArray
+    # control input matrix or vector
+    Fctrl::AbstractVecOrMat
+    # disturbance input matrix or vector
+    Fdist::AbstractVecOrMat
 
     # Inner constructor for struct `SpringMassModel`
-    SpringMassModel(system::ModalSystem, D::AbstractMatrix, Fctrl::AbstractArray, Fdist::AbstractArray) = begin
+    SpringMassModel(system::ModalSystem, D::AbstractMatrix, Fctrl::AbstractVecOrMat, Fdist::AbstractVecOrMat) = begin
         # get dimension of the system
         DOF = system.dim
         dimcontrolinput = size(Fctrl, 2)
@@ -108,7 +108,7 @@ struct SpringMassModel
         new(DOF, dimcontrolinput, dimdistinput, system, D, Fctrl, Fdist)
     end
 
-    SpringMassModel(system::PhysicalSystem, D::AbstractMatrix, Fctrl::AbstractArray, Fdist::AbstractArray) = begin
+    SpringMassModel(system::PhysicalSystem, D::AbstractMatrix, Fctrl::AbstractVecOrMat, Fdist::AbstractVecOrMat) = begin
 
         # convert physical system representation into modal system representation
         system = physical2modal(system)
