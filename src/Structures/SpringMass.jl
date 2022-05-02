@@ -12,14 +12,41 @@ export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace,
 """
     PhysicalSystem
 
-Representation of the structural system in physical coordinate
+Representation of dynamics part of the structural system in physical coordinate.
 
-## Fields
+# Fields
 
 * `dim::Integer`: dimension of the structural system
 * `mass_matrix::Matrix`: mass matrix in physical coordinate
 * `damping_matrix::Matrix`: damping matrix in physical coordinate
 * `stiffness_matrix::Matrix`: stiffness matrix in physical coordinate
+
+# Mathematical representation
+
+This data containter corresponds to the left hand side of the equation of motion as follows:
+
+```math
+\\mathbf{M} \\ddot{\\mathbf{x}} + \\mathbf{D} \\dot{\\mathbf{x}} + \\mathbf{K} \\mathbf{x} = \\ldots
+```
+
+* ``\\mathbf{M}`` : mass matrix
+* ``\\mathbf{D}`` : damping matrix
+* ``\\mathbf{K}`` : stiffness matrix
+
+# Constructor
+
+```julia
+PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)
+```
+
+# Example
+
+```julia
+# Suppose M, D, K are given
+
+# Create representation of the system in physical coordinate
+physicalsystem = PhysicalSystem(M, D, K)
+```
 """
 struct PhysicalSystem
     dim::Integer
@@ -29,6 +56,11 @@ struct PhysicalSystem
     stiffness_matrix::Matrix
 
     # Constructor
+    """
+        PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)
+
+    Constructor for data container `PhysicalSystem`
+    """
     PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix) = begin
         dim = size(mass_matrix, 1)
         new(dim, mass_matrix, damping_matrix, stiffness_matrix)
@@ -38,14 +70,47 @@ end
 """
     ModalSystem
 
-Representation of the structural system in modal coordinate
+Representation of dynamics part of the structural system in mass-normalized modal coordinate.
 
-## Fields
+# Fields
 
 * `dim::Integer`: dimension of the structural system
 * `PHI::Matrix`: modal transformation matrix
 * `OMEGA::Matrix`: modal angular velocity matrix
 * `XI::Matrix`: modal damping matrix
+
+# Mathematical representation
+
+This data containter corresponds to the left hand side of the equation of motion as follows:
+
+```math
+\\ddot{\\mathbf{\\eta}} +  2 \\boldsymbol{\\Xi \\Omega} \\dot{\\mathbf{\\eta}} + \\boldsymbol{\\Omega}^2 \\mathbf{\\eta} = \\ldots
+```
+
+The modal transformation is given as:
+
+```math
+\\mathbf{x} = \\boldsymbol{\\Phi} \\boldsymbol{\\eta}
+```
+
+* ``\\boldsymbol{\\Phi}`` : transformation matrix from modal coordinate to physical coordinate
+* ``\\boldsymbol{\\Omega}`` : modal angular velocity matrix
+* ``\\boldsymbol{\\Xi}`` : modal damping ratio matrix
+
+# Constructor
+
+```julia
+ModalSystem(PHI::Matrix, OMEGA::Matrix, XI::Matrix)
+```
+
+# Example
+
+```julia
+# You can convert the `physicalsystem::PhysicalSystem` into `::ModalSystem`
+physicalsystem = PhysicalSystem(M, C, K)
+# Convert representation of the system in modal coordinate
+modalsystem = physical2modal(physicalsystem)
+```
 """
 struct ModalSystem
     dim::Integer
