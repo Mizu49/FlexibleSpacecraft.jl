@@ -131,11 +131,13 @@ end
 
 Spring mass representation of the entire system modeling
 
+# Mathematical representation
+
 ```math
-\\ddot{\\mathbf{\\eta}} \\eta + 2 \\boldsymbol{\\Xi \\Omega} \\dot{\\mathbf{\\eta}} + \\boldsymbol{\\Omega}^2 \\mathbf{\\eta}
+\\ddot{\\mathbf{\\eta}} + 2 \\boldsymbol{\\Xi \\Omega} \\dot{\\mathbf{\\eta}} + \\boldsymbol{\\Omega}^2 \\mathbf{\\eta} = \\boldsymbol{\\Phi}^{\\mathrm{T}} \\mathbf{D} \\boldsymbol{\\omega} + \\boldsymbol{\\Phi}^{\\mathrm{T}} \\mathbf{F}_{\\mathrm{ctrl}} \\mathbf{f_\\mathrm{ctrl}} + \\boldsymbol{\\Phi}^{\\mathrm{T}} \\mathbf{F}_{\\mathrm{dist}} \\mathbf{f_\\mathrm{dist}}
 ```
 
-## Members
+# Fields
 
 * `DOF::Integer`: dimension of the displacement vector of the system
 * `dimcontrolinput::Integer`: dimension of the control input vector
@@ -191,6 +193,38 @@ end
     StateSpace
 
 State space representation of the structural system. This representation is mainly used for the time evolution of the structural system
+
+# Mathematical representation
+
+State space equation of the structural system with the control input, coupling input (angular velocity of the attitude dynamics), and the disturbance input is given as:
+
+```math
+\\frac{d}{dt} \\mathbf{z} = \\mathbf{A} \\mathbf{z} + \\mathbf{B} \\mathbf{u} + \\mathbf{E}_{\\mathrm{cplg}} \\boldsymbol{\\omega} + \\mathbf{E}_{\\mathrm{dist}} \\mathbf{f}_{\\mathrm{dist}}
+```
+
+Each matrix is defined as follows:
+
+```math
+\\mathbf{A} \\equiv \\begin{bmatrix}
+    \\mathbf{0} & \\mathbf{I} \\\\
+    - \\boldsymbol{\\Omega}^2 & -2 \\boldsymbol{\\Xi \\Omega}
+\\end{bmatrix}
+\\\\
+\\mathbf{B} \\equiv \\begin{bmatrix}
+    \\mathbf{0} \\\\
+    \\mathbf{F}_{\\mathrm{ctrl}}
+\\end{bmatrix}
+\\\\
+\\mathbf{E}_{\\mathrm{cplg}} \\equiv \\begin{bmatrix}
+    \\mathbf{0} \\\\
+    \\mathbf{D}
+\\end{bmatrix}
+\\\\
+\\mathbf{E}_{\\mathrm{dist}} \\equiv \\begin{bmatrix}
+    \\mathbf{0} \\\\
+    \\mathbf{F}_{\\mathrm{dist}}
+\\end{bmatrix}
+```
 
 # Fields
 
