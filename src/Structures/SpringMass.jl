@@ -231,7 +231,7 @@ struct StateSpace
 
         sysA = SMatrix{dimstate, dimstate}([
             zeros(model.DOF, model.DOF) I
-            -model.system.OMEGA^2 -2 * model.system.XI * model.system.PHI
+            -model.system.OMEGA^2 -2 * model.system.XI * model.system.OMEGA
         ])
 
         # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
