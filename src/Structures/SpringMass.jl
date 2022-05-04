@@ -324,6 +324,9 @@ function physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_m
     for ind = 1:dim
         mr[ind] = PHI[:, ind]' * mass_matrix * PHI[:, ind]
         PHI[:, ind] = sqrt(1/mr[ind])*PHI[:, ind]
+
+        # redo the calculation of modal mass, mr[idx] == 1.0
+        mr[ind] = PHI[:, ind]' * mass_matrix * PHI[:, ind]
     end
 
     # natural angular frequency matrix

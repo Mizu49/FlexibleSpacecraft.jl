@@ -14,14 +14,7 @@ K = [
     6e4 -1e4
     -1e4 1e4
 ]
-C_Ma = 0
-C_Mb = 0
-C_Ka = 250
-C_Kb = 50
-C = [
-    C_Ma+C_Kb+C_Kb -C_Kb
-    -C_Kb C_Mb+C_Kb
-]
+C = 0 * M + 0.005 * K
 
 Ectrl = zeros(2)
 Edist = zeros(2)
