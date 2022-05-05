@@ -4,7 +4,7 @@ include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 using Plots, StaticArrays
 
-paramfile = "../solararray.yml"
+paramfile = "param-springmass.yml"
 
 M = [
     100 0
