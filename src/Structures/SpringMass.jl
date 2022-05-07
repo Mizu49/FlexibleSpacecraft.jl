@@ -7,7 +7,7 @@ module SpringMass
 
 using LinearAlgebra, StaticArrays
 
-export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate
+export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams, defmodel
 
 """
     PhysicalSystem
@@ -449,6 +449,59 @@ function _calc_differential(model::StateSpace, currenttime::Real, currentstate::
     diff = model.sysA*currentstate + model.sysB*controlinput + model.sysEcplg*angularvelocity + model.sysEdist*distinput
 
     return diff
+end
+
+"""
+    SpringMassParams
+
+struct for accomodating the parameters for the spring mass structural model
+
+# Fields
+
+* `M::AbstractMatrix`: mass matrix
+* `D::AbstractMatrix`: damping matrix
+* `K::AbstractMatrix`: stiffness matrix
+* `Ecoupling::AbstractMatrix`: coefficient matrix for the attitude coupling input
+* `Econtrol::AbstractVecOrMat`: coefficient matrix for the control input
+* `Edisturbance::AbstractVecOrMat`: coefficient matrix for the disturbance input
+
+"""
+struct SpringMassParams
+    # mass matrix
+    M::AbstractMatrix
+    # damping matrix
+    D::AbstractMatrix
+    # stiffness matrix
+    K::AbstractMatrix
+    # attitude coupling input coefficient matrix
+    Ecoupling::AbstractMatrix
+    # control input coefficient matrix
+    Econtrol::AbstractVecOrMat
+    # disturbance input coefficient matrix
+    Edisturbance::AbstractVecOrMat
+end
+
+"""
+    defmodel
+
+function that incorporates the model formulation process
+
+# Argument
+
+* `params::SpringMassParams`: struct that incorporates the parameter setting of the spring-mass structural system
+"""
+function defmodel(params::SpringMassParams)
+
+    # Create representation of the system in physical coordinate
+    physicalsystem = PhysicalSystem(params.M, params.D, params.K)
+    # Convert representation of the system in modal coordinate
+    modalsystem = physical2modal(physicalsystem)
+
+    systemmodel = SpringMassModel(modalsystem, params.Ecoupling, params.Econtrol, params.Edisturbance)
+
+    model = StateSpace(systemmodel)
+
+    return model
 end
 
 end

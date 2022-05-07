@@ -23,14 +23,10 @@ Ecoupling = [
     0 1 0
 ]
 
-# Create representation of the system in physical coordinate
-physicalsystem = PhysicalSystem(M, C, K)
-# Convert representation of the system in modal coordinate
-modalsystem = physical2modal(physicalsystem)
-
-systemmodel = SpringMassModel(physicalsystem, Ecoupling, Ectrl, Edist)
-
-model = StateSpace(systemmodel)
+# define the parameter setting struct
+params = SpringMassParams(M, C, K, Ecoupling, Ectrl, Edist)
+# define the simulation model
+model = defmodel(params)
 
 # Test the simulation feature
 Ts = 1e-4
