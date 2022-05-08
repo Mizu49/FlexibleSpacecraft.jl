@@ -4,29 +4,9 @@ include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 using Plots, StaticArrays
 
-paramfile = "param-springmass.yml"
-
-M = [
-    100 0
-    0 50
-]
-K = [
-    6e4 -1e4
-    -1e4 1e4
-]
-C = 0 * M + 0.005 * K
-
-Ectrl = zeros(2)
-Edist = zeros(2)
-Ecoupling = [
-    1 0 0
-    0 1 0
-]
-
-# define the parameter setting struct
-params = SpringMassParams(M, C, K, Ecoupling, Ectrl, Edist)
-# define the simulation model
-model = defmodel(params)
+# parameter setting
+paramfile = "./test/module-tests/param-springmass.yml"
+(params, model) = setstructure(paramfile)
 
 # Test the simulation feature
 Ts = 1e-4

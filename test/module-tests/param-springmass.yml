@@ -1,7 +1,8 @@
-modeling: Spring-mass
+modeling: spring-mass
 
 system:
     coord: physical
+    DOF: 2
     mass: [
         100, 0,
         0, 50
@@ -10,7 +11,8 @@ system:
         6e4, -1e4,
         -1e4, 1e4
     ]
-    damping: Rayleigh
+    damping:
+        config: Rayleigh
         alpha: 0
         beta: 0.005
 
@@ -19,12 +21,16 @@ coupling: [
         0, 1, 0,
     ]
 
-control input: [
-    0, 0,
-    0, 0
-]
+control input:
+    dimension: 1
+    coefficient: [
+            0,
+            0
+        ]
 
-disturbance input: [
-    0, 0,
-    0, 0
-]
+disturbance input:
+    dimension: 1
+    coefficient: [
+            0,
+            0
+        ]
