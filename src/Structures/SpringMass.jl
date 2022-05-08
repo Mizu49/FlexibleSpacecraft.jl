@@ -482,7 +482,7 @@ struct SpringMassParams
 end
 
 """
-    defmodel
+    defmodel(params::SpringMassParams)
 
 function that incorporates the model formulation process
 
@@ -502,6 +502,45 @@ function defmodel(params::SpringMassParams)
     model = StateSpace(systemmodel)
 
     return model
+end
+
+"""
+    defmodel(paramdict::AbstractDict)
+
+# Argument
+
+* `paramdict::AbstractDict`: dictionary that incorporates the parameter setting of the spring-mass structural system. This dictionary works with the parameter setting YAML file
+"""
+function defmodel(paramdict::AbstractDict)
+
+    DOF = paramdict["system"]["DOF"]
+
+    # read the parameters from the dictionary
+    M = reshape(paramdict["system"]["mass"], (DOF, DOF))
+    K = reshape(paramdict["system"]["stiffness"], (DOF, DOF))
+
+    if paramdict["system"]["damping"]["config"] == "Rayleigh"
+        alpha = paramdict["system"]["damping"]["alpha"]
+        beta = paramdict["system"]["damping"]["beta"]
+        D = alpha * M + beta * K
+    else
+        error("damping configuration for \"$(paramdict["system"]["damping"]["config"])\" not found")
+    end
+
+    dimcontrolinput = paramdict["control input"]["dimension"]
+    Ectrl = reshape(paramdict["control input"]["coefficient"], (DOF, dimcontrolinput))
+
+    dimdistinput = paramdict["control input"]["dimension"]
+    Edist = reshape(paramdict["disturbance input"]["coefficient"], (DOF, dimdistinput))
+
+    Ecoupling = reshape(paramdict["coupling"], (DOF, 3))
+
+    # define the parameters struct
+    params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)
+    # define the state-space model
+    simmodel = defmodel(params)
+
+    return (params, simmodel)
 end
 
 end
