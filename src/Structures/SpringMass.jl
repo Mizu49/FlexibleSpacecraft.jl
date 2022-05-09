@@ -7,7 +7,7 @@ module SpringMass
 
 using LinearAlgebra, StaticArrays
 
-export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate
+export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams, defmodel
 
 """
     PhysicalSystem
@@ -449,6 +449,98 @@ function _calc_differential(model::StateSpace, currenttime::Real, currentstate::
     diff = model.sysA*currentstate + model.sysB*controlinput + model.sysEcplg*angularvelocity + model.sysEdist*distinput
 
     return diff
+end
+
+"""
+    SpringMassParams
+
+struct for accomodating the parameters for the spring mass structural model
+
+# Fields
+
+* `M::AbstractMatrix`: mass matrix
+* `D::AbstractMatrix`: damping matrix
+* `K::AbstractMatrix`: stiffness matrix
+* `Ecoupling::AbstractMatrix`: coefficient matrix for the attitude coupling input
+* `Econtrol::AbstractVecOrMat`: coefficient matrix for the control input
+* `Edisturbance::AbstractVecOrMat`: coefficient matrix for the disturbance input
+
+"""
+struct SpringMassParams
+    # mass matrix
+    M::AbstractMatrix
+    # damping matrix
+    D::AbstractMatrix
+    # stiffness matrix
+    K::AbstractMatrix
+    # attitude coupling input coefficient matrix
+    Ecoupling::AbstractMatrix
+    # control input coefficient matrix
+    Econtrol::AbstractVecOrMat
+    # disturbance input coefficient matrix
+    Edisturbance::AbstractVecOrMat
+end
+
+"""
+    defmodel(params::SpringMassParams)
+
+function that incorporates the model formulation process
+
+# Argument
+
+* `params::SpringMassParams`: struct that incorporates the parameter setting of the spring-mass structural system
+"""
+function defmodel(params::SpringMassParams)
+
+    # Create representation of the system in physical coordinate
+    physicalsystem = PhysicalSystem(params.M, params.D, params.K)
+    # Convert representation of the system in modal coordinate
+    modalsystem = physical2modal(physicalsystem)
+
+    systemmodel = SpringMassModel(modalsystem, params.Ecoupling, params.Econtrol, params.Edisturbance)
+
+    model = StateSpace(systemmodel)
+
+    return model
+end
+
+"""
+    defmodel(paramdict::AbstractDict)
+
+# Argument
+
+* `paramdict::AbstractDict`: dictionary that incorporates the parameter setting of the spring-mass structural system. This dictionary works with the parameter setting YAML file
+"""
+function defmodel(paramdict::AbstractDict)
+
+    DOF = paramdict["system"]["DOF"]
+
+    # read the parameters from the dictionary
+    M = reshape(paramdict["system"]["mass"], (DOF, DOF))
+    K = reshape(paramdict["system"]["stiffness"], (DOF, DOF))
+
+    if paramdict["system"]["damping"]["config"] == "Rayleigh"
+        alpha = paramdict["system"]["damping"]["alpha"]
+        beta = paramdict["system"]["damping"]["beta"]
+        D = alpha * M + beta * K
+    else
+        error("damping configuration for \"$(paramdict["system"]["damping"]["config"])\" not found")
+    end
+
+    dimcontrolinput = paramdict["control input"]["dimension"]
+    Ectrl = reshape(paramdict["control input"]["coefficient"], (DOF, dimcontrolinput))
+
+    dimdistinput = paramdict["control input"]["dimension"]
+    Edist = reshape(paramdict["disturbance input"]["coefficient"], (DOF, dimdistinput))
+
+    Ecoupling = reshape(paramdict["coupling"], (DOF, 3))
+
+    # define the parameters struct
+    params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)
+    # define the state-space model
+    simmodel = defmodel(params)
+
+    return (params, simmodel)
 end
 
 end
