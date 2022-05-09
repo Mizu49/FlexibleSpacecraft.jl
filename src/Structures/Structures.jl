@@ -10,7 +10,28 @@ using Reexport, YAML, StaticArrays
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export FlexibleAppendage, SpacecraftAppendages, update_structure, setstructure
+export FlexibleAppendage, SpacecraftAppendages, StructureSimData, initdatacontainer, update_structure, setstructure
+
+"""
+    StructureSimData
+
+struct of the data container for the states and inputs of the structural response of the flexible appendages
+
+# Fields
+
+* `state::AbstractVector{<:AbstractVector}`: data container for the state vector trajectory of the flexible appendage
+* `physicalstate::AbstractVector{<:AbstractVector}`: data container for the physical displacement and velocity trajectory of the flexible appendage
+* `controlinput::AbstractVector{<:AbstractVector}`: data container for the control input trajectory
+* `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
+"""
+struct StructureSimData
+
+    state::AbstractVector{<:AbstractVector}
+    physicalstate::AbstractVector{<:AbstractVector}
+    controlinput::AbstractVector{<:AbstractVector}
+    disturbance::AbstractVector{<:AbstractVector}
+
+end
 
 """
     FlexibleAppendage
@@ -23,9 +44,16 @@ struct FlexibleAppendage
     # dynamics model that is employed for simulation of this appendage
     model::DataType
 
+    # container for the simulation data
+    simdata::StructureSimData
+
     FlexibleAppendage() = begin
 
-        new(name, model)
+        name = nothing
+        model = nothing
+        simdata = nothing
+
+        new(name, model, simdata)
     end
 end
 
@@ -46,6 +74,34 @@ struct SpacecraftAppendages
 
         new(appendages)
     end
+end
+
+
+"""
+    initdatacontainer
+
+initializer for the data container for structural simulation
+
+# Arguments
+
+* `model::StateSpace`: simulation model for the flexible appendage
+* `initphysicalstate::Vector`: initial physical state value of the flexible appendage
+* `datanum::Int`: numbers of the simulation data
+"""
+function initdatacontainer(model::StateSpace, initphysicalstate::Vector, datanum::Int)::StructureSimData
+
+    # physical state vector (physical coordinate)
+    physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
+    physicalstate[1] = SVector{model.dimstate}(initphysicalstate)
+
+    # state vector (modal coordinate)
+    state = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
+    state[1] = physicalstate2modalstate(model, initphysicalstate)
+
+    controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
+    disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
+
+    return StructureSimData(state, physicalstate, controlinput, disturbance)
 end
 
 """
