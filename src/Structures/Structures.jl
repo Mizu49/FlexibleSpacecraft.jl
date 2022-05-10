@@ -10,7 +10,7 @@ using Reexport, YAML, StaticArrays
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export FlexibleAppendage, SpacecraftAppendages, StructureSimData, initdatacontainer, update_structure, setstructure
+export StructureSimData, initdatacontainer, setstructure
 
 """
     StructureSimData
@@ -32,50 +32,6 @@ struct StructureSimData
     disturbance::AbstractVector{<:AbstractVector}
 
 end
-
-"""
-    FlexibleAppendage
-
-struct that accomodates the configuration for a flexible appendage of the spacecraft
-"""
-struct FlexibleAppendage
-    # name of the flexible appendage
-    name::String
-    # dynamics model that is employed for simulation of this appendage
-    model::DataType
-
-    # container for the simulation data
-    simdata::StructureSimData
-
-    FlexibleAppendage() = begin
-
-        name = nothing
-        model = nothing
-        simdata = nothing
-
-        new(name, model, simdata)
-    end
-end
-
-"""
-    SpacecraftAppendages
-
-struct that accomodates the configurations for the multiple flexible appendages
-"""
-struct SpacecraftAppendages
-
-    appendages::SVector
-
-    SpacecraftAppendages(configs::AbstractVector) = begin
-        # numbers of appendages to be simulated
-        num_appendages = size(configs, 1)
-
-        appendages = SVector{num_appendages, Any}(undef for _ in 1:num_appendages)
-
-        new(appendages)
-    end
-end
-
 
 """
     initdatacontainer
@@ -124,16 +80,6 @@ function setstructure(configfilepath::String)
     end
 
     return (structureparams, structuresimmodel)
-end
-
-"""
-    update_structure
-
-function to calculate the time evolution of the structural motion of the flexible appendages
-"""
-function update_structure(config, angularvelocity::SVector{3, <:Real}, controlinput::AbstractVector)
-
-    return nothing
 end
 
 end
