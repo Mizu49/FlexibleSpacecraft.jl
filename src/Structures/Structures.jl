@@ -28,8 +28,8 @@ struct StructureSimData
 
     state::AbstractVector{<:AbstractVector}
     physicalstate::AbstractVector{<:AbstractVector}
-    controlinput::AbstractVector{<:AbstractVector}
-    disturbance::AbstractVector{<:AbstractVector}
+    controlinput::AbstractVector{<:Union{AbstractVector, Real}}
+    disturbance::AbstractVector{<:Union{AbstractVector, Real}}
 
 end
 
@@ -54,8 +54,18 @@ function initdatacontainer(model::StateSpace, initphysicalstate::Vector, datanum
     state = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
     state[1] = physicalstate2modalstate(model, initphysicalstate)
 
-    controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
-    disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
+    # switch based on the dimension of the input
+    if model.dimctrlinput == 1
+        controlinput = [0.0 for _ in 1:datanum]
+    else
+        controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
+    end
+
+    if model.dimdistinput == 1
+        disturbance = [0.0 for _ in 1:datanum]
+    else
+        disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
+    end
 
     return StructureSimData(state, physicalstate, controlinput, disturbance)
 end

@@ -28,8 +28,8 @@ simdata = initdatacontainer(model, [0, 0, 0, 0], datanum)
         simdata.state[cnt+1] = updatestate(model, Ts, times[cnt], simdata.state[cnt], zeros(3), ctrlinput, distinput)
     end
 
-    simdata.controlinput[cnt] = [ctrlinput]
-    simdata.disturbance[cnt] = [distinput]
+    simdata.controlinput[cnt] = ctrlinput
+    simdata.disturbance[cnt] = distinput
 end
 
 plotlyjs()
