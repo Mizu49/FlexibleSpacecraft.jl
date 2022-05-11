@@ -10,7 +10,7 @@ using StructArrays
 using StaticArrays
 using ..Frames
 
-export InitData, initsimulationdata, timeindex
+export AttitudeData, InitData, initsimulationdata, timeindex
 
 """
     function _initangularvelocity(simdata_num, initital_value::Vector)
@@ -71,6 +71,15 @@ struct InitData
 
 end
 
+struct AttitudeData
+    datanum::Int
+    quaternion::Vector{SVector{4, <:Real}}
+    angularvelocity::Vector{SVector{3, <:Real}}
+    bodyframe::StructArray
+    RPYframe::StructArray
+    eulerangle::Vector{SVector{3, <:Real}}
+end
+
 """
     initsimulationdata(datanum::Int, initialdata::InitData)
 
@@ -78,12 +87,13 @@ Initialize the data container for the attitude dynamics
 """
 function initsimulationdata(datanum::Int, initialdata::InitData)
 
-    return StructArray(
-        quaternion = _initquaternion(datanum, initialdata.quaternion),
-        angularvelocity = _initangularvelocity(datanum, initialdata.angularvelocity),
-        bodyframe = initframes(datanum, initialdata.bodyframe),
-        rollpitchyawframe = initframes(datanum, initialdata.bodyframe),
-        eulerangle = [SVector{3}(0.0, 0.0, 0.0) for _ in 1:datanum]
+    return AttitudeData(
+        datanum,
+        _initquaternion(datanum, initialdata.quaternion),
+        _initangularvelocity(datanum, initialdata.angularvelocity),
+        initframes(datanum, initialdata.bodyframe),
+        initframes(datanum, initialdata.bodyframe),
+        [SVector{3}(0.0, 0.0, 0.0) for _ in 1:datanum]
     )
 end
 
