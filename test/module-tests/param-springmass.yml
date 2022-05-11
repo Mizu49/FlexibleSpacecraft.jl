@@ -24,13 +24,13 @@ coupling: [
 control input:
     dimension: 1
     coefficient: [
-            0,
+            5,
             0
         ]
 
 disturbance input:
     dimension: 1
     coefficient: [
-            0,
+            3,
             0
         ]

@@ -10,42 +10,64 @@ using Reexport, YAML, StaticArrays
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export FlexibleAppendage, SpacecraftAppendages, update_structure, setstructure
+export StructureSimData, initdatacontainer, setstructure
 
 """
-    FlexibleAppendage
+    StructureSimData
 
-struct that accomodates the configuration for a flexible appendage of the spacecraft
+struct of the data container for the states and inputs of the structural response of the flexible appendages
+
+# Fields
+
+* `state::AbstractVector{<:AbstractVector}`: data container for the state vector trajectory of the flexible appendage
+* `physicalstate::AbstractVector{<:AbstractVector}`: data container for the physical displacement and velocity trajectory of the flexible appendage
+* `controlinput::AbstractVector{<:AbstractVector}`: data container for the control input trajectory
+* `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
-struct FlexibleAppendage
-    # name of the flexible appendage
-    name::String
-    # dynamics model that is employed for simulation of this appendage
-    model::DataType
+struct StructureSimData
 
-    FlexibleAppendage() = begin
+    state::AbstractVector{<:AbstractVector}
+    physicalstate::AbstractVector{<:AbstractVector}
+    controlinput::AbstractVector{<:Union{AbstractVector, Real}}
+    disturbance::AbstractVector{<:Union{AbstractVector, Real}}
 
-        new(name, model)
-    end
 end
 
 """
-    SpacecraftAppendages
+    initdatacontainer
 
-struct that accomodates the configurations for the multiple flexible appendages
+initializer for the data container for structural simulation
+
+# Arguments
+
+* `model::StateSpace`: simulation model for the flexible appendage
+* `initphysicalstate::Vector`: initial physical state value of the flexible appendage
+* `datanum::Int`: numbers of the simulation data
 """
-struct SpacecraftAppendages
+function initdatacontainer(model::StateSpace, initphysicalstate::Vector, datanum::Int)::StructureSimData
 
-    appendages::SVector
+    # physical state vector (physical coordinate)
+    physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
+    physicalstate[1] = SVector{model.dimstate}(initphysicalstate)
 
-    SpacecraftAppendages(configs::AbstractVector) = begin
-        # numbers of appendages to be simulated
-        num_appendages = size(configs, 1)
+    # state vector (modal coordinate)
+    state = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
+    state[1] = physicalstate2modalstate(model, initphysicalstate)
 
-        appendages = SVector{num_appendages, Any}(undef for _ in 1:num_appendages)
-
-        new(appendages)
+    # switch based on the dimension of the input
+    if model.dimctrlinput == 1
+        controlinput = [0.0 for _ in 1:datanum]
+    else
+        controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
     end
+
+    if model.dimdistinput == 1
+        disturbance = [0.0 for _ in 1:datanum]
+    else
+        disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
+    end
+
+    return StructureSimData(state, physicalstate, controlinput, disturbance)
 end
 
 """
@@ -68,16 +90,6 @@ function setstructure(configfilepath::String)
     end
 
     return (structureparams, structuresimmodel)
-end
-
-"""
-    update_structure
-
-function to calculate the time evolution of the structural motion of the flexible appendages
-"""
-function update_structure(config, angularvelocity::SVector{3, <:Real}, controlinput::AbstractVector)
-
-    return nothing
 end
 
 end
