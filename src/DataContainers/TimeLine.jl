@@ -6,8 +6,7 @@ module of time line of the physical quantity of spacecraft attitude dynamics
 """
 module TimeLine
 
-using StructArrays
-using StaticArrays
+using StaticArrays, StructArrays
 using ..Frames
 
 export AttitudeData, InitData, initsimulationdata, timeindex
@@ -25,7 +24,6 @@ function _initangularvelocity(datanum, initialvelocity::SVector{3, <:Real})
     return angularvelocitydata
 end
 
-
 """
     function _initquaternion(simdata_num, initial_value::Vector[4])
 
@@ -37,24 +35,6 @@ function _initquaternion(datanum, initialvalue::SVector{4, <:Real})
     quaterniondata[1] = initialvalue
 
     return quaterniondata
-end
-
-"""
-    Base.getindex(v::Vector{<:SVector}, r::AbstractRange, datarow::Int)
-
-get a 1-D subset of the every `datarow`-th row of `v::Vector{<:SVector}` within `r::AbstractRange`, used for custom data container for `FlexibleSpacecraft.jl`
-"""
-function Base.getindex(v::Vector{<:SVector}, r::Union{AbstractRange, Colon}, datarow::Int)
-    return getindex.(v[r], datarow)
-end
-
-"""
-    Base.getindex(v::Vector{<:SVector}, r::Int, datarow::Int)
-
-get an element of the `v<:SVector`, used for custom data container for `FlexibleSpacecraft.jl`
-"""
-function Base.getindex(v::Vector{<:SVector}, r::Int, datarow::Int)
-    return getindex(v[r], datarow)
 end
 
 """

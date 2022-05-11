@@ -5,6 +5,8 @@ using Reexport
 @reexport using LinearAlgebra
 @reexport using Plots
 
+include("utilities.jl")
+
 include("DataContainers/Frames.jl")
 @reexport using .Frames
 
