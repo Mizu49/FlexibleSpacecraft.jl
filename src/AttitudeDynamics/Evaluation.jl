@@ -9,11 +9,11 @@ using StructArrays
 using StaticArrays
 
 """
-    function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, Float64}})
+    function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, <:Real}})
 
 Check if quaternion vector satisfies constraint
 """
-function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, Float64}})
+function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, <:Real}})
 
     datanum = size(quaternion, 1)
 

@@ -49,7 +49,7 @@ struct of the table data frame from simulation results
 # Usage
 
 use the following constructor:
-`SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector)`
+`SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::StructVector)`
 
 * `time`: time data
 * `attitudedata`: `StructVector` of the attitude data
@@ -62,7 +62,7 @@ struct SimData
     orbit::DataFrame
 
     # Constructor
-    SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector) = begin
+    SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::StructVector) = begin
 
         # Get current time stamp in UTC
         timestamp = Dates.format(Dates.now(), "yyyy-mm-dd--HH-MM-SS")
@@ -94,11 +94,11 @@ function Base.write(path::AbstractString, simdata::SimData)
 end
 
 """
-    _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVector)::DataFrame
+    _convert_attitude(time::AbstractRange{<:Real}, attitudedata::AttitudeData)::DataFrame
 
 convert internal data container for attitude to the data frame object by mapping each fields
 """
-function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVector)::DataFrame
+function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::AttitudeData)::DataFrame
 
     attitude = DataFrame(
         "time" => time,
