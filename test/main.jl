@@ -23,7 +23,7 @@ println("Begin simulation!")
 @time (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
-@test Evaluation.quaternion_constraint(attitudedata.quaternion)
+@test quaternion_constraint(attitudedata.quaternion)
 
 fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
 # fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity, timerange = (0, 10))
