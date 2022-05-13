@@ -10,7 +10,7 @@ using ..TimeLine
 using StructArrays
 using StaticArrays
 
-export OrbitInfo, OrbitalElements, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
+export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -136,12 +136,30 @@ struct OrbitInfo
     end
 end
 
+"""
+    OrbitData
+
+struct of the data containers for the orbital motion
+
+# Fields
+
+* `angularposition::Vector{<:Real}`: angular position of the orbital motion of the spacecraft
+* `angularvelocity::Vector{<:Real}`: angular velocity of the orbital motion of the spacecraft
+* `LVLH::StructArray`: data container for the time history of the LVLH frame
+
+"""
+struct OrbitData
+    angularposition::Vector{<:Real}
+    angularvelocity::Vector{<:Real}
+    LVLH::StructArray
+end
+
 function initorbitdata(datanum::Integer, orbitalframe::Frame)
 
-    return StructArray(
-        angularposition = zeros(datanum),
-        angularvelocity = zeros(datanum),
-        LVLH = initframes(datanum, orbitalframe)
+    return OrbitData(
+        zeros(datanum),
+        zeros(datanum),
+        initframes(datanum, orbitalframe)
     )
 end
 

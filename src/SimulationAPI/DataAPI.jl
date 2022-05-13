@@ -31,7 +31,7 @@ Here, we specify `output` as an output root directory. The system generates a ne
 module DataAPI
 
 using DataFrames, CSV, StaticArrays, StructArrays, Dates
-using ..Frames, ..TimeLine
+using ..Frames, ..TimeLine, ..Orbit
 
 export SimData
 
@@ -62,7 +62,7 @@ struct SimData
     orbit::DataFrame
 
     # Constructor
-    SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::StructVector) = begin
+    SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::OrbitData) = begin
 
         # Get current time stamp in UTC
         timestamp = Dates.format(Dates.now(), "yyyy-mm-dd--HH-MM-SS")
@@ -122,7 +122,7 @@ end
 
 convert internal data container for orbital motion to the data frame object by mapping each fields
 """
-function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::StructVector)::DataFrame
+function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::OrbitData)::DataFrame
 
     orbit = DataFrame(
         "time" => time,
