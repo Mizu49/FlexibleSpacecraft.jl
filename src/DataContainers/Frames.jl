@@ -38,10 +38,7 @@ initialize `StructArray` of time-variant coordinate frame
 """
 function initframes(datanum, initialframe::Frame)
 
-    frames = StructArray(
-        Frame(zeros(3), zeros(3), zeros(3)) for _ in 1:datanum
-    )
-
+    frames = [Frame(zeros(3), zeros(3), zeros(3)) for _ in 1:datanum]
     frames[1] = initialframe
 
     return frames
