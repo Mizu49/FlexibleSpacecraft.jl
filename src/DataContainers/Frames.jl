@@ -1,6 +1,6 @@
 module Frames
 
-using StaticArrays, StructArrays
+using StaticArrays
 
 export Frame, RefFrame, ECI_frame, initframes, getframe, ECI2BodyFrame
 
@@ -34,7 +34,7 @@ Base.:-(a::Frame, b::Frame)::Frame = Frame(a.x - b.x, a.y - b.y, a.z - b.z)
 """
     initframes(datanum, initial_coordinate::Frame)
 
-initialize `StructArray` of time-variant coordinate frame
+initialize data container of time-variant coordinate frame
 """
 function initframes(datanum, initialframe::Frame)
 

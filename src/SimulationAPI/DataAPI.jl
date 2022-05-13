@@ -30,7 +30,7 @@ Here, we specify `output` as an output root directory. The system generates a ne
 """
 module DataAPI
 
-using DataFrames, CSV, StaticArrays, StructArrays, Dates
+using DataFrames, CSV, StaticArrays, Dates
 using ..Frames, ..TimeLine, ..Orbit
 
 export SimData

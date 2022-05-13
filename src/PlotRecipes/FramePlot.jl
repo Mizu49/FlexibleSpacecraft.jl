@@ -4,7 +4,6 @@ using Plots
 # Include module `TimeLine`
 import ...TimeLine
 using ...Frames: Frame
-using StructArrays: StructArray
 
 export dispframe, framegif
 
@@ -88,7 +87,7 @@ end
 
 Generates animation of frame rotation as GIF figure
 """
-function framegif(time::StepRangeLen, refframe::Frame, frames::StructArray; Tgif = 60, FPS = 3, timerange = (0, 0))
+function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; Tgif = 60, FPS = 3, timerange = (0, 0))
 
     # get the index for data
     dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))

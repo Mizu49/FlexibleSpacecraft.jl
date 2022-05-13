@@ -6,7 +6,7 @@ module of time line of the physical quantity of spacecraft attitude dynamics
 """
 module TimeLine
 
-using StaticArrays, StructArrays
+using StaticArrays
 using ..Frames
 
 export AttitudeData, InitData, initsimulationdata, timeindex
@@ -55,8 +55,8 @@ struct AttitudeData
     datanum::Int
     quaternion::Vector{SVector{4, <:Real}}
     angularvelocity::Vector{SVector{3, <:Real}}
-    bodyframe::StructArray
-    RPYframe::StructArray
+    bodyframe::Vector{<:Frame}
+    RPYframe::Vector{<:Frame}
     eulerangle::Vector{SVector{3, <:Real}}
 end
 

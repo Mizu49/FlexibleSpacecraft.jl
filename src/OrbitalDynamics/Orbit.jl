@@ -7,7 +7,6 @@ module Orbit
 
 using ..Frames
 using ..TimeLine
-using StructArrays
 using StaticArrays
 
 export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
@@ -151,7 +150,7 @@ struct of the data containers for the orbital motion
 struct OrbitData
     angularposition::Vector{<:Real}
     angularvelocity::Vector{<:Real}
-    LVLH::StructArray
+    LVLH::Vector{<:Frame}
 end
 
 function initorbitdata(datanum::Integer, orbitalframe::Frame)
