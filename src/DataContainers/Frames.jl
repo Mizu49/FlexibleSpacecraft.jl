@@ -23,7 +23,6 @@ const RefFrame = Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
 Constant variable that specifies ECI frame
 """
 const ECI_frame = Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
-
 """
     Base.:-(a::Frame, b::Frame)::Frame
 

@@ -22,7 +22,7 @@ Return is tuple of `(time, attitudedata, orbitdata)`
 (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 ```
 """
-function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
 

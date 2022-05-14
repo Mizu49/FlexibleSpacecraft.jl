@@ -3,7 +3,7 @@ module FramePlot
 using Plots
 # Include module `TimeLine`
 import ...TimeLine
-using ...Frames: Frame
+using ...Frames
 
 export dispframe, framegif
 
@@ -105,7 +105,7 @@ function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; 
 
     # create animation
     anim = @animate for idx = animindex
-        frame = TimeLine.getframe(time[idx], Tsampling, frames)
+        frame = getframe(time[idx], Tsampling, frames)
         dispframe(time[idx], refframe, frame)
     end
 
