@@ -5,14 +5,11 @@ using Reexport
 @reexport using LinearAlgebra
 @reexport using Plots
 
-include("utilities.jl")
+include("DataContainers/DataContainers.jl")
+@reexport using .DataContainers
 
 include("DataContainers/Frames.jl")
 @reexport using .Frames
-
-# Include module `TimeLine`
-include("DataContainers/TimeLine.jl")
-@reexport using .TimeLine
 
 # Include module `Orbit`
 include("OrbitalDynamics/Orbit.jl")
