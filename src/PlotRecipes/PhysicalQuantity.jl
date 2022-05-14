@@ -2,8 +2,8 @@ module PhysicalQuantity
 
 using Plots
 
-# Include module `TimeLine`
-import ...TimeLine
+# Include module `DataContainers`
+import ...DataContainers
 using StaticArrays
 
 export angularvelocities, eulerangles, quaternions
@@ -71,7 +71,7 @@ end
     label --> datalabel
 
     # get the index for data
-    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
 
     return time[dataindex], quaternion[dataindex, index]
 end
@@ -83,7 +83,7 @@ end
     label --> datalabel
 
     # get the index for data
-    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
 
     return time[dataindex], angularvelocity[dataindex, axisindex]
 end

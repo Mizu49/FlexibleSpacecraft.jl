@@ -6,7 +6,7 @@ Informations about spacecraft orbit
 module Orbit
 
 using ..Frames
-using ..TimeLine
+using ..DataContainers
 using StaticArrays
 
 export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
