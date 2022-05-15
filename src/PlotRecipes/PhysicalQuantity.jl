@@ -61,7 +61,7 @@ function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector
     return plt
 end
 
-@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}, index::Integer; timerange = (0, 0), ylabelname = "No name", datalabel::String = "")
+@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}, index::Integer; timerange = (0, 0), ylabelname = "No name", datalabel = "")
     if !(1 <= index <= 4)
         throw(BoundsError(quaternion[1], index))
     end
@@ -76,7 +76,7 @@ end
     return time[dataindex], quaternion[dataindex, index]
 end
 
-@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}, axisindex::Integer; timerange = (0, 0), ylabelname = "No name", datalabel::String = "")
+@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}, axisindex::Integer; timerange = (0, 0), ylabelname = "No name", datalabel = "")
 
     xguide --> "Time (s)"
     yguide --> ylabelname
