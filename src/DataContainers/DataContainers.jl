@@ -1,4 +1,14 @@
+"""
+    DataContainers
 
+submodule for accomodating the features and interface functions for handling the data containers for the `FlexibleSpacecraft.jl`.
+
+# Main features
+
+* `function getdataindex`
+
+This submodule also includes the multiple dispatch for the `::AbstractVector{<:AbstractVector}` type data container used for simulation. Please be noted that you may need to pay attention to this feature when you manually code your simulation using the `::AbstractVector{<:AbstractVector}` type variables.
+"""
 module DataContainers
 
 using StaticArrays
