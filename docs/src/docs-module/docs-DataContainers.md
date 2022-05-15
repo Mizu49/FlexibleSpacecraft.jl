@@ -1,9 +1,4 @@
-# Data container
-
-Data container is the set of variables that contains all the necessary data of the simulation. We have two sub-modules for data container.
-
-* `Frames`: data container for frame representation
-* `TimeLine`: data container for the time-variant physical quantities
+# Data container and its handling interfaces
 
 ## `Frames`
 
@@ -15,10 +10,15 @@ Order   = [:type, :function]
 Pages   = ["Frames.jl"]
 ```
 
-## `TimeLine`
+## `DataContainers`
+
+`DataContainers.jl` is the set of function that deals with the handling of all the necessary data container of the simulation. 
+
+!!! note "Dispatch of the `::AbstractVector{<:AbstractVector}`"
+    This submodule also includes the multiple dispatch for the `::AbstractVector{<:AbstractVector}` type data container used for simulation. Please be noted that you may need to pay attention to this feature when you manually code your simulation using the `::AbstractVector{<:AbstractVector}` type variables.
 
 ```@autodocs
-Modules = [TimeLine]
+Modules = [DataContainers]
 Order   = [:type, :function]
-Pages   = ["TimeLine.jl"]
+Pages   = ["DataContainers.jl"]
 ```

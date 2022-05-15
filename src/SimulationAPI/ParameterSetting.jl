@@ -5,7 +5,7 @@ using YAML
 using ..Frames
 using ..Orbit
 using ..RigidBody
-using ..TimeLine
+using ..Attitude
 using ..Disturbance
 
 export SimulationConfig, setorbit, setdynamicsmodel, setsimconfig, setinitvalue, setdisturbance

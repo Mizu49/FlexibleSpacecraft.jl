@@ -1,5 +1,5 @@
 """
-    runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+    runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
@@ -22,7 +22,7 @@ Return is tuple of `(time, attitudedata, orbitdata)`
 (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
 ```
 """
-function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
 
@@ -60,7 +60,7 @@ function runsimulation(model, initvalue::TimeLine.InitData, orbitinfo::Orbit.Orb
         attitudedata.bodyframe[loopCounter+1] = C_ECI2Body * RefFrame
 
         C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
-        attitudedata.rollpitchyawframe[loopCounter+1] = C_LVLH2Body * RefFrame
+        attitudedata.RPYframe[loopCounter+1] = C_LVLH2Body * RefFrame
         attitudedata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
