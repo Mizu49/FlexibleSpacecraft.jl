@@ -14,7 +14,7 @@ module RigidBody
 using StaticArrays
 using ..Frames
 
-export RigidBodyModel, update_angularvelocity
+export RigidBodyModel
 
 """
     struct RigidBodyModel

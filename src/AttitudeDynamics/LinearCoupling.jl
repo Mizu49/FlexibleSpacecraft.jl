@@ -8,7 +8,7 @@ module LinearCoupling
 using StaticArrays
 using ..Frames
 
-export LinearCouplingModel, update_angularvelocity
+export LinearCouplingModel
 
 """
     struct LinearCouplingModel

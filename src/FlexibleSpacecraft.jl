@@ -18,12 +18,8 @@ include("OrbitalDynamics/Orbit.jl")
 include("Disturbances/Disturbance.jl")
 @reexport using .Disturbance
 
-# Include module `RigidBody.jl`
-include("AttitudeDynamics/RigidBody.jl")
-@reexport using .RigidBody
-
-include("AttitudeDynamics/LinearCoupling.jl")
-@reexport using .LinearCoupling
+include("AttitudeDynamics/DynamicsBase.jl")
+@reexport using .DynamicsBase
 
 include("AttitudeDynamics/Attitude.jl")
 @reexport using .Attitude
