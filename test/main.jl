@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # Set the dynamics model
-model = setdynamicsmodel("./test/spacecraft.yml",)
+model = setdynamicsmodel("./test/spacecraft2.yml",)
 
 # define a orbit info
 orbitinfo = setorbit("./test/orbit2.yml", ECI_frame)
