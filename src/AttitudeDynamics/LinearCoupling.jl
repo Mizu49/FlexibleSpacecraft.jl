@@ -18,7 +18,7 @@ Data container of spacecraft model attitude dynamics model with the linear attit
 # Fields of struct `LinearCouplingModel`
 
 * `inertia::SMatrix{3, 3, <:Real}`: Inertia matrix of spacecraft platform
-* `Dcplt::SMatrix{3, 3, <:Real}`: coefficient matric for the coupling dynamics with the structural motion
+* `Dcplt::SMatrix{<:Real}`: coefficient matric for the coupling dynamics with the structural motion. The size of this matrix is 3 x (dimstructure)
 
 """
 struct LinearCouplingModel
@@ -26,17 +26,17 @@ struct LinearCouplingModel
     inertia::SMatrix{3, 3, <:Real}
 
     # coefficient matrix for the coupling dynamics
-    Dcplg::SMatrix{3, 3, <:Real}
+    Dcplg::SMatrix{<:Real}
 
     # counstructor for `LinearCouplingModel`
-    LinearCouplingModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}) = begin
+    LinearCouplingModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}, dimstructurestate::Int) = begin
 
         if size(inertia) != (3, 3)
             throw(DimensionMismatch("dimension of `inertia` is invalid, it should be 3x3."))
         end
 
         inertiamat = SMatrix{3, 3}(inertia)
-        Dcplg = SMatrix{3, 3}(couplingmat)
+        Dcplg = SMatrix{3, dimstructurestate}(couplingmat)
 
         return new(inertiamat, Dcplg)
     end
