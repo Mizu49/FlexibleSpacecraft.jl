@@ -2,8 +2,7 @@ module FlexibleSpacecraft
 
 using Reexport
 
-@reexport using LinearAlgebra
-@reexport using Plots
+@reexport using LinearAlgebra, Plots, StaticArrays
 
 include("DataContainers/DataContainers.jl")
 @reexport using .DataContainers
@@ -22,6 +21,9 @@ include("Disturbances/Disturbance.jl")
 # Include module `RigidBody.jl`
 include("AttitudeDynamics/RigidBody.jl")
 @reexport using .RigidBody
+
+include("AttitudeDynamics/LinearCoupling.jl")
+@reexport using .LinearCoupling
 
 include("AttitudeDynamics/Attitude.jl")
 @reexport using .Attitude
