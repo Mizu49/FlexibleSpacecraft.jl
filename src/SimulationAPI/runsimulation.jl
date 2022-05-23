@@ -66,11 +66,14 @@ function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.Orb
         # Disturbance torque
         disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
 
+        # structural input is zero at this point
+        structuralinput = zeros(6)
+
         # Time evolution of the system
         if loopCounter != datanum - 1
 
             # Update angular velocity
-            attitudedata.angularvelocity[loopCounter+2] = update_angularvelocity(model, time[loopCounter + 1], attitudedata.angularvelocity[loopCounter+1], simconfig.samplingtime, attitudedata.bodyframe[loopCounter+1], disturbance)
+            attitudedata.angularvelocity[loopCounter+2] = update_angularvelocity(model, time[loopCounter + 1], attitudedata.angularvelocity[loopCounter+1], simconfig.samplingtime, attitudedata.bodyframe[loopCounter+1], disturbance, structuralinput)
 
             # Update quaternion
             attitudedata.quaternion[loopCounter+2] = update_quaternion(attitudedata.angularvelocity[loopCounter+1], attitudedata.quaternion[loopCounter+1], simconfig.samplingtime)

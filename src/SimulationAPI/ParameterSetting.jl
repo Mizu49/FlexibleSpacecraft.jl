@@ -4,7 +4,7 @@ using YAML
 
 using ..Frames
 using ..Orbit
-using ..RigidBody
+using ..RigidBody, ..LinearCoupling
 using ..Attitude
 using ..Disturbance
 
@@ -73,10 +73,15 @@ function setdynamicsmodel(filepath::String)
         throw(AssertionError("`property` does not match with `dynamics`"))
     end
 
-    if lawdata["dynamicsmodel"] == "Rigid body"
+    if lawdata["dynamicsmodel"] == "Linear coupling"
         inertia = reshape(lawdata["platform"]["inertia"], (3,3))
 
-        model = RigidBody.RigidBodyModel(inertia)
+        # get dimension of the structural motion of the flexible appendages
+        dimstructurestate = Int(length(lawdata["platform"]["coupling"]) / 3)
+
+        Dcplg = reshape(lawdata["platform"]["coupling"], (3, dimstructurestate))
+
+        model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
     else
         error("configuration for dynamics model in YAML file is set improperly")
     end

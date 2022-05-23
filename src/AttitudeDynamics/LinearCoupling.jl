@@ -26,7 +26,7 @@ struct LinearCouplingModel
     inertia::SMatrix{3, 3, <:Real}
 
     # coefficient matrix for the coupling dynamics
-    Dcplg::SMatrix{<:Real}
+    Dcplg::SMatrix
 
     # counstructor for `LinearCouplingModel`
     LinearCouplingModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}, dimstructurestate::Int) = begin

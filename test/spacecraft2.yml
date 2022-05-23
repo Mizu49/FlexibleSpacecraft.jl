@@ -2,7 +2,7 @@ property: dynamics
 name: example spacecraft No. 2
 note: This model is for test purpose
 
-dynamicsmodel: Rigid body
+dynamicsmodel: Linear coupling
 
 platform:
     inertia: [

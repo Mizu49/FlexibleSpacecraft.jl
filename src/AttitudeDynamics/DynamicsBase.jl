@@ -26,15 +26,16 @@ update the angular velocity of the angular velocity of the attitude dynamics. In
 * `Tsampling::Real`: sampling period for the dynamics simulation
 * `currentbodyframe::Frame`: current frame variable of the spacecraft's body fixed frame
 * `disturbance::AbstractVector{<:Real}`: disturbance input vector
+* `structuralinput::AbstractVector{<:Real}`: input vector for the structural motion
 
 """
-function update_angularvelocity(model::TypeModels, currentTime::Real, angularvelocity::AbstractVector{<:Real}, Tsampling::Real, currentbodyframe::Frame, disturbance::AbstractVector{<:Real})::SVector{3, <:Real}
+function update_angularvelocity(model::TypeModels, currentTime::Real, angularvelocity::AbstractVector{<:Real}, Tsampling::Real, currentbodyframe::Frame, disturbance::AbstractVector{<:Real}, structuralinput::AbstractVector{<:Real})::SVector{3, <:Real}
 
     # switch based on the type of `model`
     if typeof(model) == RigidBodyModel
         angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, disturbance)
     elseif typeof(model) == LinearCouplingModel
-        angularvelocity = LinearCouplingModel.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, disturbance)
+        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, disturbance, structuralinput)
     else
         error("given model is invalid")
     end
