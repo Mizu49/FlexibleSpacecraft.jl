@@ -1,4 +1,17 @@
 """
+    SimulationCore
+
+submodule contains the high-level interface functions and core implementation of the simulation features
+"""
+module SimulationCore
+
+using LinearAlgebra, StaticArrays
+using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..Structures, ..ParameterSetting
+
+export runsimulation
+
+############# runsimulation function ##################################
+"""
     runsimulation(attitudemodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
@@ -84,4 +97,6 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
     end
 
     return (time, attitudedata, orbitdata)
+end
+
 end

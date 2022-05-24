@@ -40,8 +40,8 @@ include("Structures/Structures.jl")
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI
 
-include("SimulationAPI/runsimulation.jl")
-export runsimulation
+include("Core/SimulationCore.jl")
+@reexport using .SimulationCore
 
 include("CLI/CLI.jl")
 
