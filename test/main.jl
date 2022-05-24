@@ -4,10 +4,13 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # Set the dynamics model
-model = setdynamicsmodel("./test/spacecraft2.yml",)
+attitudemodel = setdynamicsmodel("./test/spacecraft2.yml",)
 
 # define a orbit info
 orbitinfo = setorbit("./test/orbit2.yml", ECI_frame)
+
+# define parameter and simulation model for the flexible appendages
+(strparam, strmodel) = setstructure("./test/module-tests/param-springmass.yml")
 
 # Set disturbance torque
 distconfig = setdisturbance("./test/disturbance.yml")
@@ -20,7 +23,7 @@ initvalue = setinitvalue("./test/initvalue.yml")
 
 # run simulation
 println("Begin simulation!")
-@time (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, attitudedata, orbitdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
 @test quaternion_constraint(attitudedata.quaternion)

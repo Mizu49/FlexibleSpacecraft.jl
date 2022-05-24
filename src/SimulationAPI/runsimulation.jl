@@ -1,10 +1,11 @@
 """
-    runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+    runsimulation(attitudemodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
 ## Arguments
-* `model`: Dynamics model of the system
+* `attitudemodel`: Attitude dynamics model of the system
+* `strmodel`: Structural model of the flexible appendages
 * `initvalue::InitData`: Inital value of the simulation physical states
 * `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
 * `simconfig::SimulationConfig`: Simulation configuration ParameterSetting
@@ -19,10 +20,10 @@ Return is tuple of `(time, attitudedata, orbitdata)`
 
 ## Usage
 ```
-(time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+(time, attitudedata, orbitdata) = runsimulation(attitudemodel, initvalue, orbitinfo, distconfig, simconfig)
 ```
 """
-function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
 
@@ -64,7 +65,7 @@ function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.Orb
         attitudedata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
-        disturbance = disturbanceinput(distconfig, model.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
+        disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
 
         # structural input is zero at this point
         structuralinput = zeros(6)
@@ -73,7 +74,7 @@ function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.Orb
         if loopCounter != datanum - 1
 
             # Update angular velocity
-            attitudedata.angularvelocity[loopCounter+2] = update_angularvelocity(model, time[loopCounter + 1], attitudedata.angularvelocity[loopCounter+1], simconfig.samplingtime, attitudedata.bodyframe[loopCounter+1], disturbance, structuralinput)
+            attitudedata.angularvelocity[loopCounter+2] = update_angularvelocity(attitudemodel, time[loopCounter + 1], attitudedata.angularvelocity[loopCounter+1], simconfig.samplingtime, attitudedata.bodyframe[loopCounter+1], disturbance, structuralinput)
 
             # Update quaternion
             attitudedata.quaternion[loopCounter+2] = update_quaternion(attitudedata.angularvelocity[loopCounter+1], attitudedata.quaternion[loopCounter+1], simconfig.samplingtime)
