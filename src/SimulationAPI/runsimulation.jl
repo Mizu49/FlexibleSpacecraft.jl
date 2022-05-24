@@ -30,7 +30,7 @@ function runsimulation(model, initvalue::Attitude.InitData, orbitinfo::Orbit.Orb
     datanum = floor(Int, simconfig.simulationtime/simconfig.samplingtime) + 1;
 
     # Initialize data array
-    attitudedata = initsimulationdata(datanum, initvalue)
+    attitudedata = initattitudedata(datanum, initvalue)
 
     C_ECI2OrbitPlane = Orbit.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
 

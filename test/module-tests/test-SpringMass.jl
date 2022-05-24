@@ -14,7 +14,7 @@ times = 0:Ts:10
 
 datanum = size(times, 1)
 
-simdata = initdatacontainer(model, [0, 0, 0, 0], datanum)
+simdata = initappendagedata(model, [0, 0, 0, 0], datanum)
 
 @time for cnt = 1:datanum
     # Calculate the state in physical coordinate

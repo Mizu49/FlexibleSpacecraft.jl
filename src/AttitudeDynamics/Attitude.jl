@@ -8,7 +8,7 @@ module Attitude
 using StaticArrays
 using ..Frames
 
-export InitData, AttitudeData, initsimulationdata, update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
+export InitData, AttitudeData, initattitudedata, update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
 
 """
     function _initangularvelocity(simdata_num, initital_value::Vector)
@@ -60,11 +60,11 @@ struct AttitudeData
 end
 
 """
-    initsimulationdata(datanum::Int, initialdata::InitData)
+    initattitudedata(datanum::Int, initialdata::InitData)
 
 Initialize the data container for the attitude dynamics
 """
-function initsimulationdata(datanum::Int, initialdata::InitData)
+function initattitudedata(datanum::Int, initialdata::InitData)
 
     return AttitudeData(
         datanum,
