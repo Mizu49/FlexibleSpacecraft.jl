@@ -54,42 +54,42 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
     orbitdata = Orbit.initorbitdata(datanum, orbitinfo.planeframe)
 
     # main loop of the simulation
-    for loopCounter = 0:datanum - 1
+    for cnt = 0:datanum - 1
 
         # Update orbit state
-        orbitdata.angularvelocity[loopCounter+1] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
-        orbitdata.angularposition[loopCounter+1] = orbitdata.angularvelocity[loopCounter+1] * time[loopCounter+1]
+        orbitdata.angularvelocity[cnt+1] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
+        orbitdata.angularposition[cnt+1] = orbitdata.angularvelocity[cnt+1] * time[cnt+1]
 
         # update transformation matrix from orbit plane frame to radial along tract frame
-        C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[loopCounter+1], time[loopCounter+1])
+        C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[cnt+1], time[cnt+1])
         C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
 
         # calculates transformation matrix from orbital plane frame to radial along frame
         C_ECI2LVLH = T_RAT2LVLH * C_ECI2RAT
-        orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * RefFrame
+        orbitdata.LVLH[cnt + 1] = C_ECI2LVLH * RefFrame
 
         # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[loopCounter+1])
-        attitudedata.bodyframe[loopCounter+1] = C_ECI2Body * RefFrame
+        C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[cnt+1])
+        attitudedata.bodyframe[cnt+1] = C_ECI2Body * RefFrame
 
         C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
-        attitudedata.RPYframe[loopCounter+1] = C_LVLH2Body * RefFrame
-        attitudedata.eulerangle[loopCounter+1] = dcm2euler(C_LVLH2Body)
+        attitudedata.RPYframe[cnt+1] = C_LVLH2Body * RefFrame
+        attitudedata.eulerangle[cnt+1] = dcm2euler(C_LVLH2Body)
 
         # Disturbance torque
-        disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[loopCounter+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[loopCounter + 1].z)
+        disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[cnt+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[cnt + 1].z)
 
         # structural input is zero at this point
         structuralinput = zeros(6)
 
         # Time evolution of the system
-        if loopCounter != datanum - 1
+        if cnt != datanum - 1
 
             # Update angular velocity
-            attitudedata.angularvelocity[loopCounter+2] = update_angularvelocity(attitudemodel, time[loopCounter + 1], attitudedata.angularvelocity[loopCounter+1], simconfig.samplingtime, attitudedata.bodyframe[loopCounter+1], disturbance, structuralinput)
+            attitudedata.angularvelocity[cnt+2] = update_angularvelocity(attitudemodel, time[cnt + 1], attitudedata.angularvelocity[cnt+1], simconfig.samplingtime, attitudedata.bodyframe[cnt+1], disturbance, structuralinput)
 
             # Update quaternion
-            attitudedata.quaternion[loopCounter+2] = update_quaternion(attitudedata.angularvelocity[loopCounter+1], attitudedata.quaternion[loopCounter+1], simconfig.samplingtime)
+            attitudedata.quaternion[cnt+2] = update_quaternion(attitudedata.angularvelocity[cnt+1], attitudedata.quaternion[cnt+1], simconfig.samplingtime)
 
         end
 
