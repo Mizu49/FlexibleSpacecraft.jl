@@ -38,20 +38,22 @@ Return is tuple of `(time, attitudedata, orbitdata)`
 """
 function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
+    # array of the time
     time = 0:simconfig.samplingtime:simconfig.simulationtime
 
     # Numbers of simulation data
     datanum = floor(Int, simconfig.simulationtime/simconfig.samplingtime) + 1;
 
-    # Initialize data array
+    # Initialize data containers
     attitudedata = initattitudedata(datanum, initvalue)
 
+    # transformation matrix from ECI frame to orbital plane frame
     C_ECI2OrbitPlane = Orbit.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
 
     # initialize orbit state data array
     orbitdata = Orbit.initorbitdata(datanum, orbitinfo.planeframe)
-    RATframe = initframes(datanum, orbitinfo.planeframe)
 
+    # main loop of the simulation
     for loopCounter = 0:datanum - 1
 
         # Update orbit state
@@ -65,9 +67,6 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
         # calculates transformation matrix from orbital plane frame to radial along frame
         C_ECI2LVLH = T_RAT2LVLH * C_ECI2RAT
         orbitdata.LVLH[loopCounter + 1] = C_ECI2LVLH * RefFrame
-        # Update spacecraft Radial Along Track (RAT) frame
-        RATframe[loopCounter+1] = Orbit.update_radial_along_track(orbitinfo.planeframe, orbitinfo.orbitalelement, time[loopCounter+1], orbitdata.angularvelocity[loopCounter+1])
-
 
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[loopCounter+1])
