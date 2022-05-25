@@ -56,33 +56,32 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
     # main loop of the simulation
     for cnt = 0:datanum - 1
 
-        # Update orbit state
+        ############### orbit state ##################################################
         orbitdata.angularvelocity[cnt+1] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
         orbitdata.angularposition[cnt+1] = orbitdata.angularvelocity[cnt+1] * time[cnt+1]
 
-        # update transformation matrix from orbit plane frame to radial along tract frame
+        # calculation of the LVLH frame and its transformation matrix
         C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[cnt+1], time[cnt+1])
-        C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
-
-        # calculates transformation matrix from orbital plane frame to radial along frame
-        C_ECI2LVLH = T_RAT2LVLH * C_ECI2RAT
+        C_ECI2LVLH = T_RAT2LVLH * C_OrbitPlane2RAT * C_ECI2OrbitPlane
         orbitdata.LVLH[cnt + 1] = C_ECI2LVLH * RefFrame
 
+        ############### attitude #####################################################
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[cnt+1])
         attitudedata.bodyframe[cnt+1] = C_ECI2Body * RefFrame
-
+        # update the euler angle representations
         C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
         attitudedata.RPYframe[cnt+1] = C_LVLH2Body * RefFrame
         attitudedata.eulerangle[cnt+1] = dcm2euler(C_LVLH2Body)
 
+        ############### disturbance torque input to the attitude dynamics ############
         # Disturbance torque
         disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[cnt+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[cnt + 1].z)
 
-        # structural input is zero at this point
+        ############### structural dynamics of the flexible appendages ###############
         structuralinput = zeros(6)
 
-        # Time evolution of the system
+        ################## Time evolution of the system ##############################
         if cnt != datanum - 1
 
             # Update angular velocity
