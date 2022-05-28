@@ -23,7 +23,7 @@ initvalue = setinitvalue("./test/initvalue.yml")
 
 # run simulation
 println("Begin simulation!")
-@time (time, attitudedata, orbitdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
 @test quaternion_constraint(attitudedata.quaternion)

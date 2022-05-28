@@ -69,7 +69,7 @@ end
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function update_angularvelocity(model::LinearCouplingModel, currentTime::Real, angularvelocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}}, structuralinput::Vector{<:Real})::SVector{3, <:Real}
+function update_angularvelocity(model::LinearCouplingModel, currentTime::Real, angularvelocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}}, structuralinput::AbstractVector{<:Real})::SVector{3, <:Real}
 
     # define body frame matrix from struct `Frame`
     bodyframematrix = SMatrix{3, 3}(hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z))
