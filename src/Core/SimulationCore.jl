@@ -92,14 +92,15 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
         strdata.disturbance[cnt+1] = strdistinput
 
         ############### coupling dynamics of the flexible spacecraft ###############
-        structuralinput = strdata.physicalstate[cnt+1]
+        straccel = zeros(2)
+        strvelocity = zeros(2)
         attitudeinput = attitudedata.angularvelocity[cnt+1]
 
         ################## Time evolution of the system ##############################
         if cnt != datanum - 1
 
             # Update angular velocity
-            attitudedata.angularvelocity[cnt+2] = update_angularvelocity(attitudemodel, time[cnt+1], attitudedata.angularvelocity[cnt+1], simconfig.samplingtime, attitudedata.bodyframe[cnt+1], disturbance, structuralinput)
+            attitudedata.angularvelocity[cnt+2] = update_angularvelocity(attitudemodel, time[cnt+1], attitudedata.angularvelocity[cnt+1], simconfig.samplingtime, attitudedata.bodyframe[cnt+1], disturbance, straccel, strvelocity)
 
             # Update quaternion
             attitudedata.quaternion[cnt+2] = update_quaternion(attitudedata.angularvelocity[cnt+1], attitudedata.quaternion[cnt+1], simconfig.samplingtime)

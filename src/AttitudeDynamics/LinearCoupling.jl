@@ -45,12 +45,28 @@ end
 """
     function _calc_differential_dynamics
 
-Get the differential of equation of dynamics. Internal function for module `RigidBody`
+Get the differential of equation of dynamics. Internal function for module `LinearCoupling.jl`
 
 # Arguments
 
+* `model::LinearCouplingModel`: attitude dynamics model
+* `currentTime::Real`: current time
+* `angularvelocity::AbstractVector{<:Real}`: angular velocity vector
+* `current_body_frame::SMatrix{3, 3, <:Real, 9}`: current body frame matrix
+* `distinput::AbstractVector{<:Real}`: disturbance torque input vector
+* `straccel::AbstractVector{<:Real}`: acceleration of the structural response of the flexible appendages
+* `strvelocity::AbstractVector{<:Real}`: velocity of the structural response of the flexible appendages
+
 """
-function _calc_differential_dynamics(model::LinearCouplingModel, currentTime::Real, angularvelocity::AbstractVector{<:Real}, current_body_frame::SMatrix{3, 3, <:Real, 9}, disturbance::AbstractVector{<:Real}, structuralinput::AbstractVector{<:Real})::SVector{3, <:Real}
+function _calc_differential_dynamics(
+    model::LinearCouplingModel,
+    currentTime::Real,
+    angularvelocity::AbstractVector{<:Real},
+    current_body_frame::SMatrix{3, 3, <:Real, 9},
+    distinput::AbstractVector{<:Real},
+    straccel::AbstractVector{<:Real},
+    strvelocity::AbstractVector{<:Real}
+    )::SVector{3, <:Real}
 
     # skew matrix of angular velocity vector
     skewOmega = [
@@ -59,25 +75,49 @@ function _calc_differential_dynamics(model::LinearCouplingModel, currentTime::Re
         -angularvelocity[2] angularvelocity[1] 0]
 
     # calculate differential of equation of motion
-    differential = SVector{3}(inv(model.inertia) * (disturbance - current_body_frame' * model.inertia * skewOmega * current_body_frame * current_body_frame' * angularvelocity))
+    differential = SVector{3}(inv(model.inertia) * (
+        distinput # disturbance torque
+        - current_body_frame' * model.inertia * skewOmega * current_body_frame * current_body_frame' * angularvelocity # attitude dynamics
+        - model.Dcplg * straccel - skewOmega * model.Dcplg * strvelocity # structural coupling
+    ))
 
     return differential
 end
 
 """
-    function update_angularvelocity(model::LinearCouplingModel, currentTime::Real, angularvelocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}})::SVector{3, <:Real}
+    update_angularvelocity
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
+
+# Arguments
+
+* `model::LinearCouplingModel`: attitude dynamics model
+* `currentTime::Real`: current time
+* `angularvelocity::AbstractVector{<:Real}`: angular velocity vector
+* `current_body_frame::SMatrix{3, 3, <:Real, 9}`: current body frame matrix
+* `distinput::AbstractVector{<:Real}`: disturbance torque input vector
+* `straccel::AbstractVector{<:Real}`: acceleration of the structural response of the flexible appendages
+* `strvelocity::AbstractVector{<:Real}`: velocity of the structural response of the flexible appendages
+
 """
-function update_angularvelocity(model::LinearCouplingModel, currentTime::Real, angularvelocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}}, structuralinput::AbstractVector{<:Real})::SVector{3, <:Real}
+function update_angularvelocity(
+    model::LinearCouplingModel,
+    currentTime::Real,
+    angularvelocity::AbstractVector{<:Real},
+    Tsampling::Real,
+    currentbodyframe::Frame,
+    distinput::AbstractVector{<:Real},
+    straccel::AbstractVector{<:Real},
+    strvelocity::AbstractVector{<:Real}
+    )::SVector{3, <:Real}
 
     # define body frame matrix from struct `Frame`
     bodyframematrix = SMatrix{3, 3}(hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z))
 
-    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , bodyframematrix, disturbance, structuralinput)
-    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, bodyframematrix, disturbance, structuralinput)
-    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, bodyframematrix, disturbance, structuralinput)
-    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, bodyframematrix, disturbance, structuralinput)
+    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , bodyframematrix, distinput, straccel, strvelocity)
+    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, bodyframematrix, distinput, straccel, strvelocity)
+    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, bodyframematrix, distinput, straccel, strvelocity)
+    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, bodyframematrix, distinput, straccel, strvelocity)
 
     nextOmega = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 
