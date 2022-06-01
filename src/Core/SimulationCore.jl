@@ -38,11 +38,14 @@ Return is tuple of `(time, attitudedata, orbitdata)`
 """
 function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
+    # misc of the simulation implementation
+    Ts = simconfig.samplingtime
+
     # array of the time
-    time = 0:simconfig.samplingtime:simconfig.simulationtime
+    time = 0:Ts:simconfig.simulationtime
 
     # Numbers of simulation data
-    datanum = floor(Int, simconfig.simulationtime/simconfig.samplingtime) + 1;
+    datanum = floor(Int, simconfig.simulationtime/Ts) + 1;
 
     # Initialize data containers
     attitudedata = initattitudedata(datanum, initvalue)
@@ -85,28 +88,38 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
         disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[cnt+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[cnt + 1].z)
 
         ############### control and disturbance input to the flexible appendages
-        strdistinput = 5 * sin(10* time[cnt+1])
+        strdistinput = 2000 * sin(10* time[cnt+1])
         strctrlinput = 0
 
         strdata.controlinput[cnt+1] = strctrlinput
         strdata.disturbance[cnt+1] = strdistinput
 
         ############### coupling dynamics of the flexible spacecraft ###############
-        straccel = zeros(2)
-        strvelocity = zeros(2)
+
+        # calculation of the structural response input for the attitude dynamics
+        currentstrstate = strdata.state[cnt+1]
+        if cnt == 0
+            straccel = currentstrstate[3:end] / Ts
+        else
+            previousstrstate = strdata.state[cnt]
+            straccel = (currentstrstate[3:end] - previousstrstate[3:end]) / Ts
+        end
+        strvelocity = currentstrstate[3:end]
+
+        # angular velocity of the attitude dynamics for the structural coupling input
         attitudeinput = attitudedata.angularvelocity[cnt+1]
 
         ################## Time evolution of the system ##############################
         if cnt != datanum - 1
 
             # Update angular velocity
-            attitudedata.angularvelocity[cnt+2] = update_angularvelocity(attitudemodel, time[cnt+1], attitudedata.angularvelocity[cnt+1], simconfig.samplingtime, attitudedata.bodyframe[cnt+1], disturbance, straccel, strvelocity)
+            attitudedata.angularvelocity[cnt+2] = update_angularvelocity(attitudemodel, time[cnt+1], attitudedata.angularvelocity[cnt+1], Ts, attitudedata.bodyframe[cnt+1], disturbance, straccel, strvelocity)
 
             # Update quaternion
-            attitudedata.quaternion[cnt+2] = update_quaternion(attitudedata.angularvelocity[cnt+1], attitudedata.quaternion[cnt+1], simconfig.samplingtime)
+            attitudedata.quaternion[cnt+2] = update_quaternion(attitudedata.angularvelocity[cnt+1], attitudedata.quaternion[cnt+1], Ts)
 
             # Update the state of the flexible appendages
-            strdata.state[cnt+2] = updatestate(strmodel, simconfig.samplingtime, time[cnt+1], strdata.state[cnt+1], attitudeinput, strctrlinput, strdistinput)
+            strdata.state[cnt+2] = updatestate(strmodel, Ts, time[cnt+1], strdata.state[cnt+1], attitudeinput, strctrlinput, strdistinput)
 
         end
 
