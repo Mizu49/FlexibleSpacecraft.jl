@@ -60,66 +60,66 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
     orbitdata = Orbit.initorbitdata(datanum, orbitinfo.planeframe)
 
     # main loop of the simulation
-    for cnt = 0:datanum - 1
+    for iter = 1:datanum
 
         ############### orbit state ##################################################
-        orbitdata.angularvelocity[cnt+1] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
-        orbitdata.angularposition[cnt+1] = orbitdata.angularvelocity[cnt+1] * time[cnt+1]
+        orbitdata.angularvelocity[iter] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
+        orbitdata.angularposition[iter] = orbitdata.angularvelocity[iter] * time[iter]
 
         # calculation of the LVLH frame and its transformation matrix
-        C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[cnt+1], time[cnt+1])
+        C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
         C_ECI2LVLH = T_RAT2LVLH * C_OrbitPlane2RAT * C_ECI2OrbitPlane
-        orbitdata.LVLH[cnt + 1] = C_ECI2LVLH * RefFrame
+        orbitdata.LVLH[iter] = C_ECI2LVLH * RefFrame
 
         ############### attitude #####################################################
         # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[cnt+1])
-        attitudedata.bodyframe[cnt+1] = C_ECI2Body * RefFrame
+        C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[iter])
+        attitudedata.bodyframe[iter] = C_ECI2Body * RefFrame
         # update the euler angle representations
         C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
-        attitudedata.RPYframe[cnt+1] = C_LVLH2Body * RefFrame
-        attitudedata.eulerangle[cnt+1] = dcm2euler(C_LVLH2Body)
+        attitudedata.RPYframe[iter] = C_LVLH2Body * RefFrame
+        attitudedata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
 
         ############### flexible appendages state ####################################
-        strdata.physicalstate[cnt+1] = modalstate2physicalstate(strmodel, strdata.state[cnt+1])
+        strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ############### disturbance torque input to the attitude dynamics ############
         # Disturbance torque
-        disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[cnt+1], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[cnt + 1].z)
+        disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[iter].z)
 
         ############### control and disturbance input to the flexible appendages
-        strdistinput = 2000 * sin(10* time[cnt+1])
+        strdistinput = 100 * sin(10* time[iter])
         strctrlinput = 0
 
-        strdata.controlinput[cnt+1] = strctrlinput
-        strdata.disturbance[cnt+1] = strdistinput
+        strdata.controlinput[iter] = strctrlinput
+        strdata.disturbance[iter] = strdistinput
 
         ############### coupling dynamics of the flexible spacecraft ###############
 
         # calculation of the structural response input for the attitude dynamics
-        currentstrstate = strdata.state[cnt+1]
-        if cnt == 0
+        currentstrstate = strdata.state[iter]
+        if iter == 0
             straccel = currentstrstate[3:end] / Ts
         else
-            previousstrstate = strdata.state[cnt]
+            previousstrstate = strdata.state[iter]
             straccel = (currentstrstate[3:end] - previousstrstate[3:end]) / Ts
         end
         strvelocity = currentstrstate[3:end]
 
         # angular velocity of the attitude dynamics for the structural coupling input
-        attitudeinput = attitudedata.angularvelocity[cnt+1]
+        attitudeinput = attitudedata.angularvelocity[iter]
 
         ################## Time evolution of the system ##############################
-        if cnt != datanum - 1
+        if iter != datanum
 
             # Update angular velocity
-            attitudedata.angularvelocity[cnt+2] = update_angularvelocity(attitudemodel, time[cnt+1], attitudedata.angularvelocity[cnt+1], Ts, attitudedata.bodyframe[cnt+1], disturbance, straccel, strvelocity)
+            attitudedata.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, time[iter], attitudedata.angularvelocity[iter], Ts, attitudedata.bodyframe[iter], disturbance, straccel, strvelocity)
 
             # Update quaternion
-            attitudedata.quaternion[cnt+2] = update_quaternion(attitudedata.angularvelocity[cnt+1], attitudedata.quaternion[cnt+1], Ts)
+            attitudedata.quaternion[iter+1] = update_quaternion(attitudedata.angularvelocity[iter], attitudedata.quaternion[iter], Ts)
 
             # Update the state of the flexible appendages
-            strdata.state[cnt+2] = updatestate(strmodel, Ts, time[cnt+1], strdata.state[cnt+1], attitudeinput, strctrlinput, strdistinput)
+            strdata.state[iter+1] = updatestate(strmodel, Ts, time[iter], strdata.state[iter], attitudeinput, strctrlinput, strdistinput)
 
         end
 

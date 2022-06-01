@@ -29,11 +29,10 @@ println("Completed!")
 @test quaternion_constraint(attitudedata.quaternion)
 
 fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
-# fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity, timerange = (0, 10))
 display(fig1)
 
-# fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
-# display(fig2)
+fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
+display(fig2)
 
 # Plot of the body frame with respect to ECI frame
 fig3 = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 20, FPS = 8)
