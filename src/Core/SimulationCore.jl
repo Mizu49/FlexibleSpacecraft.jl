@@ -16,27 +16,39 @@ export runsimulation
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
-## Arguments
+# Arguments
+
 * `attitudemodel`: Attitude dynamics model of the system
 * `strmodel`: Structural model of the flexible appendages
 * `initvalue::InitData`: Inital value of the simulation physical states
+* `orbitinfo::Orbit.OrbitInfo`: information and model definition of the orbital dynamics
 * `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
 * `simconfig::SimulationConfig`: Simulation configuration ParameterSetting
 
-## Return
+# Return value
 
-Return is tuple of `(time, attitudedata, orbitdata)`
+Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
 * `time`: 1-D array of the time
-* `attitudedata`: StructArray of trajectory of the physical amount states of the spacecraft system
-* `orbitdata`: StructArray of the orbit state trajectory
+* `attidata`: Struct of time trajectory of the physical amount states of the spacecraft system
+* `orbitdata`: Struct of the orbit state trajectory
+* `strdata`: Struct of the trajectory of the state of the flexible appendage
 
-## Usage
+# Usage
+
+```julia
+(time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
 ```
-(time, attitudedata, orbitdata) = runsimulation(attitudemodel, initvalue, orbitinfo, distconfig, simconfig)
-```
+
 """
-function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+@inline function runsimulation(
+    attitudemodel,
+    strmodel,
+    initvalue::Attitude.InitData,
+    orbitinfo::Orbit.OrbitInfo,
+    distconfig::DisturbanceConfig,
+    simconfig::SimulationConfig
+    )::Tuple
 
     # misc of the simulation implementation
     Ts = simconfig.samplingtime
@@ -47,8 +59,8 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
     # Numbers of simulation data
     datanum = floor(Int, simconfig.simulationtime/Ts) + 1;
 
-    # Initialize data containers
-    attitudedata = initattitudedata(datanum, initvalue)
+    # Initialize data containers for the attitude dynamics
+    attidata = initattitudedata(datanum, initvalue)
 
     # initialize data container for the structural motion of the flexible appendages
     strdata = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
@@ -73,19 +85,18 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
 
         ############### attitude #####################################################
         # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(attitudedata.quaternion[iter])
-        attitudedata.bodyframe[iter] = C_ECI2Body * RefFrame
+        C_ECI2Body = ECI2BodyFrame(attidata.quaternion[iter])
+        attidata.bodyframe[iter] = C_ECI2Body * RefFrame
         # update the euler angle representations
         C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
-        attitudedata.RPYframe[iter] = C_LVLH2Body * RefFrame
-        attitudedata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
+        attidata.RPYframe[iter] = C_LVLH2Body * RefFrame
+        attidata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
 
         ############### flexible appendages state ####################################
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ############### disturbance torque input to the attitude dynamics ############
-        # Disturbance torque
-        disturbance = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[iter].z)
+        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[iter].z)
 
         ############### control and disturbance input to the flexible appendages
         strdistinput = 100 * sin(10* time[iter])
@@ -98,34 +109,34 @@ function runsimulation(attitudemodel, strmodel, initvalue::Attitude.InitData, or
 
         # calculation of the structural response input for the attitude dynamics
         currentstrstate = strdata.state[iter]
-        if iter == 0
+        if iter == 1
             straccel = currentstrstate[3:end] / Ts
         else
-            previousstrstate = strdata.state[iter]
+            previousstrstate = strdata.state[iter-1]
             straccel = (currentstrstate[3:end] - previousstrstate[3:end]) / Ts
         end
         strvelocity = currentstrstate[3:end]
 
         # angular velocity of the attitude dynamics for the structural coupling input
-        attitudeinput = attitudedata.angularvelocity[iter]
+        attiinput = attidata.angularvelocity[iter]
 
         ################## Time evolution of the system ##############################
         if iter != datanum
 
             # Update angular velocity
-            attitudedata.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, time[iter], attitudedata.angularvelocity[iter], Ts, attitudedata.bodyframe[iter], disturbance, straccel, strvelocity)
+            attidata.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, time[iter], attidata.angularvelocity[iter], Ts, attidata.bodyframe[iter], attidistinput, straccel, strvelocity)
 
             # Update quaternion
-            attitudedata.quaternion[iter+1] = update_quaternion(attitudedata.angularvelocity[iter], attitudedata.quaternion[iter], Ts)
+            attidata.quaternion[iter+1] = update_quaternion(attidata.angularvelocity[iter], attidata.quaternion[iter], Ts)
 
             # Update the state of the flexible appendages
-            strdata.state[iter+1] = updatestate(strmodel, Ts, time[iter], strdata.state[iter], attitudeinput, strctrlinput, strdistinput)
+            strdata.state[iter+1] = updatestate(strmodel, Ts, time[iter], strdata.state[iter], attiinput, strctrlinput, strdistinput)
 
         end
 
     end
 
-    return (time, attitudedata, orbitdata, strdata)
+    return (time, attidata, orbitdata, strdata)
 end
 
 end
