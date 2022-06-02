@@ -1,0 +1,18 @@
+property: dynamics
+name: example spacecraft No. 2
+note: This model is for test purpose
+
+dynamicsmodel: Linear coupling
+
+platform:
+    inertia: [
+        1000, 0, 0,
+        0, 1000, 0,
+        0, 0, 1000
+    ]
+
+    coupling: [
+        1, 0,
+        0, 1,
+        0, 0
+    ]

@@ -4,10 +4,13 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # Set the dynamics model
-model = setdynamicsmodel("./test/spacecraft.yml",)
+attitudemodel = setdynamicsmodel("./test/spacecraft2.yml",)
 
 # define a orbit info
 orbitinfo = setorbit("./test/orbit2.yml", ECI_frame)
+
+# define parameter and simulation model for the flexible appendages
+(strparam, strmodel) = setstructure("./test/module-tests/param-springmass.yml")
 
 # Set disturbance torque
 distconfig = setdisturbance("./test/disturbance.yml")
@@ -20,13 +23,12 @@ initvalue = setinitvalue("./test/initvalue.yml")
 
 # run simulation
 println("Begin simulation!")
-@time (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+@time (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
 println("Completed!")
 
 @test quaternion_constraint(attitudedata.quaternion)
 
 fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
-# fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity, timerange = (0, 10))
 display(fig1)
 
 fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
@@ -39,6 +41,10 @@ display(fig3)
 # Plot of the euler angle
 fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
 display(fig4)
+
+fig5 = plot(time, strdata.physicalstate[:, 1])
+fig5 = plot!(time, strdata.physicalstate[:, 2])
+display(fig5)
 
 location = "output" # specify where to save your data
 outputdata = SimData(time, attitudedata, orbitdata)

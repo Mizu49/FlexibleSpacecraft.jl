@@ -10,7 +10,7 @@ using Reexport, YAML, StaticArrays
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export StructureSimData, initdatacontainer, setstructure
+export StructureSimData, initappendagedata, setstructure
 
 """
     StructureSimData
@@ -34,7 +34,7 @@ struct StructureSimData
 end
 
 """
-    initdatacontainer
+    initappendagedata
 
 initializer for the data container for structural simulation
 
@@ -44,7 +44,7 @@ initializer for the data container for structural simulation
 * `initphysicalstate::Vector`: initial physical state value of the flexible appendage
 * `datanum::Int`: numbers of the simulation data
 """
-function initdatacontainer(model::StateSpace, initphysicalstate::Vector, datanum::Int)::StructureSimData
+function initappendagedata(model::StateSpace, initphysicalstate::Vector, datanum::Int)::StructureSimData
 
     # physical state vector (physical coordinate)
     physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]

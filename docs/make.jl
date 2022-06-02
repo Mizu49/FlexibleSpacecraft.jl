@@ -13,9 +13,10 @@ makedocs(
             "Configuration" => "simulation/simulation_config.md"
         ],
         "CLI" => "docs-CLI/index.md",
-        "Dynamics" => [
+        "Attitude" => [
+            "Kinematics" => "dynamics/attitude.md",
+            "Dynamics" => "dynamics/dynamics.md",
             "Frames" => "dynamics/frames.md",
-            "Attitude dynamics" => "dynamics/attitude.md",
             "Rigid body" => "dynamics/rigid-body.md",
             "Orbit" => "dynamics/orbit.md",
             "Disturbance input" => "dynamics/disturbance.md",
