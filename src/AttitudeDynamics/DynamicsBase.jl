@@ -3,7 +3,7 @@ module DynamicsBase
 using Reexport, StaticArrays
 using ..Frames
 
-export update_angularvelocity
+export update_angularvelocity, setdynamicsmodel
 
 include("RigidBody.jl")
 @reexport using .RigidBody

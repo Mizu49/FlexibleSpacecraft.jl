@@ -53,11 +53,11 @@ function readparamfile(filepath::String)
         throw(AssertionError("simulation configuration is not found on parameter setting file"))
     end
 
-    # inital value
-    if haskey(paramread, "inital value")
+    # initial value
+    if haskey(paramread, "initial value")
         initvalue = _setinitvalue(paramread["initial value"])
     else
-        throw(AssertionError("inital value configuration is not found on parameter setting file"))
+        throw(AssertionError("initial value configuration is not found on parameter setting file"))
     end
 
     # Dynamics model
@@ -108,7 +108,7 @@ end
 """
     _setinitvalue(filepath::String)::InitData
 
-Define the inital value for simulation
+Define the initial value for simulation
 """
 function _setinitvalue(initvaluedict::AbstractDict)::InitData
 
