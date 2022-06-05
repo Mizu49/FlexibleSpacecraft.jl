@@ -31,14 +31,17 @@ include("AttitudeDynamics/Evaluation.jl")
 include("PlotRecipes/PlotRecipe.jl")
 @reexport using .PlotRecipe
 
-include("SimulationAPI/ParameterSetting.jl")
-@reexport using .ParameterSetting
-
 include("Structures/Structures.jl")
 @reexport using .Structures
 
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI
+
+include("SimulationAPI/ParameterSetting.jl")
+@reexport using .ParameterSetting
+
+include("SimulationAPI/ParameterSettingBase.jl")
+@reexport using .ParameterSettingBase
 
 include("Core/SimulationCore.jl")
 @reexport using .SimulationCore
