@@ -14,6 +14,31 @@ include("LinearCoupling.jl")
 TypeModels = Union{RigidBodyModel, LinearCouplingModel}
 
 """
+    setdynamicsmodel
+
+Load a dictionaly data of configuration and construct the appropriate model for the simulation for the attitude dynamics
+"""
+function setdynamicsmodel(paramsetting::AbstractDict)
+
+    if paramsetting["model"] == "Linear coupling"
+
+        inertia = Matrix(transpose(reshape(paramsetting["platform"]["inertia"], (3,3))))
+
+        # get dimension of the structural motion of the flexible appendages
+        dimstructurestate = Int(length(paramsetting["platform"]["coupling"]) / 3)
+
+        Dcplg = Matrix(transpose(reshape(paramsetting["platform"]["coupling"], (3, dimstructurestate))))
+
+        model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
+    else
+        error("configuration for dynamics model in YAML file is set improperly")
+    end
+
+    return model
+end
+
+
+"""
     update_angularvelocity
 
 update the angular velocity of the angular velocity of the attitude dynamics. Interface to the individual functions implemented in each submodules

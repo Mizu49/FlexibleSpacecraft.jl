@@ -11,9 +11,9 @@ initial value:
     angular velocity: [0, 0, 0]
 
 
-dynamics model: Linear coupling
-
-platform:
+attitude dynamics:
+    model: Linear coupling
+    platform:
     inertia: [
         1000, 0, 0,
         0, 1000, 0,
