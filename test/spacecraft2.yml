@@ -1,8 +1,18 @@
-property: dynamics
+# parameter configuration file for `FlexibleSpacecraft.jl`
+
 name: example spacecraft No. 2
 note: This model is for test purpose
 
-dynamicsmodel: Linear coupling
+config:
+    sampling time: 1e-2 # Sampling period of simulation (second)
+    time length: 1000 # Time length of simulation (second)
+
+initial value:
+    quaternion: [0, 0, 0, 1]
+    angular velocity: [0, 0, 0]
+
+
+dynamics model: Linear coupling
 
 platform:
     inertia: [
@@ -16,3 +26,52 @@ platform:
         0, 1,
         0, 0
     ]
+
+disturbance:
+    constant torque: [0.0, 0.0, 0.0]
+    gravitational torque: false
+
+Orbit:
+    Dynamics model: Circular
+    Orbital elements:
+        right ascension: 0
+        inclination: 0
+        semimajor axis: 6763e3
+        eccentricity: 0
+        argument of perigee: 0
+        true anomaly at epoch: 0
+
+modeling: spring-mass
+
+appendage:
+    coord: physical
+    DOF: 2
+    mass: [
+        100, 0,
+        0, 50
+    ]
+    stiffness: [
+        6e4, -1e4,
+        -1e4, 1e4
+    ]
+    damping:
+        config: Rayleigh
+        alpha: 0
+        beta: 0.005
+    coupling: [
+            1, 0, 0,
+            0, 1, 0,
+        ]
+    control input:
+        dimension: 1
+        coefficient: [
+                5,
+                0
+            ]
+    disturbance input:
+        dimension: 1
+        coefficient: [
+                3,
+                0
+            ]
+
