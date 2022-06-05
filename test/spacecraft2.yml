@@ -1,9 +1,8 @@
 # parameter configuration file for `FlexibleSpacecraft.jl`
 
-name: example spacecraft No. 2
-note: This model is for test purpose
-
 config:
+    name: example spacecraft No. 2
+    note: This model is for test purpose
     sampling time: 1e-2 # Sampling period of simulation (second)
     time length: 1000 # Time length of simulation (second)
 
