@@ -12,39 +12,6 @@ export SimulationConfig, setorbit, setdynamicsmodel, setsimconfig, setinitvalue,
 
 
 """
-    setorbit(filepath::String, ECI::Frame)::OrbitInfo
-
-Load the YAML file configuration and construct the appropriate model for the simulation
-"""
-function setorbit(filepath::String, ECI::Frame)::OrbitInfo
-
-    # Read YAML file
-    lawread = YAML.load_file(filepath)
-
-    if haskey(lawread, "property") == false
-        throw(ErrorException("`property` is not specified in YAML configuration file"))
-    elseif lawread["property"] != "orbit"
-        throw(AssertionError("`property` does not match with `orbit`"))
-    end
-
-    # Define Orbit.OrbitInfo
-    orbitinfo = OrbitInfo(
-        OrbitalElements(
-            lawread["OrbitalElements"]["right ascention"],
-            lawread["OrbitalElements"]["inclination"],
-            lawread["OrbitalElements"]["semimajor axis"],
-            lawread["OrbitalElements"]["eccentricity"],
-            lawread["OrbitalElements"]["argument of perigee"],
-            lawread["OrbitalElements"]["true anomaly at epoch"]
-        ),
-        ECI,
-        lawread["OrbitInfo"]
-    )
-
-    return orbitinfo
-end
-
-"""
     setdynamicsmodel(filepath::String)
 
 Load the YAML file configuration and construct the appropriate model for the simulation

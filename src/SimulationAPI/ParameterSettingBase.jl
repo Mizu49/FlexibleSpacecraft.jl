@@ -65,6 +65,11 @@ function readparamfile(filepath::String)
     # Disturbance for the attitude dynamics
 
     # Orbital dynamics
+    if haskey(paramread, "Orbit")
+        orbitinfo = setorbit(paramread["Orbit"], ECI_frame)
+    else
+        throw(AssertionError("orbit configuration is not found on parameter setting file"))
+    end
 
     return (simconfig, initvalue)
 end
