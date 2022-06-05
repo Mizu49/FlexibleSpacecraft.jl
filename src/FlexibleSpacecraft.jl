@@ -37,9 +37,6 @@ include("Structures/Structures.jl")
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI
 
-include("SimulationAPI/ParameterSetting.jl")
-@reexport using .ParameterSetting
-
 include("SimulationAPI/ParameterSettingBase.jl")
 @reexport using .ParameterSettingBase
 
