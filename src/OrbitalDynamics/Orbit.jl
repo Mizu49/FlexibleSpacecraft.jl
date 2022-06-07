@@ -9,7 +9,7 @@ using ..Frames
 using ..DataContainers
 using StaticArrays
 
-export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
+export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)

@@ -22,12 +22,11 @@ function setdynamicsmodel(paramsetting::AbstractDict)
 
     if paramsetting["model"] == "Linear coupling"
 
-        inertia = Matrix(transpose(reshape(paramsetting["platform"]["inertia"], (3,3))))
+        inertia = Matrix(transpose(reshape(paramsetting["inertia"], (3,3))))
 
         # get dimension of the structural motion of the flexible appendages
-        dimstructurestate = Int(length(paramsetting["platform"]["coupling"]) / 3)
-
-        Dcplg = Matrix(transpose(reshape(paramsetting["platform"]["coupling"], (3, dimstructurestate))))
+        dimstructurestate = Int(length(paramsetting["coupling"]) / 3)
+        Dcplg = Matrix(transpose(reshape(paramsetting["coupling"], (3, dimstructurestate))))
 
         model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
     else
