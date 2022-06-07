@@ -98,8 +98,8 @@ function _setsimconfig(simconfigdict::AbstractDict)::SimulationConfig
     simconfig = SimulationConfig(
         simconfigdict["name"],
         simconfigdict["note"],
-        simconfigdict["sampling time"],
-        simconfigdict["time length"]
+        simconfigdict["time length"],
+        simconfigdict["sampling time"]
     )
 
     return simconfig
