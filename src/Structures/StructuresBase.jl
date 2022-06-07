@@ -1,9 +1,9 @@
 """
-    Structures
+    StructuresBase
 
 module for wrapping all the submodules for the structual dynamics for flexible spacecraft
 """
-module Structures
+module StructuresBase
 
 using Reexport, YAML, StaticArrays
 

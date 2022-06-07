@@ -31,8 +31,8 @@ include("AttitudeDynamics/Evaluation.jl")
 include("PlotRecipes/PlotRecipe.jl")
 @reexport using .PlotRecipe
 
-include("Structures/Structures.jl")
-@reexport using .Structures
+include("Structures/StructuresBase.jl")
+@reexport using .StructuresBase
 
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI

@@ -6,7 +6,7 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays
-using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..Structures, ..ParameterSettingBase
+using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..ParameterSettingBase
 
 export runsimulation
 
