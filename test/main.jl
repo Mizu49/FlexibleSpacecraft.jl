@@ -5,10 +5,7 @@ using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
 paramfilepath = "./test/spacecraft2.yml"
-(simconfig, attitudemodel, distconfig, initvalue, orbitinfo) = readparamfile(paramfilepath)
-
-# define parameter and simulation model for the flexible appendages
-(strparam, strmodel) = setstructure("./test/module-tests/param-springmass.yml")
+(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(paramfilepath)
 
 # run simulation
 println("Begin simulation!")

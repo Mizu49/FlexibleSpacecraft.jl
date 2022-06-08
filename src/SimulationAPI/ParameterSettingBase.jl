@@ -1,7 +1,7 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..Orbit, ..DynamicsBase, ..Attitude, ..Disturbance
+using ..Frames, ..Orbit, ..DynamicsBase, ..Attitude, ..Disturbance, ..StructuresBase
 
 export SimulationConfig, yamlread2matrix, readparamfile
 
@@ -81,7 +81,12 @@ function readparamfile(filepath::String)
         throw(AssertionError("orbit configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, initvalue, orbitinfo)
+    # Flexible appendage
+    if haskey(paramread, "appendage")
+        (strparam, strmodel) = setstructure(paramread["appendage"])
+    end
+
+    return (simconfig, attimodel, distconfig, initvalue, orbitinfo, strparam, strmodel)
 end
 
 """
