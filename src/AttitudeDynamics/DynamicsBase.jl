@@ -1,7 +1,7 @@
 module DynamicsBase
 
 using Reexport, StaticArrays
-using ..Frames
+using ..Frames, ..Utilities
 
 export update_angularvelocity, setdynamicsmodel
 
@@ -22,11 +22,11 @@ function setdynamicsmodel(paramsetting::AbstractDict)
 
     if paramsetting["model"] == "Linear coupling"
 
-        inertia = Matrix(transpose(reshape(paramsetting["inertia"], (3,3))))
+        inertia = yamlread2matrix(paramsetting["inertia"], (3,3))
 
         # get dimension of the structural motion of the flexible appendages
         dimstructurestate = Int(length(paramsetting["coupling"]) / 3)
-        Dcplg = Matrix(transpose(reshape(paramsetting["coupling"], (3, dimstructurestate))))
+        Dcplg = yamlread2matrix(paramsetting["coupling"], (3, dimstructurestate))
 
         model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
     else

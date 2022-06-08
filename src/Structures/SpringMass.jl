@@ -6,6 +6,7 @@ submodule that contains all features for spring-mass modeling of flexible append
 module SpringMass
 
 using LinearAlgebra, StaticArrays
+using ..Utilities
 
 export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams, defmodel
 
@@ -516,8 +517,8 @@ function defmodel(paramdict::AbstractDict)
     DOF = paramdict["system"]["DOF"]
 
     # read the parameters from the dictionary
-    M = reshape(paramdict["system"]["mass"], (DOF, DOF))
-    K = reshape(paramdict["system"]["stiffness"], (DOF, DOF))
+    M = yamlread2matrix(paramdict["system"]["mass"], (DOF, DOF))
+    K = yamlread2matrix(paramdict["system"]["stiffness"], (DOF, DOF))
 
     if paramdict["system"]["damping"]["config"] == "Rayleigh"
         alpha = paramdict["system"]["damping"]["alpha"]
@@ -528,12 +529,12 @@ function defmodel(paramdict::AbstractDict)
     end
 
     dimcontrolinput = paramdict["control input"]["dimension"]
-    Ectrl = reshape(paramdict["control input"]["coefficient"], (DOF, dimcontrolinput))
+    Ectrl = yamlread2matrix(paramdict["control input"]["coefficient"], (DOF, dimcontrolinput))
 
     dimdistinput = paramdict["control input"]["dimension"]
-    Edist = reshape(paramdict["disturbance input"]["coefficient"], (DOF, dimdistinput))
+    Edist = yamlread2matrix(paramdict["disturbance input"]["coefficient"], (DOF, dimdistinput))
 
-    Ecoupling = reshape(paramdict["coupling"], (DOF, 3))
+    Ecoupling = yamlread2matrix(paramdict["coupling"], (DOF, 3))
 
     # define the parameters struct
     params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)
