@@ -1,4 +1,4 @@
-# Simulation configuration
+# Parameter configuration
 
 `FlexibleSpacecraft.jl` offers an soft cording method to allow you to manage your simulation parameters and configurations. You need parameter setting and simulation configuration files to run your simulation with your desired setting. This documentation illustrates how to prepare your simulation configuration files.
 
