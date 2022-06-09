@@ -26,6 +26,19 @@ end
 
 """
     readparamfile
+
+read the configuration of the spacecraft from the configuration file in YAML format.
+
+# Arguments
+
+* `filepath::String`: Path to the configuration file
+
+# Usage
+
+```julia
+paramfilepath = "./test/spacecraft2.yml"
+(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(paramfilepath)
+```
 """
 function readparamfile(filepath::String)
 

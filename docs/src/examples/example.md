@@ -6,18 +6,6 @@ This documentation page provides an example script and quick start guide for the
 
 Example script `main.jl` is found in the `/test` directory. Configuration and parameter setting file is preferred for the simulation, and these files should be in YAML format. Detailed formatting for the parameter settings is found in the [Simulation configuration](@ref).
 
-You need the following files:
-
-* [Configuration files for simulation (`simconfig.yml`)](@ref)
-* [Dynamics model parameters definition file (`spacecraft.yml`)](@ref)
-* [Disturbance parameters (`disturbance.yml`)](@ref)
-* [Orbital parameters (`orbit.yml`)](@ref)
-* [Initial values (`initvalue.yml`)](@ref)
-
-If you are using CLI, not script, you need one more file:
-
-* [Wrapper for all of the configuration files](@ref)
-
 These files are found on the `test` directory in the GitHub repository. Run the `main.jl`, and you will get the simulation result. By default, the software provides the data set of simulation results and plots of those data. It also gives you a GIF animation of the spacecraft attitude.
 
 ## Description of the `main.jl` and UI

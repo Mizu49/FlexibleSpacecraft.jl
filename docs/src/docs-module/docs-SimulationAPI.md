@@ -8,7 +8,7 @@ Our API mainly contains the following sub-modules:
 
 The high-level API function for the simulation is `runsimulation`. Basically you can run your simulation by passing all the necessary arguments into function `runsimulation`.
 
-## `ParameterSettingBase`
+## Parameter setting API
 
 ```@autodocs
 Modules = [ParameterSettingBase]
