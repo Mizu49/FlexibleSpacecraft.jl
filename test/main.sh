@@ -3,4 +3,4 @@
 echo "Testing the CLI of FlexibleSpacecraft.jl ..."
 
 # run simulation with command
-evalspacecraft run params.yml --save
+evalspacecraft run spacecraft2.yml --save
