@@ -5,7 +5,9 @@ FROM julia
 USER root
 
 # update package list
-RUN apt-get update
+RUN apt-get update -y
+RUN apt-get upgrade -y
+RUN apt-get autoremove
 
 # install git
 RUN apt-get install -y git
