@@ -58,20 +58,25 @@ appendage:
             config: Rayleigh
             alpha: 0
             beta: 0.005
-    coupling: [
-            1, 0, 0,
-            0, 1, 0,
-        ]
-    control input:
-        dimension: 1
-        coefficient: [
-                5,
-                0
+        coupling: [
+                1, 0, 0,
+                0, 1, 0,
             ]
-    disturbance input:
-        dimension: 1
-        coefficient: [
-                3,
-                0
-            ]
+        control input:
+            dimension: 1
+            coefficient: [
+                    5,
+                    0
+                ]
+        disturbance input:
+            dimension: 1
+            coefficient: [
+                    3,
+                    0
+                ]
+    disturbance:
+        type: vibration
+        frequency: [10, 20]
+        amplitude: [10, 10]
+        phase: [0, 0]
 
