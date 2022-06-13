@@ -528,13 +528,13 @@ function defmodel(paramdict::AbstractDict)
         error("damping configuration for \"$(paramdict["system"]["damping"]["config"])\" not found")
     end
 
-    dimcontrolinput = paramdict["control input"]["dimension"]
-    Ectrl = yamlread2matrix(paramdict["control input"]["coefficient"], (DOF, dimcontrolinput))
+    dimcontrolinput = paramdict["system"]["control input"]["dimension"]
+    Ectrl = yamlread2matrix(paramdict["system"]["control input"]["coefficient"], (DOF, dimcontrolinput))
 
-    dimdistinput = paramdict["control input"]["dimension"]
-    Edist = yamlread2matrix(paramdict["disturbance input"]["coefficient"], (DOF, dimdistinput))
+    dimdistinput = paramdict["system"]["control input"]["dimension"]
+    Edist = yamlread2matrix(paramdict["system"]["disturbance input"]["coefficient"], (DOF, dimdistinput))
 
-    Ecoupling = yamlread2matrix(paramdict["coupling"], (DOF, 3))
+    Ecoupling = yamlread2matrix(paramdict["system"]["coupling"], (DOF, 3))
 
     # define the parameters struct
     params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)
