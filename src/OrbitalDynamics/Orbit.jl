@@ -9,7 +9,7 @@ using ..Frames
 using ..DataContainers
 using StaticArrays
 
-export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref
+export OrbitInfo, OrbitalElements, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -134,6 +134,30 @@ struct OrbitInfo
         )
     end
 end
+
+"""
+    setorbit
+
+Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
+"""
+function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
+
+    orbitinfo = OrbitInfo(
+        OrbitalElements(
+            orbitparamdict["Orbital elements"]["right ascension"],
+            orbitparamdict["Orbital elements"]["inclination"],
+            orbitparamdict["Orbital elements"]["semimajor axis"],
+            orbitparamdict["Orbital elements"]["eccentricity"],
+            orbitparamdict["Orbital elements"]["argument of perigee"],
+            orbitparamdict["Orbital elements"]["true anomaly at epoch"]
+        ),
+        ECI,
+        " "
+    )
+
+    return orbitinfo
+end
+
 
 """
     OrbitData

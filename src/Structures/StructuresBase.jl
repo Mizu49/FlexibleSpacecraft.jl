@@ -1,11 +1,12 @@
 """
-    Structures
+    StructuresBase
 
 module for wrapping all the submodules for the structual dynamics for flexible spacecraft
 """
-module Structures
+module StructuresBase
 
 using Reexport, YAML, StaticArrays
+using ..Utilities
 
 include("SpringMass.jl")
 @reexport using .SpringMass
@@ -73,7 +74,11 @@ end
 """
     setstructure
 
-API function to define the model to
+API function to define the model of the flexible appendages. Argument is a file path for the configuration file. This function is expected to be used directly with the configuration file
+
+# Arguments
+
+* `configfilepath::String`: path for the configuration file for the structural appendages
 """
 function setstructure(configfilepath::String)
 
@@ -87,6 +92,30 @@ function setstructure(configfilepath::String)
         (structureparams, structuresimmodel) = defmodel(lawread)
     else
         throw(ErrorException("no matching modeling method for \"$(lawread["modeling"])\""))
+    end
+
+    return (structureparams, structuresimmodel)
+end
+
+"""
+    setstructure
+
+API function to define the model of the flexible appendages. Argument is the dictionary type variable
+
+# Arguments
+
+* `configdata::AbstractDict`: path for the configuration file for the structural appendages
+"""
+function setstructure(configdata::AbstractDict)
+
+    if haskey(configdata, "modeling") == false
+        throw(ErrorException("`modeling` is undefined in configuration"))
+    end
+
+    if configdata["modeling"] == "spring-mass"
+        (structureparams, structuresimmodel) = defmodel(configdata)
+    else
+        throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
 
     return (structureparams, structuresimmodel)

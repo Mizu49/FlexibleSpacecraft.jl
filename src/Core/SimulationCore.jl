@@ -6,7 +6,7 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays
-using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..Structures, ..ParameterSetting
+using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..ParameterSettingBase
 
 export runsimulation
 
@@ -23,7 +23,7 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 * `initvalue::InitData`: Inital value of the simulation physical states
 * `orbitinfo::Orbit.OrbitInfo`: information and model definition of the orbital dynamics
 * `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
-* `simconfig::SimulationConfig`: Simulation configuration ParameterSetting
+* `simconfig::SimulationConfig`: Simulation configuration ParameterSettingBase
 
 # Return value
 

@@ -3,23 +3,9 @@ using Test
 include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
-# Set the dynamics model
-attitudemodel = setdynamicsmodel("./test/spacecraft2.yml",)
-
-# define a orbit info
-orbitinfo = setorbit("./test/orbit2.yml", ECI_frame)
-
-# define parameter and simulation model for the flexible appendages
-(strparam, strmodel) = setstructure("./test/module-tests/param-springmass.yml")
-
-# Set disturbance torque
-distconfig = setdisturbance("./test/disturbance.yml")
-
-# Initialize the simulation configuration
-simconfig = setsimconfig("./test/simconfig.yml")
-
-# Define initial values for simulation
-initvalue = setinitvalue("./test/initvalue.yml")
+# define parameter for the spacecraft
+paramfilepath = "./test/spacecraft2.yml"
+(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(paramfilepath)
 
 # run simulation
 println("Begin simulation!")

@@ -1,7 +1,0 @@
-# This YAML file configures initial values
-
-# Specify property of this YAML file
-property: initvalue
-
-quaternion: [0, 0, 0, 1]
-angular velocity: [0, 0, 0]

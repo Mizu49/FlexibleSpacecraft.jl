@@ -8,7 +8,7 @@ module Disturbance
 using LinearAlgebra:norm
 using StaticArrays
 
-export DisturbanceConfig, disturbanceinput
+export DisturbanceConfig, disturbanceinput, setdisturbance
 
 """
     struct DisturbanceConfig
@@ -30,6 +30,22 @@ struct DisturbanceConfig
     end
 
 end
+
+"""
+    setdisturbance
+
+set disturbance configuration from YAML setting file
+"""
+function setdisturbance(distconfigdict::AbstractDict)::DisturbanceConfig
+
+    distconfig = DisturbanceConfig(
+        constanttorque = distconfigdict["constant torque"],
+        gravitygradient = distconfigdict["gravitational torque"]
+    )
+
+    return distconfig
+end
+
 
 """
     constant_torque(constant_torque::Vector)
