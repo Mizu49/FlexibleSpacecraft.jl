@@ -82,10 +82,10 @@ function readparamfile(filepath::String)
 
     # Flexible appendage
     if haskey(paramread, "appendage")
-        (strparam, strmodel) = setstructure(paramread["appendage"])
+        (strparam, strmodel, strdistconfig) = setstructure(paramread["appendage"])
     end
 
-    return (simconfig, attimodel, distconfig, initvalue, orbitinfo, strparam, strmodel)
+    return (simconfig, attimodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig)
 end
 
 """
