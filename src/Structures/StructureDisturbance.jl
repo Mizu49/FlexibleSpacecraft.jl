@@ -49,12 +49,12 @@ end
 
 function setstrdistconfig(configdata::AbstractDict)
 
-    dimdistcomp = size(configdata["frequency"], 1)
+    dimdistcomp = size(configdata["angular velocity"], 1)
 
     config = VibrationConfig(
         configdata["dimension"],
         dimdistcomp,
-        configdata["frequency"],
+        configdata["angular velocity"],
         configdata["amplitude"],
         configdata["phase"]
     )
