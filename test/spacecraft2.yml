@@ -3,8 +3,8 @@
 config:
     name: example spacecraft No. 2
     note: This model is for test purpose
-    sampling time: 1e-2 # Sampling period of simulation (second)
-    time length: 1000 # Time length of simulation (second)
+    sampling time: 1e-3 # Sampling period of simulation (second)
+    time length: 600 # Time length of simulation (second)
 
 initial value:
     quaternion: [0, 0, 0, 1]
@@ -77,7 +77,6 @@ appendage:
     disturbance:
         type: vibration
         dimension: 1
-        frequency: [10, 20]
-        amplitude: [10, 10]
+        angular velocity: [5, 20]
+        amplitude: [50, 50]
         phase: [0, 0]
-
