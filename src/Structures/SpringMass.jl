@@ -247,6 +247,7 @@ StateSpace(model::SpringMassModel)
 struct StateSpace
 
     # dimension of the state and input vectors
+    DOF::Int
     dimstate::Int
     dimctrlinput::Int
     dimdistinput::Int
@@ -297,7 +298,7 @@ struct StateSpace
             zeros(model.DOF, model.DOF) model.system.PHI
         ])
 
-        new(dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist, modalstate2physicalstate)
+        new(model.DOF, dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist, modalstate2physicalstate)
     end
 end
 

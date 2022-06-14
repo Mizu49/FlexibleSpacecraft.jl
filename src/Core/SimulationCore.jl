@@ -111,12 +111,12 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # calculation of the structural response input for the attitude dynamics
         currentstrstate = strdata.state[iter]
         if iter == 1
-            straccel = currentstrstate[3:end] / Ts
+            straccel = currentstrstate[(strmodel.DOF+1):end] / Ts
         else
             previousstrstate = strdata.state[iter-1]
-            straccel = (currentstrstate[3:end] - previousstrstate[3:end]) / Ts
+            straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
         end
-        strvelocity = currentstrstate[3:end]
+        strvelocity = currentstrstate[(strmodel.DOF+1):end]
 
         # angular velocity of the attitude dynamics for the structural coupling input
         attiinput = attidata.angularvelocity[iter]
