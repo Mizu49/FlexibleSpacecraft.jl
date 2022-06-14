@@ -76,6 +76,7 @@ appendage:
                 ]
     disturbance:
         type: vibration
+        dimension: 1
         frequency: [10, 20]
         amplitude: [10, 10]
         phase: [0, 0]
