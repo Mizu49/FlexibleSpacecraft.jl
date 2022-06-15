@@ -6,7 +6,7 @@ module for wrapping all the submodules for the structual dynamics for flexible s
 module StructuresBase
 
 using Reexport, YAML, StaticArrays
-using ..Utilities
+using ..Utilities, ..StructureDisturbance
 
 include("SpringMass.jl")
 @reexport using .SpringMass
@@ -118,7 +118,11 @@ function setstructure(configdata::AbstractDict)
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
 
-    return (structureparams, structuresimmodel)
+    if haskey(configdata, "disturbance")
+        strdistconfig = setstrdistconfig(configdata["disturbance"])
+    end
+
+    return (structureparams, structuresimmodel, strdistconfig)
 end
 
 end

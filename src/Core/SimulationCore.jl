@@ -6,7 +6,7 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays
-using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..ParameterSettingBase
+using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
 
 export runsimulation
 
@@ -47,6 +47,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     initvalue::Attitude.InitData,
     orbitinfo::Orbit.OrbitInfo,
     distconfig::DisturbanceConfig,
+    strdistconfig::AbstractStrDistConfig,
     simconfig::SimulationConfig
     )::Tuple
 
@@ -99,7 +100,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[iter].z)
 
         ############### control and disturbance input to the flexible appendages
-        strdistinput = 100 * sin(10* time[iter])
+        strdistinput = calcstrdisturbance(strdistconfig, time[iter])
         strctrlinput = 0
 
         strdata.controlinput[iter] = strctrlinput
@@ -110,12 +111,12 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # calculation of the structural response input for the attitude dynamics
         currentstrstate = strdata.state[iter]
         if iter == 1
-            straccel = currentstrstate[3:end] / Ts
+            straccel = currentstrstate[(strmodel.DOF+1):end] / Ts
         else
             previousstrstate = strdata.state[iter-1]
-            straccel = (currentstrstate[3:end] - previousstrstate[3:end]) / Ts
+            straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
         end
-        strvelocity = currentstrstate[3:end]
+        strvelocity = currentstrstate[(strmodel.DOF+1):end]
 
         # angular velocity of the attitude dynamics for the structural coupling input
         attiinput = attidata.angularvelocity[iter]
