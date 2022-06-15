@@ -8,9 +8,7 @@ paramfilepath = "./test/spacecraft2.yml"
 (simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig) = readparamfile(paramfilepath)
 
 # run simulation
-println("Begin simulation!")
 @time (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, strdistconfig, simconfig)
-println("Completed!")
 
 @test quaternion_constraint(attitudedata.quaternion)
 
