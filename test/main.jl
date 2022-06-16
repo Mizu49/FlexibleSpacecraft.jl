@@ -12,24 +12,24 @@ paramfilepath = "./test/spacecraft2.yml"
 
 @test quaternion_constraint(attitudedata.quaternion)
 
-fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
-display(fig1)
+@time begin # measure time for post process
 
-fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
-display(fig2)
+    fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
+    fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
+    fig3 = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 20, FPS = 8)
+    fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
 
-# Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 20, FPS = 8)
-display(fig3)
+    fig5 = plot(time, strdata.physicalstate[:, 1])
+    fig5 = plot!(time, strdata.physicalstate[:, 2])
 
-# Plot of the euler angle
-fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
-display(fig4)
+    location = "output" # specify where to save your data
+    outputdata = SimData(time, attitudedata, orbitdata)
+    write(location, outputdata)
 
-fig5 = plot(time, strdata.physicalstate[:, 1])
-fig5 = plot!(time, strdata.physicalstate[:, 2])
-display(fig5)
+    display(fig1)
+    display(fig2)
+    display(fig3)
+    display(fig4)
+    display(fig5)
+end
 
-location = "output" # specify where to save your data
-outputdata = SimData(time, attitudedata, orbitdata)
-write(location, outputdata)
