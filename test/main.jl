@@ -1,4 +1,4 @@
-using Test
+using Test, Profile
 
 include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
