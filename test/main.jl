@@ -8,11 +8,11 @@ paramfilepath = "./test/spacecraft2.yml"
 (simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig) = readparamfile(paramfilepath)
 
 # run simulation
-@time (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, strdistconfig, simconfig)
+simtime = @timed (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, strdistconfig, simconfig)
 
 @test quaternion_constraint(attitudedata.quaternion)
 
-@time begin # measure time for post process
+plottime = @timed begin # measure time for post process
 
     fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
     fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
