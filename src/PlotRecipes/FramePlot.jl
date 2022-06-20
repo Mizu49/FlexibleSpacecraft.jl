@@ -1,6 +1,6 @@
 module FramePlot
 
-using Plots
+using Plots, ProgressMeter
 import ...DataContainers
 using ...Frames
 
@@ -103,9 +103,12 @@ function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; 
     end
 
     # create animation
+    prog = Progress(length(animindex), 1, "Generating animation...", 50)   # progress meter
     anim = @animate for idx = animindex
         frame = getframe(time[idx], Tsampling, frames)
         dispframe(time[idx], refframe, frame)
+
+        next!(prog) # update the progress meter
     end
 
     # make gif image

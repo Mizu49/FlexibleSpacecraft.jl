@@ -5,7 +5,7 @@ submodule contains the high-level interface functions and core implementation of
 """
 module SimulationCore
 
-using LinearAlgebra, StaticArrays
+using LinearAlgebra, StaticArrays, ProgressMeter
 using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
 
 export runsimulation
@@ -73,6 +73,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     orbitdata = Orbit.initorbitdata(datanum, orbitinfo.planeframe)
 
     # main loop of the simulation
+    prog = Progress(datanum, 1, "Simulation running...", 50)   # progress meter
     for iter = 1:datanum
 
         ############### orbit state ##################################################
@@ -135,6 +136,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         end
 
+        next!(prog) # update the progress meter
     end
 
     return (time, attidata, orbitdata, strdata)
