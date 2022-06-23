@@ -122,14 +122,26 @@ struct OrbitInfo
 
     OrbitInfo(orbitalelement::OrbitalElements, ECIframe::Frame, info::String) = begin
 
-        dynamicsmodel = CircularOrbit(6370e+3 + 400e3, 3.986e+14)
+        orbitmodel = CircularOrbit(6370e+3 + 400e3, 3.986e+14)
 
         planeframe = calc_orbitalframe(orbitalelement, ECIframe)
 
         return new(
             info,
-            dynamicsmodel,
+            orbitmodel,
             orbitalelement,
+            planeframe
+        )
+    end
+
+    OrbitInfo(orbitalelement::Nothing, ECIframe, info::String) = begin
+        orbitmodel = nothing
+        planeframe = ECIframe
+
+        return new(
+            info,
+            orbitmodel,
+            nothing,
             planeframe
         )
     end
@@ -142,18 +154,30 @@ Load the configuration from YAML file and construct the appropriate model for th
 """
 function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
 
-    orbitinfo = OrbitInfo(
-        OrbitalElements(
-            orbitparamdict["Orbital elements"]["right ascension"],
-            orbitparamdict["Orbital elements"]["inclination"],
-            orbitparamdict["Orbital elements"]["semimajor axis"],
-            orbitparamdict["Orbital elements"]["eccentricity"],
-            orbitparamdict["Orbital elements"]["argument of perigee"],
-            orbitparamdict["Orbital elements"]["true anomaly at epoch"]
-        ),
-        ECI,
-        " "
-    )
+    if orbitparamdict["Dynamics model"] == "none"
+
+        orbitinfo = OrbitInfo(
+            nothing,
+            ECI,
+            "no orbit simulation"
+        );
+
+    elseif orbitparamdict["Dynamics model"] == "Circular"
+
+        # set the orbital parameter for the circular orbit
+        orbitinfo = OrbitInfo(
+            OrbitalElements(
+                orbitparamdict["Orbital elements"]["right ascension"],
+                orbitparamdict["Orbital elements"]["inclination"],
+                orbitparamdict["Orbital elements"]["semimajor axis"],
+                orbitparamdict["Orbital elements"]["eccentricity"],
+                orbitparamdict["Orbital elements"]["argument of perigee"],
+                orbitparamdict["Orbital elements"]["true anomaly at epoch"]
+            ),
+            ECI,
+            " "
+        )
+    end
 
     return orbitinfo
 end
@@ -195,6 +219,10 @@ function get_angular_velocity(orbit::CircularOrbit)
 
     return sqrt(orbit._gravityconstant / orbit._radius^3)
 
+end
+
+function get_angular_velocity(orbit::Nothing)
+    return 0
 end
 
 """
@@ -262,6 +290,26 @@ function ECI2OrbitalPlaneFrame(elements::OrbitalElements)
 
 end
 
+function ECI2OrbitalPlaneFrame(elements::Nothing)
+
+    C1 = i -> begin
+        i = deg2rad(i)
+        [1 0 0
+        0 cos(i) sin(i)
+        0 -sin(i) cos(i)]
+    end
+
+    C3 = Ω -> begin
+        Ω = deg2rad(Ω)
+        [cos(Ω) sin(Ω) 0
+        -sin(Ω) cos(Ω) 0
+        0 0 1]
+    end
+
+    return C1(0) * C3(0)
+
+end
+
 """
     function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_velocity, time)
 
@@ -280,6 +328,21 @@ function OrbitalPlaneFrame2RadialAlongTrack(elements::OrbitalElements, angular_v
 
     return C3(current_position)
 end
+
+function OrbitalPlaneFrame2RadialAlongTrack(elements::Nothing, angular_velocity::Real, time::Real)
+
+    C3 = u -> begin
+        [cos(u) sin(u) 0
+        -sin(u) cos(u) 0
+        0 0 1]
+    end
+
+    # current angle of spacecraft relative to ascending axis of orbital plane frame
+    current_position = 0
+
+    return C3(current_position)
+end
+
 
 """
     function OrbitalPlaneFrame2LVLH(OrbitalPlaneFrame2RadialAlongTrack)
