@@ -16,9 +16,7 @@ plottime = @timed begin # measure time for post process
 
     fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
     fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
-    fig3 = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 20, FPS = 8)
     fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
-
     fig5 = plot(time, strdata.physicalstate[:, 1])
     fig5 = plot!(time, strdata.physicalstate[:, 2])
 
@@ -28,8 +26,8 @@ plottime = @timed begin # measure time for post process
 
     display(fig1)
     display(fig2)
-    display(fig3)
     display(fig4)
     display(fig5)
 end
 
+println("Simulation time : $(simtime.time) (s)")
