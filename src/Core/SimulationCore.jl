@@ -77,11 +77,11 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     for iter = 1:datanum
 
         ############### orbit state ##################################################
-        orbitdata.angularvelocity[iter] = OrbitBase.get_angular_velocity(orbitinfo.orbitmodel)
+        orbitdata.angularvelocity[iter] = get_angular_velocity(orbitinfo.orbitmodel)
         orbitdata.angularposition[iter] = orbitdata.angularvelocity[iter] * time[iter]
 
         # calculation of the LVLH frame and its transformation matrix
-        C_OrbitPlane2RAT = OrbitBase.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
+        C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
         C_ECI2LVLH = T_RAT2LVLH * C_OrbitPlane2RAT * C_ECI2OrbitPlane
         orbitdata.LVLH[iter] = C_ECI2LVLH * RefFrame
 
