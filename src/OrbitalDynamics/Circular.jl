@@ -1,6 +1,6 @@
 module Circular
 
-export CircularOrbit, get_angular_velocity, get_velocity, get_timeperiod
+export CircularOrbit, get_velocity, get_timeperiod
 
 """
     struct CircularOrbit(_radius::Float64, _gravityconstant::Float64)
@@ -48,10 +48,6 @@ function get_angular_velocity(orbit::CircularOrbit)
 
     return sqrt(orbit._gravityconstant / orbit._radius^3)
 
-end
-
-function get_angular_velocity(orbit::Nothing)
-    return 0
 end
 
 """

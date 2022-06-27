@@ -6,10 +6,13 @@ using StaticArrays, Reexport
 include("Elements.jl")
 @reexport using .Elements
 
+include("NoOrbit.jl")
+@reexport using .NoOrbit
+
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit
+export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit, get_angular_velocity
 
 """
     OrbitInfo
@@ -37,13 +40,13 @@ struct OrbitInfo
     end
 
     OrbitInfo(orbitalelement::Nothing, ECIframe, info::String) = begin
-        orbitmodel = nothing
+        orbitmodel = NoOrbitModel()
         planeframe = ECIframe
 
         return new(
             info,
             orbitmodel,
-            nothing,
+            orbitalelement,
             planeframe
         )
     end
@@ -131,5 +134,31 @@ const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
     Reference unit frame for the LVLH frame
 """
 const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
+
+const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
+
+function get_angular_velocity(orbitmodel::CircularOrbit)
+    Circular.get_angular_velocity(orbitmodel)
+end
+
+function get_angular_velocity(orbitmodel::NoOrbitModel)
+    NoOrbit.get_angular_velocity(orbitmodel)
+end
+
+function get_velocity(orbitmodel::CircularOrbit)
+    CircularOrbit.get_velocity(orbitmodel)
+end
+
+function get_velocity(orbitmodel::NoOrbitModel)
+    NoOrbit.get_velocity(orbitmodel)
+end
+
+function get_timeperiod(orbitmodel::CircularOrbit; unit = "second")
+    CircularOrbit.get_timeperiod(orbitmodel, unit)
+end
+
+function get_timeperiod(orbitmodel::NoOrbitModel; unit = "second")
+    NoOrbit.get_timeperiod(orbitmodel, unit)
+end
 
 end
