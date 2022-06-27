@@ -31,7 +31,7 @@ Here, we specify `output` as an output root directory. The system generates a ne
 module DataAPI
 
 using DataFrames, CSV, StaticArrays, Dates
-using ..Frames, ..Orbit, ..Attitude
+using ..Frames, ..OrbitBase, ..Attitude
 
 export SimData
 

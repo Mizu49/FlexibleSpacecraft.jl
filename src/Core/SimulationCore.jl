@@ -6,13 +6,13 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays, ProgressMeter
-using ..Frames, ..Orbit, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
+using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
 
 export runsimulation
 
 ############# runsimulation function ##################################
 """
-    runsimulation(attitudemodel, initvalue::Attitude.InitData, orbitinfo::Orbit.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+    runsimulation(attitudemodel, initvalue::Attitude.InitData, orbitinfo::OrbitBase.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
@@ -21,7 +21,7 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 * `attitudemodel`: Attitude dynamics model of the system
 * `strmodel`: Structural model of the flexible appendages
 * `initvalue::InitData`: Inital value of the simulation physical states
-* `orbitinfo::Orbit.OrbitInfo`: information and model definition of the orbital dynamics
+* `orbitinfo::OrbitBase.OrbitInfo`: information and model definition of the orbital dynamics
 * `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
 * `simconfig::SimulationConfig`: Simulation configuration ParameterSettingBase
 
@@ -45,7 +45,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     attitudemodel,
     strmodel,
     initvalue::Attitude.InitData,
-    orbitinfo::Orbit.OrbitInfo,
+    orbitinfo::OrbitBase.OrbitInfo,
     distconfig::DisturbanceConfig,
     strdistconfig::AbstractStrDistConfig,
     simconfig::SimulationConfig
@@ -67,21 +67,21 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     strdata = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
 
     # transformation matrix from ECI frame to orbital plane frame
-    C_ECI2OrbitPlane = Orbit.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
+    C_ECI2OrbitPlane = OrbitBase.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
 
     # initialize orbit state data array
-    orbitdata = Orbit.initorbitdata(datanum, orbitinfo.planeframe)
+    orbitdata = OrbitBase.initorbitdata(datanum, orbitinfo.planeframe)
 
     # main loop of the simulation
     prog = Progress(datanum, 1, "Simulation running...", 50)   # progress meter
     for iter = 1:datanum
 
         ############### orbit state ##################################################
-        orbitdata.angularvelocity[iter] = Orbit.get_angular_velocity(orbitinfo.orbitmodel)
+        orbitdata.angularvelocity[iter] = OrbitBase.get_angular_velocity(orbitinfo.orbitmodel)
         orbitdata.angularposition[iter] = orbitdata.angularvelocity[iter] * time[iter]
 
         # calculation of the LVLH frame and its transformation matrix
-        C_OrbitPlane2RAT = Orbit.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
+        C_OrbitPlane2RAT = OrbitBase.OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
         C_ECI2LVLH = T_RAT2LVLH * C_OrbitPlane2RAT * C_ECI2OrbitPlane
         orbitdata.LVLH[iter] = C_ECI2LVLH * RefFrame
 

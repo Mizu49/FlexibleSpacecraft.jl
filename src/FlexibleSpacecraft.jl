@@ -13,9 +13,9 @@ include("DataContainers/DataContainers.jl")
 include("DataContainers/Frames.jl")
 @reexport using .Frames
 
-# Include module `Orbit`
-include("OrbitalDynamics/Orbit.jl")
-@reexport using .Orbit
+# Include module `OrbitBase`
+include("OrbitalDynamics/OrbitBase.jl")
+@reexport using .OrbitBase
 
 # Inculde module `Disturbance`
 include("Disturbances/Disturbance.jl")
