@@ -1,5 +1,7 @@
 module Circular
 
+using ..OrbitBase, ..Elements
+
 export CircularOrbit, get_velocity, get_timeperiod
 
 """
@@ -87,6 +89,21 @@ function get_timeperiod(orbit::CircularOrbit; unit = "second")
         error("keyword argument `unit` is set improperly.")
     end
 
+end
+
+"""
+    setorbit(elements::OrbitalElements)::CircularOrbit
+
+API function to define the dynamics model for the circular orbit
+"""
+function setorbit(elements::OrbitalElements)::CircularOrbit
+
+    # set radius of the orbit from orbital elements
+    radius = elements.semimajor_axis
+
+    orbitmodel = CircularOrbit(radius, OrbitBase.EarthGravityConstant)
+
+    return orbitmodel
 end
 
 end

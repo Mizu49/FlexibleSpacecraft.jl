@@ -3,6 +3,10 @@ module OrbitBase
 using ..Frames, ..DataContainers
 using StaticArrays, Reexport
 
+const GravityConstant = 6.673e-11
+const EarthMass = 5.974e24
+const EarthGravityConstant = GravityConstant * EarthMass
+
 include("Elements.jl")
 @reexport using .Elements
 
@@ -14,41 +18,21 @@ include("Circular.jl")
 
 export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit, get_angular_velocity
 
+const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
+
 """
     OrbitInfo
 
 struct that contains the information about the orbital dynamics of the spacecraft
 """
 struct OrbitInfo
-    info
-    orbitmodel
-    orbitalelement
-    planeframe
+    orbitmodel::AbstractOrbitModel
+    orbitalelement::OrbitalElements
+    planeframe::Frame
+    info::String
 
-    OrbitInfo(orbitalelement::OrbitalElements, ECIframe::Frame, info::String) = begin
-
-        orbitmodel = CircularOrbit(6370e+3 + 400e3, 3.986e+14)
-
-        planeframe = calc_orbitalframe(orbitalelement, ECIframe)
-
-        return new(
-            info,
-            orbitmodel,
-            orbitalelement,
-            planeframe
-        )
-    end
-
-    OrbitInfo(orbitalelement::Nothing, ECIframe, info::String) = begin
-        orbitmodel = NoOrbitModel()
-        planeframe = ECIframe
-
-        return new(
-            info,
-            orbitmodel,
-            orbitalelement,
-            planeframe
-        )
+    OrbitInfo(orbitmodel::AbstractOrbitModel, orbitalelement::OrbitalElements, planeframe::Frame; info::String = "") = begin
+        new(orbitmodel, orbitalelement, planeframe, info)
     end
 end
 
@@ -71,7 +55,10 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
         # set the orbital parameter for the circular orbit
 
         elements = setelements(orbitparamdict["Orbital elements"])
-        orbitinfo = OrbitInfo(elements, ECI, " ")
+        orbitmodel = Circular.setorbit(elements)
+        orbitalplaneframe = calc_orbitalframe(elements, ECI)
+
+        orbitinfo = OrbitInfo(orbitmodel, elements, orbitalplaneframe)
     end
 
     return orbitinfo
@@ -125,7 +112,6 @@ const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
 """
 const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 
-const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 
 function get_angular_velocity(orbitmodel::CircularOrbit)
     Circular.get_angular_velocity(orbitmodel)
