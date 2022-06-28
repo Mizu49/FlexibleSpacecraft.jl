@@ -3,7 +3,7 @@ module Elements
 using StaticArrays
 using ..Frames, ..DataContainers
 
-export OrbitalElements, ECI2OrbitalPlaneFrame, OrbitalPlaneFrame2RadialAlongTrack, OrbitalPlaneFrame2LVLH, calc_orbitalframe, update_radial_along_track
+export OrbitalElements, ECI2OrbitalPlaneFrame, OrbitalPlaneFrame2RadialAlongTrack, OrbitalPlaneFrame2LVLH, calc_orbitalframe, update_radial_along_track, setelements
 
 """
     struct OrbitalElements
@@ -152,6 +152,18 @@ function C3(theta::Real)::SMatrix
         -sin(theta) cos(theta) 0
         0 0 1
     ])
+end
+
+function setelements(paramdict::AbstractDict)::OrbitalElements
+
+    return OrbitalElements(
+        paramdict["right ascension"],
+        paramdict["inclination"],
+        paramdict["semimajor axis"],
+        paramdict["eccentricity"],
+        paramdict["argument of perigee"],
+        paramdict["true anomaly at epoch"]
+    )
 end
 
 end

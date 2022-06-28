@@ -68,20 +68,10 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
         );
 
     elseif orbitparamdict["Dynamics model"] == "Circular"
-
         # set the orbital parameter for the circular orbit
-        orbitinfo = OrbitInfo(
-            OrbitalElements(
-                orbitparamdict["Orbital elements"]["right ascension"],
-                orbitparamdict["Orbital elements"]["inclination"],
-                orbitparamdict["Orbital elements"]["semimajor axis"],
-                orbitparamdict["Orbital elements"]["eccentricity"],
-                orbitparamdict["Orbital elements"]["argument of perigee"],
-                orbitparamdict["Orbital elements"]["true anomaly at epoch"]
-            ),
-            ECI,
-            " "
-        )
+
+        elements = setelements(orbitparamdict["Orbital elements"])
+        orbitinfo = OrbitInfo(elements, ECI, " ")
     end
 
     return orbitinfo
