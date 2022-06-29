@@ -45,11 +45,8 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
 
     if orbitparamdict["Dynamics model"] == "none"
 
-        orbitinfo = OrbitInfo(
-            nothing,
-            ECI,
-            "no orbit simulation"
-        );
+        elements = OrbitalElements(0, 0, 0, 0, 0, 0)
+        orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
 
     elseif orbitparamdict["Dynamics model"] == "Circular"
         # set the orbital parameter for the circular orbit
@@ -134,7 +131,7 @@ function get_timeperiod(orbitmodel::CircularOrbit; unit = "second")
 end
 
 function get_timeperiod(orbitmodel::NoOrbitModel; unit = "second")
-    NoOrbit.get_timeperiod(orbitmodel, unit)
+    NoOrbit.get_timeperiod(orbitmodel, unit = unit)
 end
 
 end

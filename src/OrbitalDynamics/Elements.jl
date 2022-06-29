@@ -44,7 +44,7 @@ struct OrbitalElements
         # Check if the arguments are appropriate
         if !(0 <= Ω < 360) throw(DomainError(Ω, "Argument `Ω` exceeds appropriate domain. (0 <= Ω < 360)")) end
         if !(0 <= i < 360) throw(DomainError(i, "Argument `i` exceeds appropriate domain. (0 <= i < 360)")) end
-        if !(a > 0) throw(DomainError(a, "Argument `a` should be positive real number.")) end
+        if !(a >= 0) throw(DomainError(a, "Argument `a` should be positive real number.")) end
         if !(e >= 0) throw(DomainError(e, "Argument `e` should be positive real number.")) end
         if !(0 <= ω < 360) throw(DomainError(ω, "Argument `ω` exceeds appropriate domain. (0 <= ω < 360)")) end
         if !(0 <= f < 360) throw(DomainError(f, "Argument `f` exceeds appropriate domain. (0 <= ω < 360)")) end
