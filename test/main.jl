@@ -15,19 +15,18 @@ simtime = @timed (time, attitudedata, orbitdata, strdata) = runsimulation(attitu
 plottime = @timed begin # measure time for post process
 
     fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
-    fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
-    fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
-    fig5 = plot(time, strdata.physicalstate[:, 1])
-    fig5 = plot!(time, strdata.physicalstate[:, 2])
+    fig2 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
+    fig3 = plot(time, strdata.physicalstate[:, 1])
+    fig3 = plot!(time, strdata.physicalstate[:, 2])
 
-    location = "output" # specify where to save your data
-    outputdata = SimData(time, attitudedata, orbitdata)
-    write(location, outputdata)
+    # file output
+    # location = "output" # specify where to save your data
+    # outputdata = SimData(time, attitudedata, orbitdata)
+    # write(location, outputdata)
 
     display(fig1)
     display(fig2)
-    display(fig4)
-    display(fig5)
+    display(fig3)
 end
 
 println("Simulation time : $(simtime.time) (s)")
