@@ -1,9 +1,9 @@
 """
-    module Attitude
+    module KinematicsBase
 
 module for functions and APIs for the attitude kinematics
 """
-module Attitude
+module KinematicsBase
 
 using StaticArrays
 using ..Frames
