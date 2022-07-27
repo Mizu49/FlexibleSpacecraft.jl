@@ -120,6 +120,8 @@ function setstructure(configdata::AbstractDict)
 
     if haskey(configdata, "disturbance")
         strdistconfig = setstrdistconfig(configdata["disturbance"])
+    else
+        throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
     end
 
     return (structureparams, structuresimmodel, strdistconfig)

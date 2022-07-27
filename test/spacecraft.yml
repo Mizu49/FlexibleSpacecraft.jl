@@ -68,7 +68,7 @@ appendage:
                     0
                 ]
     disturbance:
-        type: vibration
+        type: no disturbance
         dimension: 1
         angular velocity: [1, 0]
         amplitude: [5000, 0]
