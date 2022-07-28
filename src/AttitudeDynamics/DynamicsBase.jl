@@ -77,4 +77,22 @@ function update_angularvelocity(
     return angularvelocity
 end
 
+"""
+    Base.:~(x::AbstractVector)
+
+operator for calculating the skew-symmetric matrix. It will be used for internal calculation of the calculation of the attitude dynamics of `FlexibleSpacecraft.jl`.
+"""
+@inline function Base.:~(x::AbstractVector)
+
+    if size(x, 1) != 3
+        throw(DimensionMismatch("dimension of vector `x` should be 3"))
+    end
+
+    return SMatrix{3, 3, <:Real}([
+        0 -x[3] x[2]
+        x[3] 0 -x[1]
+        -x[2] x[1] 0
+    ])
+end
+
 end
