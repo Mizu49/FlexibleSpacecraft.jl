@@ -29,6 +29,12 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         Dcplg = yamlread2matrix(paramsetting["coupling"], (3, dimstructurestate))
 
         model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
+
+    elseif paramsetting["model"] == "Rigid body"
+
+        inertia = yamlread2matrix(paramsetting["inertia"], (3,3))
+
+        model = RigidBodyModel(inertia)
     else
         error("configuration for dynamics model in YAML file is set improperly")
     end
