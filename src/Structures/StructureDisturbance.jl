@@ -3,7 +3,7 @@ submodule for the disturbance input to the flexible appendages
 """
 module StructureDisturbance
 
-export VibrationConfig, calcstrdisturbance, setstrdistconfig, AbstractStrDistConfig
+export VibrationConfig, NoStrDisturbance, calcstrdisturbance, setstrdistconfig, AbstractStrDistConfig
 
 """
 struct of parameter configuration of the vibration disturbance input
@@ -22,7 +22,11 @@ struct VibrationConfig
 
 end
 
-AbstractStrDistConfig = Union{VibrationConfig}
+struct NoStrDisturbance
+    dimdistinput::Int
+end
+
+AbstractStrDistConfig = Union{VibrationConfig, NoStrDisturbance}
 
 function calcstrdisturbance(config::AbstractStrDistConfig, time::Real)
 
@@ -47,16 +51,45 @@ function _calcstrdisturbance(config::VibrationConfig, time::Real)::Real
     return distinput
 end
 
-function setstrdistconfig(configdata::AbstractDict)
+function _calcstrdisturbance(config::NoStrDisturbance, time::Real)
 
-    dimdistcomp = size(configdata["angular velocity"], 1)
+    if config.dimdistinput == 1
+        return 0
+    else
+        return zeros(config.dimdistinput)
+    end
+end
+
+function setstrdistconfig(configdata::AbstractDict)::AbstractStrDistConfig
+
+    if configdata["type"] == "vibration"
+        config = _setconfig_vibration(configdata)
+    elseif configdata["type"] == "no disturbance"
+        config = _setconfig_nodisturbance(configdata)
+    else
+        error("configuration for disturbance input to structual appendage is invalid")
+    end
+
+    return config
+end
+
+function _setconfig_vibration(configdata::AbstractDict)
 
     config = VibrationConfig(
         configdata["dimension"],
-        dimdistcomp,
+        size(configdata["angular velocity"], 1),
         configdata["angular velocity"],
         configdata["amplitude"],
         configdata["phase"]
+    )
+
+    return config
+end
+
+function _setconfig_nodisturbance(configdata::AbstractDict)
+
+    config = NoStrDisturbance(
+        configdata["dimension"]
     )
 
     return config

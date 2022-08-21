@@ -24,8 +24,8 @@ include("Disturbances/Disturbance.jl")
 include("AttitudeDynamics/DynamicsBase.jl")
 @reexport using .DynamicsBase
 
-include("AttitudeDynamics/Attitude.jl")
-@reexport using .Attitude
+include("AttitudeDynamics/KinematicsBase.jl")
+@reexport using .KinematicsBase
 
 include("AttitudeDynamics/Evaluation.jl")
 @reexport using .Evaluation

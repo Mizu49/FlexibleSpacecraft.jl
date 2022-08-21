@@ -29,6 +29,12 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         Dcplg = yamlread2matrix(paramsetting["coupling"], (3, dimstructurestate))
 
         model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
+
+    elseif paramsetting["model"] == "Rigid body"
+
+        inertia = yamlread2matrix(paramsetting["inertia"], (3,3))
+
+        model = RigidBodyModel(inertia)
     else
         error("configuration for dynamics model in YAML file is set improperly")
     end
@@ -75,6 +81,24 @@ function update_angularvelocity(
     end
 
     return angularvelocity
+end
+
+"""
+    Base.:~(x::AbstractVector)
+
+operator for calculating the skew-symmetric matrix. It will be used for internal calculation of the calculation of the attitude dynamics of `FlexibleSpacecraft.jl`.
+"""
+@inline function Base.:~(x::AbstractVector)
+
+    if size(x, 1) != 3
+        throw(DimensionMismatch("dimension of vector `x` should be 3"))
+    end
+
+    return SMatrix{3, 3, <:Real}([
+        0 -x[3] x[2]
+        x[3] 0 -x[1]
+        -x[2] x[1] 0
+    ])
 end
 
 end

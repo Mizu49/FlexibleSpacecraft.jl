@@ -6,7 +6,7 @@ submodule that accommodate the implementation of the linear model for the attitu
 module LinearCoupling
 
 using StaticArrays
-using ..Frames
+using ..Frames, ..DynamicsBase
 
 export LinearCouplingModel
 
@@ -68,17 +68,11 @@ function _calc_differential_dynamics(
     strvelocity::AbstractVector{<:Real}
     )::SVector{3, <:Real}
 
-    # skew matrix of angular velocity vector
-    skewOmega = [
-        0 -angularvelocity[3] angularvelocity[2]
-        angularvelocity[3] 0 -angularvelocity[1]
-        -angularvelocity[2] angularvelocity[1] 0]
-
     # calculate differential of equation of motion
     differential = SVector{3}(inv(model.inertia) * (
         distinput # disturbance torque
-        - current_body_frame' * model.inertia * skewOmega * current_body_frame * current_body_frame' * angularvelocity # attitude dynamics
-        - model.Dcplg * straccel - skewOmega * model.Dcplg * strvelocity # structural coupling
+        - current_body_frame' * model.inertia * ~(angularvelocity) * current_body_frame * current_body_frame' * angularvelocity # attitude dynamics
+        - model.Dcplg * straccel - ~(angularvelocity) * model.Dcplg * strvelocity # structural coupling
     ))
 
     return differential

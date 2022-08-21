@@ -6,19 +6,19 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays, ProgressMeter
-using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..Attitude, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
+using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
 
 export runsimulation
 
 ############# runsimulation function ##################################
 """
-    runsimulation(attitudemodel, initvalue::Attitude.InitData, orbitinfo::OrbitBase.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+    runsimulation(attitudemodel, initvalue::KinematicsBase.InitData, orbitinfo::OrbitBase.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
 # Arguments
 
-* `attitudemodel`: Attitude dynamics model of the system
+* `attitudemodel`: KinematicsBase dynamics model of the system
 * `strmodel`: Structural model of the flexible appendages
 * `initvalue::InitData`: Inital value of the simulation physical states
 * `orbitinfo::OrbitBase.OrbitInfo`: information and model definition of the orbital dynamics
@@ -44,7 +44,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 @inline function runsimulation(
     attitudemodel,
     strmodel,
-    initvalue::Attitude.InitData,
+    initvalue::KinematicsBase.InitData,
     orbitinfo::OrbitBase.OrbitInfo,
     distconfig::DisturbanceConfig,
     strdistconfig::AbstractStrDistConfig,
