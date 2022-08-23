@@ -9,7 +9,11 @@ makedocs(
         "home" => "index.md",
         "Example" => "examples/example.md",
         "Simulation" => [
+            "Core" => "simulation/simulation_cores/example.md",
+        "Simulation" => [
             "Core" => "simulation/simulation_core.md",
+            "Configuration" => "simulation/simulation_config.md"
+        ],
             "Configuration" => "simulation/simulation_config.md"
         ],
         "CLI" => "docs-CLI/index.md",
@@ -29,6 +33,10 @@ makedocs(
             "API" => "docs-module/docs-SimulationAPI.md",
             "Data containers" => "docs-module/docs-DataContainers.md",
             "Plot recipe" => "docs-module/docs-PlotRecipe.md"
+        ],
+        "Development" => [
+            "Developer's Guideline" => "development/developer's-guideline.md",
+            "Environment" => "development/environment.md"
         ],
         "Development" => [
             "Developer's Guideline" => "development/developer's-guideline.md",
