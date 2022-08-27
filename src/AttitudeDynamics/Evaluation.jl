@@ -5,15 +5,16 @@ Functions and APIs for the evaluation of the simulation result. Checking the con
 """
 module Evaluation
 
-using StructArrays
 using StaticArrays
 
+export quaternion_constraint
+
 """
-    function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, Float64}})
+    function quaternion_constraint(quaternion::Vector{SVector{4, <:Real}})
 
 Check if quaternion vector satisfies constraint
 """
-function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, Float64}})
+function quaternion_constraint(quaternion::Vector{SVector{4, <:Real}})
 
     datanum = size(quaternion, 1)
 
@@ -22,7 +23,10 @@ function quaternion_constraint(quaternion::Vector{StaticArrays.SVector{4, Float6
 
     # evaluate constraint of quaiteratively
     for cnt = 1:datanum
-        constraint = quaternion[cnt, 1]^2 + quaternion[cnt, 2]^2 + quaternion[cnt, 3]^2 + quaternion[cnt, 4]^2
+
+        q = quaternion[cnt]
+
+        constraint = q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
 
         if constraint ≈ 1 rtol = 1e-9
             logicalArray[cnt] = true

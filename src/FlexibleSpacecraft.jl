@@ -2,30 +2,30 @@ module FlexibleSpacecraft
 
 using Reexport
 
-@reexport using LinearAlgebra
-@reexport using Plots
+@reexport using LinearAlgebra, Plots, StaticArrays
+
+include("Core/Utilities.jl")
+@reexport using.Utilities
+
+include("DataContainers/DataContainers.jl")
+@reexport using .DataContainers
 
 include("DataContainers/Frames.jl")
 @reexport using .Frames
 
-# Include module `TimeLine`
-include("DataContainers/TimeLine.jl")
-@reexport using .TimeLine
-
-# Include module `Orbit`
-include("OrbitalDynamics/Orbit.jl")
-@reexport using .Orbit
+# Include module `OrbitBase`
+include("OrbitalDynamics/OrbitBase.jl")
+@reexport using .OrbitBase
 
 # Inculde module `Disturbance`
 include("Disturbances/Disturbance.jl")
 @reexport using .Disturbance
 
-# Include module `RigidBody.jl`
-include("AttitudeDynamics/RigidBody.jl")
-@reexport using .RigidBody
+include("AttitudeDynamics/DynamicsBase.jl")
+@reexport using .DynamicsBase
 
-include("AttitudeDynamics/Attitude.jl")
-@reexport using .Attitude
+include("AttitudeDynamics/KinematicsBase.jl")
+@reexport using .KinematicsBase
 
 include("AttitudeDynamics/Evaluation.jl")
 @reexport using .Evaluation
@@ -34,14 +34,20 @@ include("AttitudeDynamics/Evaluation.jl")
 include("PlotRecipes/PlotRecipe.jl")
 @reexport using .PlotRecipe
 
-include("SimulationAPI/ParameterSetting.jl")
-@reexport using .ParameterSetting
+include("Structures/StructureDisturbance.jl")
+@reexport using .StructureDisturbance
+
+include("Structures/StructuresBase.jl")
+@reexport using .StructuresBase
 
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI
 
-include("SimulationAPI/runsimulation.jl")
-export runsimulation
+include("SimulationAPI/ParameterSettingBase.jl")
+@reexport using .ParameterSettingBase
+
+include("Core/SimulationCore.jl")
+@reexport using .SimulationCore
 
 include("CLI/CLI.jl")
 

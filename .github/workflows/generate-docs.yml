@@ -4,12 +4,12 @@ on:
   push:
     branches:
       - main
-      - dev-build
+      - develop
     tags: 'v*'
   pull_request:
     branches:
       - main
-      - dev-build
+      - develop
   release:
     types: [published]
 

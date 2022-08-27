@@ -9,7 +9,7 @@ We employ the following branching model. Please try to follow this!
 | Branch naming  | Description                                                                                                               | Branch off from: | Merge back into:                               |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------- |
 | `main`         | Latest stable release with version tag.                                                                                   | None             | None                                           |
-| `dev-build`    | Latest development build. Newly developed features are merged to this branch.                                             | `main`           | `release-****` or `main` with `--no-ff` option |
+| `develop`    | Latest development build. Newly developed features are merged to this branch.                                             | `main`           | `release-****` or `main` with `--no-ff` option |
 | `dev-****`     | Feature development branch. Development of new feature should be on this branch. Contributors are encouraged to use this. | `development`    | `development` with `no-ff` option              |
 | `release-****` | Preparation for next release will be done in this branch.                                                                 | `development`    | `main` and `develop` with `no-ff` option       |
 | `hotfix-****`  | Bug fix in `main`                                                                                                         | `main`           | `main` and `development`                       |  |

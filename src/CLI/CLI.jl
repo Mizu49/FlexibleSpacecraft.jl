@@ -19,31 +19,15 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
 """
 @cast function run(configfilepath::String; save::Bool = false)
 
-    print("loading the simulation configulation files...")
 
     # Read the YAML file to obtain the pathes for the configulation files
-    configfiles = YAML.load_file(configfilepath)
+    print("loading the simulation configulation files...")
+    (simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(configfilepath)
+    println("completed!")
 
-    # Set the dynamics model
-    model = setdynamicsmodel(configfiles["configfiles"]["model"],)
-
-    # define a orbit info
-    orbitinfo = setorbit(configfiles["configfiles"]["orbit"], ECI_frame)
-
-    # Set disturbance torque
-    distconfig = setdisturbance(configfiles["configfiles"]["disturbance"])
-
-    # Initialize the simulation configuration
-    simconfig = setsimconfig(configfiles["configfiles"]["simconfig"])
-
-    # Define initial values for simulation
-    initvalue = setinitvalue(configfiles["configfiles"]["initvalue"])
-
-    println("done!")
-
-    # Execute the simulation
-    print("running simulation ...")
-    (time, attitudedata, orbitdata) = runsimulation(model, initvalue, orbitinfo, distconfig, simconfig)
+    # run simulation
+    print("Begin simulation...")
+    @time (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
     println("completed!")
 
     if save == true

@@ -2,18 +2,18 @@ module PhysicalQuantity
 
 using Plots
 
-# Include module `TimeLine`
-import ...TimeLine
+# Include module `DataContainers`
+import ...DataContainers
 using StaticArrays
 
 export angularvelocities, eulerangles, quaternions
 
 """
-    function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+    function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
 Plots angular velocity of each axis in one figure
 """
-function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
     plotlyjs()
 
@@ -26,12 +26,12 @@ function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArr
 end
 
 """
-    eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+    eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
 Plots time history of euler angles
 
 """
-function eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+function eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
     plotlyjs()
 
@@ -44,11 +44,11 @@ function eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector
 end
 
 """
-function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
+function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
 
     Plot quaternions in single plot
 """
-function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
+function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
 
     plotlyjs()
 
@@ -61,7 +61,7 @@ function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector
     return plt
 end
 
-@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, Float64}}, index::Integer; timerange = (0, 0), ylabelname = "No name", datalabel::String = "")
+@recipe function f(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}, index::Integer; timerange = (0, 0), ylabelname = "No name", datalabel = "")
     if !(1 <= index <= 4)
         throw(BoundsError(quaternion[1], index))
     end
@@ -71,19 +71,19 @@ end
     label --> datalabel
 
     # get the index for data
-    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
 
     return time[dataindex], quaternion[dataindex, index]
 end
 
-@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, Float64}}, axisindex::Integer; timerange = (0, 0), ylabelname = "No name", datalabel::String = "")
+@recipe function f(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}, axisindex::Integer; timerange = (0, 0), ylabelname = "No name", datalabel = "")
 
     xguide --> "Time (s)"
     yguide --> ylabelname
     label --> datalabel
 
     # get the index for data
-    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
 
     return time[dataindex], angularvelocity[dataindex, axisindex]
 end

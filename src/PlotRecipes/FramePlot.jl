@@ -1,10 +1,8 @@
 module FramePlot
 
-using Plots
-# Include module `TimeLine`
-import ...TimeLine
-using ...Frames: Frame
-using StructArrays: StructArray
+using Plots, ProgressMeter
+import ...DataContainers
+using ...Frames
 
 export dispframe, framegif
 
@@ -88,10 +86,10 @@ end
 
 Generates animation of frame rotation as GIF figure
 """
-function framegif(time::StepRangeLen, refframe::Frame, frames::StructArray; Tgif = 60, FPS = 3, timerange = (0, 0))
+function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; Tgif = 60, FPS = 3, timerange = (0, 0))
 
     # get the index for data
-    dataindex = TimeLine.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
 
     Tsampling = convert(Float64, time.step)
 
@@ -105,9 +103,12 @@ function framegif(time::StepRangeLen, refframe::Frame, frames::StructArray; Tgif
     end
 
     # create animation
+    prog = Progress(length(animindex), 1, "Generating animation...", 50)   # progress meter
     anim = @animate for idx = animindex
-        frame = TimeLine.getframe(time[idx], Tsampling, frames)
+        frame = getframe(time[idx], Tsampling, frames)
         dispframe(time[idx], refframe, frame)
+
+        next!(prog) # update the progress meter
     end
 
     # make gif image

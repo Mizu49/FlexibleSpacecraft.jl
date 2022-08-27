@@ -30,8 +30,8 @@ Here, we specify `output` as an output root directory. The system generates a ne
 """
 module DataAPI
 
-using DataFrames, CSV, StaticArrays, StructArrays, Dates
-using ..Frames, ..TimeLine
+using DataFrames, CSV, StaticArrays, Dates
+using ..Frames, ..OrbitBase, ..KinematicsBase
 
 export SimData
 
@@ -49,7 +49,7 @@ struct of the table data frame from simulation results
 # Usage
 
 use the following constructor:
-`SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector)`
+`SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::StructVector)`
 
 * `time`: time data
 * `attitudedata`: `StructVector` of the attitude data
@@ -62,7 +62,7 @@ struct SimData
     orbit::DataFrame
 
     # Constructor
-    SimData(time::AbstractRange{<:Real}, attitudedata::StructVector, orbitdata::StructVector) = begin
+    SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::OrbitData) = begin
 
         # Get current time stamp in UTC
         timestamp = Dates.format(Dates.now(), "yyyy-mm-dd--HH-MM-SS")
@@ -94,11 +94,11 @@ function Base.write(path::AbstractString, simdata::SimData)
 end
 
 """
-    _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVector)::DataFrame
+    _convert_attitude(time::AbstractRange{<:Real}, attitudedata::AttitudeData)::DataFrame
 
 convert internal data container for attitude to the data frame object by mapping each fields
 """
-function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::StructVector)::DataFrame
+function _convert_attitude(time::AbstractRange{<:Real}, attitudedata::AttitudeData)::DataFrame
 
     attitude = DataFrame(
         "time" => time,
@@ -122,7 +122,7 @@ end
 
 convert internal data container for orbital motion to the data frame object by mapping each fields
 """
-function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::StructVector)::DataFrame
+function _convert_orbit(time::AbstractRange{<:Real}, orbitdata::OrbitData)::DataFrame
 
     orbit = DataFrame(
         "time" => time,

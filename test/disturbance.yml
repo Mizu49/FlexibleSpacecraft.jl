@@ -1,6 +1,0 @@
-# set disturbance
-
-property: distconfig
-
-constant torque: [0.05, 0, 0]
-gravitational torque: false

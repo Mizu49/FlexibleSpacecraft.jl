@@ -4,35 +4,7 @@
 
 ## Pre-process of the simulation parameters
 
-You need to prepare all of the parameters for simulation in the following manner.
-
-You need to an YAML file that specifies the locaton of the parameter setting files for the each subsystem.
-
-* `spacecraft.yml`: parameters for the spacecraft itself and its model formulation
-* `orbit.yml`: parameters for the orbital motion
-* `disturbance.yml`: parameters for the disturbance input
-* `simconfig.yml`: configuration files for the simulation
-* `initvalue.yml`: configuration of initial value for the simulation
-
-The location of these files should be addressed in the YAML file like:
-
-```yaml
-name: Test parameters # Name of the parameters setting
-dates: "2022/04/20" # Date (Optional)
-notes: "This YAML file is only for testing the CLI" # Notes (Optional)
-
-# Specify the relative path of the parameter configuration files (Required) 
-# These file locations should be declared in this file, otherwise, the software gives an error
-configfiles:
-    model: "spacecraft.yml"
-    orbit: "orbit2.yml"
-    disturbance: "disturbance.yml"
-    simconfig: "simconfig.yml"
-    initvalue: "initvalue.yml"
-```
-
-Save this file as YAML files like `params.yml`. In the following documentation, we will use `params.yml`.
-
+You need a parameter setting file to run simulation from the CLI tool. Visit the [Parameter configuration](@ref) to learn more about the parameter setting format.
 ## Commands and basic usage
 
 `evalspacecraft` is the topmost basic CLI command for `FlexibleSpacecraft.jl`. You need to type the subcommand to specify what you want to do with `FlexibleSpacecraft.jl`.
@@ -58,10 +30,10 @@ You can also use the following flags:
 $ evalspacecraft -V
 ```
 
-Suppose you have the parameter setting file `params.yml` in your current working directory. You can run simulation with the predefined parameters with following command. 
+Suppose you have the parameter setting file `spacecraft.yml` in your current working directory. You can run simulation with the predefined parameters with following command. 
 
 ```text
-$ evalspacecraft run params.yml --save
+$ evalspacecraft run spacecraft.yml --save
 ```
 
 `--save` is a flag that specifies wheather to save the simulation data or not. False by default.

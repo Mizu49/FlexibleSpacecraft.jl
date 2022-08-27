@@ -13,12 +13,17 @@ makedocs(
             "Configuration" => "simulation/simulation_config.md"
         ],
         "CLI" => "docs-CLI/index.md",
-        "Dynamics" => [
+        "Attitude" => [
+            "Kinematics" => "dynamics/kinematics.md",
+            "Dynamics" => "dynamics/dynamics.md",
             "Frames" => "dynamics/frames.md",
-            "Attitude dynamics" => "dynamics/attitude.md",
             "Rigid body" => "dynamics/rigid-body.md",
             "Orbit" => "dynamics/orbit.md",
-            "Disturbance input" => "dynamics/disturbance.md"
+            "Disturbance input" => "dynamics/disturbance.md",
+            "Structures" => [
+                "Index" => "dynamics/structures/structures.md",
+                "Spring mass model" => "dynamics/structures/SpringMass.md"
+            ]
         ],
         "Libraries" => [
             "API" => "docs-module/docs-SimulationAPI.md",
@@ -35,6 +40,6 @@ makedocs(
 # Deploy documentation to `gh-pages` branch
 deploydocs(
     repo = "github.com/Mizu49/FlexibleSpacecraft.jl.git",
-    devbranch = "dev-build",
+    devbranch = "develop",
     push_preview = true,
 )
