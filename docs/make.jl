@@ -14,7 +14,6 @@ makedocs(
         ],
         "CLI" => "docs-CLI/index.md",
         "Attitude" => [
-            "AttitudeBase" => "dynamics/attitude.md",
             "Kinematics" => "dynamics/kinematics.md",
             "Dynamics" => "dynamics/dynamics.md",
             "Frames" => "dynamics/frames.md",
