@@ -14,7 +14,7 @@ makedocs(
         ],
         "CLI" => "docs-CLI/index.md",
         "Attitude" => [
-            "Kinematics" => "dynamics/attitude.md",
+            "Kinematics" => "dynamics/kinematics.md",
             "Dynamics" => "dynamics/dynamics.md",
             "Frames" => "dynamics/frames.md",
             "Rigid body" => "dynamics/rigid-body.md",

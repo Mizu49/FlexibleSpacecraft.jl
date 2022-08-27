@@ -1,4 +1,4 @@
-# Dynamics simulation 
+# Dynamics
 
 Dynamics simulation is the key feature of the `FlexibleSpacecraft.jl`. This documentation provides the information on the features and APIs that allow you to execute your simulation conveniently.
 
