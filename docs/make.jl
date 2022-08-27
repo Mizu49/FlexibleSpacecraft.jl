@@ -9,16 +9,13 @@ makedocs(
         "home" => "index.md",
         "Example" => "examples/example.md",
         "Simulation" => [
-            "Core" => "simulation/simulation_cores/example.md",
-        "Simulation" => [
             "Core" => "simulation/simulation_core.md",
-            "Configuration" => "simulation/simulation_config.md"
-        ],
             "Configuration" => "simulation/simulation_config.md"
         ],
         "CLI" => "docs-CLI/index.md",
         "Attitude" => [
-            "Kinematics" => "dynamics/attitude.md",
+            "AttitudeBase" => "dynamics/attitude.md",
+            "Kinematics" => "dynamics/kinematics.md",
             "Dynamics" => "dynamics/dynamics.md",
             "Frames" => "dynamics/frames.md",
             "Rigid body" => "dynamics/rigid-body.md",
