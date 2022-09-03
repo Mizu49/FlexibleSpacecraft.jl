@@ -27,4 +27,21 @@ function define_controller(config::AbstractDict)
     return controller_config
 end
 
+function get_controlinput(config::PIDconfig, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+
+    error = calc_error(state, target)
+    integraldata = 0;
+
+    input = config.Pgain * error + config.Igain * integraldata + config.Dgain * error
+
+    return input
+end
+
+function calc_error(state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+
+    error = state - target
+
+    return error
+end
+
 end
