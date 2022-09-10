@@ -40,6 +40,9 @@ include("Structures/StructureDisturbance.jl")
 include("Structures/StructuresBase.jl")
 @reexport using .StructuresBase
 
+include("AttitudeControl/AttitudeControlBase.jl")
+@reexport using .AttitudeControlBase
+
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI
 
