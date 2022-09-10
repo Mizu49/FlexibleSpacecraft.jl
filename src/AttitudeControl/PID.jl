@@ -5,11 +5,26 @@ submodule that contains implementation of the Proportional-Integral-Differential
 """
 module PID
 
-struct PIDconfig
+export control_input!
+
+struct _Config
     # gains
-    Pgain::AbstractVecOrMat
-    Igain::AbstractVecOrMat
-    Dgain::AbstractVecOrMat
+    Pgain::Union{AbstractVecOrMat, Real}
+    Igain::Union{AbstractVecOrMat, Real}
+    Dgain::Union{AbstractVecOrMat, Real}
+end
+
+"""
+    _Internals
+
+Internal struct for dealing with the controller-related tasks
+"""
+mutable struct _Internals
+    #  Cumulative error for the I controller
+    cumulativeerror::Union{AbstractVector, Real}
+
+    #  previous error for the D controller
+    previouserror::Union{AbstractVector, Real}
 end
 
 function define_controller(config::AbstractDict)
@@ -18,7 +33,7 @@ function define_controller(config::AbstractDict)
     if haskey(config, "Igain") thorw(KeyError("key \"Igain\" is not configured")) end
     if haskey(config, "Dgain") thorw(KeyError("key \"Dgain\" is not configured")) end
 
-    controller_config = PIDconfig(
+    controller_config = _Config(
         config["Pgain"],
         config["Igain"],
         config["Dgain"]
@@ -27,17 +42,24 @@ function define_controller(config::AbstractDict)
     return controller_config
 end
 
-function get_controlinput(config::PIDconfig, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function control_input!(config::_Config, internals::_Internals, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
 
-    error = calc_error(state, target)
-    integraldata = 0;
+    error = _calc_error(state, target)
+    error_diff = (error - internals.previouserror)/0.1
 
-    input = config.Pgain * error + config.Igain * integraldata + config.Dgain * error
+    # process internal calculation
+    internals.previouserror = error
+    internals.cumulativeerror = internals.cumulativeerror + error
+
+    input =
+        - config.Pgain * error +
+        - config.Igain * internals.cumulativeerror +
+        - config.Dgain * error_diff
 
     return input
 end
 
-function calc_error(state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function _calc_error(state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
 
     error = state - target
 
