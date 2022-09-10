@@ -27,11 +27,11 @@ mutable struct _Internals
     previouserror::Union{AbstractVector, Real}
 end
 
-function define_controller(config::AbstractDict)
+function set_controller(config::AbstractDict)
     # check the configuration
-    if haskey(config, "Pgain") thorw(KeyError("key \"Pgain\" is not configured")) end
-    if haskey(config, "Igain") thorw(KeyError("key \"Igain\" is not configured")) end
-    if haskey(config, "Dgain") thorw(KeyError("key \"Dgain\" is not configured")) end
+    if !haskey(config, "Pgain") throw(KeyError("key \"Pgain\" is not configured")) end
+    if !haskey(config, "Igain") throw(KeyError("key \"Igain\" is not configured")) end
+    if !haskey(config, "Dgain") throw(KeyError("key \"Dgain\" is not configured")) end
 
     controller_config = _Config(
         config["Pgain"],
@@ -40,6 +40,10 @@ function define_controller(config::AbstractDict)
     )
 
     return controller_config
+end
+
+function init_internals(config::AbstractDict)
+    return _Internals(0, 0)
 end
 
 @inline function control_input!(config::_Config, internals::_Internals, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
