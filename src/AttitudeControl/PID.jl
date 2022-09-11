@@ -5,7 +5,7 @@ submodule that contains implementation of the Proportional-Integral-Differential
 """
 module PID
 
-export control_input!
+export PIDController, control_input!
 
 struct _Config
     # gains
@@ -27,7 +27,20 @@ mutable struct _Internals
     previouserror::Union{AbstractVector, Real}
 end
 
-function set_controller(config::AbstractDict)
+mutable struct PIDController
+    _config::_Config
+    _internals::_Internals
+
+    PIDController(argconfig::AbstractDict) = begin
+
+        controller_config = _set_controller_config(argconfig)
+        internals = _init_controller_internals(argconfig)
+
+        new(controller_config, internals)
+    end
+end
+
+function _set_controller_config(config::AbstractDict)
     # check the configuration
     if !haskey(config, "Pgain") throw(KeyError("key \"Pgain\" is not configured")) end
     if !haskey(config, "Igain") throw(KeyError("key \"Igain\" is not configured")) end
@@ -42,23 +55,23 @@ function set_controller(config::AbstractDict)
     return controller_config
 end
 
-function init_internals(config::AbstractDict)
+function _init_controller_internals(config::AbstractDict)
     return _Internals(0, 0)
 end
 
-@inline function control_input!(config::_Config, internals::_Internals, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function control_input!(controller::PIDController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
 
     error = _calc_error(state, target)
-    error_diff = (error - internals.previouserror)/0.1
+    error_diff = (error - controller.internals.previouserror)/0.1
 
     # process internal calculation
-    internals.previouserror = error
-    internals.cumulativeerror = internals.cumulativeerror + error
+    controller.internals.previouserror = error
+    controller.internals.cumulativeerror = controller.internals.cumulativeerror + error
 
     input =
-        - config.Pgain * error +
-        - config.Igain * internals.cumulativeerror +
-        - config.Dgain * error_diff
+        - controller.config.Pgain * error +
+        - controller.config.Igain * internals.cumulativeerror +
+        - controller.config.Dgain * error_diff
 
     return input
 end
