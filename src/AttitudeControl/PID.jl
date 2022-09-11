@@ -62,16 +62,16 @@ end
 @inline function control_input!(controller::PIDController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
 
     error = _calc_error(state, target)
-    error_diff = (error - controller.internals.previouserror)/0.1
+    error_diff = (error - controller._internals.previouserror)/0.1
 
     # process internal calculation
-    controller.internals.previouserror = error
-    controller.internals.cumulativeerror = controller.internals.cumulativeerror + error
+    controller._internals.previouserror = error
+    controller._internals.cumulativeerror = controller._internals.cumulativeerror + error
 
     input =
-        - controller.config.Pgain * error +
-        - controller.config.Igain * internals.cumulativeerror +
-        - controller.config.Dgain * error_diff
+        - controller._config.Pgain * error +
+        - controller._config.Igain * controller._internals.cumulativeerror +
+        - controller._config.Dgain * error_diff
 
     return input
 end
