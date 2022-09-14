@@ -76,7 +76,7 @@ function update_angularvelocity(
     if typeof(model) == RigidBodyModel
         angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput)
     elseif typeof(model) == LinearCouplingModel
-        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, straccel, strvelocity)
+        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput, straccel, strvelocity)
     else
         error("given model is invalid")
     end

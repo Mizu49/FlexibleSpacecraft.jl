@@ -64,13 +64,15 @@ function _calc_differential_dynamics(
     angularvelocity::AbstractVector{<:Real},
     current_body_frame::SMatrix{3, 3, <:Real, 9},
     distinput::AbstractVector{<:Real},
+    ctrlinput::AbstractVector{<:Real},
     straccel::AbstractVector{<:Real},
     strvelocity::AbstractVector{<:Real}
     )::SVector{3, <:Real}
 
     # calculate differential of equation of motion
     differential = SVector{3}(inv(model.inertia) * (
-        distinput # disturbance torque
+        + ctrlinput
+        + distinput # disturbance torque
         - current_body_frame' * model.inertia * ~(angularvelocity) * current_body_frame * current_body_frame' * angularvelocity # attitude dynamics
         - model.Dcplg * straccel - ~(angularvelocity) * model.Dcplg * strvelocity # structural coupling
     ))
@@ -101,6 +103,7 @@ function update_angularvelocity(
     Tsampling::Real,
     currentbodyframe::Frame,
     distinput::AbstractVector{<:Real},
+    ctrlinput::AbstractVector{<:Real},
     straccel::AbstractVector{<:Real},
     strvelocity::AbstractVector{<:Real}
     )::SVector{3, <:Real}
@@ -108,10 +111,10 @@ function update_angularvelocity(
     # define body frame matrix from struct `Frame`
     bodyframematrix = SMatrix{3, 3}(hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z))
 
-    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , bodyframematrix, distinput, straccel, strvelocity)
-    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, bodyframematrix, distinput, straccel, strvelocity)
-    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, bodyframematrix, distinput, straccel, strvelocity)
-    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, bodyframematrix, distinput, straccel, strvelocity)
+    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , bodyframematrix, distinput, ctrlinput, straccel, strvelocity)
+    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, bodyframematrix, distinput, ctrlinput, straccel, strvelocity)
+    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, bodyframematrix, distinput, ctrlinput, straccel, strvelocity)
+    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, bodyframematrix, distinput, ctrlinput, straccel, strvelocity)
 
     nextOmega = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 
