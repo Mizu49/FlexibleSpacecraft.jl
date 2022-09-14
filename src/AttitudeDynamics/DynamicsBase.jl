@@ -67,13 +67,14 @@ function update_angularvelocity(
     Tsampling::Real,
     currentbodyframe::Frame,
     distinput::AbstractVector{<:Real},
+    ctrlinput::AbstractVector{<:Real},
     straccel::AbstractVector{<:Real},
     strvelocity::AbstractVector{<:Real}
     )::SVector{3, <:Real}
 
     # switch based on the type of `model`
     if typeof(model) == RigidBodyModel
-        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput)
+        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput)
     elseif typeof(model) == LinearCouplingModel
         angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, straccel, strvelocity)
     else
