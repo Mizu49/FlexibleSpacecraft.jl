@@ -19,6 +19,8 @@ plottime = @timed begin # measure time for post process
     fig3 = plot(time, strdata.physicalstate[:, 1])
     fig3 = plot!(time, strdata.physicalstate[:, 2])
 
+    anim = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 5e-1, FPS = 20)
+
     # file output
     # location = "output" # specify where to save your data
     # outputdata = SimData(time, attitudedata, orbitdata)
@@ -27,6 +29,7 @@ plottime = @timed begin # measure time for post process
     display(fig1)
     display(fig2)
     display(fig3)
+    display(anim)
 end
 
 println("Simulation time : $(simtime.time) (s)")
