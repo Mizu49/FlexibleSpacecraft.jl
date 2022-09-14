@@ -73,3 +73,10 @@ appendage:
         angular velocity: [1, 0]
         amplitude: [5000, 0]
         phase: [0, 0]
+
+attitude controller:
+    strategy: PID
+    config:
+        Pgain: 1
+        Igain: 1
+        Dgain: 1

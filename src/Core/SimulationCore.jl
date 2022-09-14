@@ -6,7 +6,7 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays, ProgressMeter
-using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
+using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase, ..AttitudeControlBase
 
 export runsimulation
 
@@ -48,7 +48,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     orbitinfo::OrbitBase.OrbitInfo,
     distconfig::DisturbanceConfig,
     strdistconfig::AbstractStrDistConfig,
-    simconfig::SimulationConfig
+    simconfig::SimulationConfig,
+    attitude_controller
     )::Tuple
 
     # misc of the simulation implementation
@@ -106,6 +107,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         strdata.controlinput[iter] = strctrlinput
         strdata.disturbance[iter] = strdistinput
+
+        attictrlinput = control_input!(attitude_controller, 0.1, 0)
 
         ############### coupling dynamics of the flexible spacecraft ###############
 
