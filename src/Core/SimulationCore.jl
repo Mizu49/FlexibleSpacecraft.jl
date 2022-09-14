@@ -109,7 +109,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.disturbance[iter] = strdistinput
 
         # attictrlinput = control_input!(attitude_controller, 0.1, 0) #TODO: fix this for 3d control input
-        attictrlinput = [1, 0, 0]
+        attictrlinput = [0, 20 * sin(1.5 * time[iter]), 0]
 
         ############### coupling dynamics of the flexible spacecraft ###############
 
