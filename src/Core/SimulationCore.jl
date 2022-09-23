@@ -91,7 +91,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         C_ECI2Body = ECI2BodyFrame(attidata.quaternion[iter])
         attidata.bodyframe[iter] = C_ECI2Body * RefFrame
         # update the euler angle representations
-        C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
+        C_LVLH2Body = T_LVLHref2RPY * C_ECI2Body * transpose(C_ECI2LVLH)
         attidata.RPYframe[iter] = C_LVLH2Body * RefFrame
         attidata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
 

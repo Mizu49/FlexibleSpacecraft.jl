@@ -16,7 +16,7 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit, get_angular_velocity
+export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2RPY, LVLHref, setorbit, get_angular_velocity
 
 const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 
@@ -96,11 +96,11 @@ Transformation matrix from radial along track frame to LVLH frame. LVLH frame is
 const T_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
 
 """
-    T_LVLHref2rollpitchyaw
+    T_LVLHref2RPY
 
 Transformation matrix from LVLH reference frame to roll-pitch-yaw frame. This transformation matrix converts the reference frame from `UnitFrame` to `LVLHref`.
 """
-const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
+const T_LVLHref2RPY = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
 
 """
     LVLHref
