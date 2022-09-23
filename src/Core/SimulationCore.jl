@@ -108,7 +108,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.controlinput[iter] = strctrlinput
         strdata.disturbance[iter] = strdistinput
 
-        attictrlinput = control_input!(attitude_controller, 0.1, 0)
+        # attictrlinput = control_input!(attitude_controller, 0.1, 0) #TODO: fix this for 3d control input
+        attictrlinput = [0, 20 * sin(1.5 * time[iter]), 0]
 
         ############### coupling dynamics of the flexible spacecraft ###############
 
@@ -129,7 +130,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         if iter != datanum
 
             # Update angular velocity
-            attidata.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, time[iter], attidata.angularvelocity[iter], Ts, attidata.bodyframe[iter], attidistinput, straccel, strvelocity)
+            attidata.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, time[iter], attidata.angularvelocity[iter], Ts, attidata.bodyframe[iter], attidistinput, attictrlinput, straccel, strvelocity)
 
             # Update quaternion
             attidata.quaternion[iter+1] = update_quaternion(attidata.angularvelocity[iter], attidata.quaternion[iter], Ts)
