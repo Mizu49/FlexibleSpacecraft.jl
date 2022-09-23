@@ -92,7 +92,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         attidata.bodyframe[iter] = C_ECI2Body * RefFrame
         # update the euler angle representations
         C_LVLH2Body = T_LVLHref2RPY * C_ECI2Body * transpose(C_ECI2LVLH)
-        attidata.RPYframe[iter] = C_LVLH2Body * RefFrame
+        attidata.RPYframe[iter] = C_LVLH2Body * LVLHref
         attidata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
 
         ############### flexible appendages state ####################################
