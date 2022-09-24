@@ -5,7 +5,7 @@ using Reexport
 @reexport using LinearAlgebra, Plots, StaticArrays
 
 include("Core/Utilities.jl")
-@reexport using.Utilities
+@reexport using .Utilities
 
 include("DataContainers/DataContainers.jl")
 @reexport using .DataContainers

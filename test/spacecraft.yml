@@ -77,6 +77,18 @@ appendage:
 attitude controller:
     strategy: PID
     config:
-        Pgain: 1
-        Igain: 1
-        Dgain: 1
+        Pgain: [
+            0.1, 0, 0,
+            0, 0.1, 0,
+            0, 0, 0.1
+        ]
+        Igain: [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ]
+        Dgain: [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ]

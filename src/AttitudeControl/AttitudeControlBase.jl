@@ -1,6 +1,7 @@
 module AttitudeControlBase
 
 using Reexport
+using ..Utilities
 
 include("PID.jl")
 @reexport using .PID

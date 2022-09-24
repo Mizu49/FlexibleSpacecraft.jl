@@ -93,7 +93,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # update the roll-pitch-yaw representations
         C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
         # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
-        attidata.eulerangle[iter] = dcm2euler(C_RAT2Body)
+        current_RPY = dcm2euler(C_RAT2Body)
+        attidata.eulerangle[iter] = current_RPY
         # RPYframe representation can be obtained from the LVLH unit frame
         attidata.RPYframe[iter] = C_RAT2Body * LVLHUnitFrame
 
@@ -101,7 +102,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ############### disturbance torque input to the attitude dynamics ############
-        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
+        # attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
+        attidistinput = transpose(C_ECI2Body) * [10 * sin(10 * time[iter]), 0, 0]
 
         ############### control and disturbance input to the flexible appendages
         strdistinput = calcstrdisturbance(strdistconfig, time[iter])
@@ -110,9 +112,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.controlinput[iter] = strctrlinput
         strdata.disturbance[iter] = strdistinput
 
-        # attictrlinput = control_input!(attitude_controller, 0.1, 0) #TODO: fix this for 3d control input
-        # attictrlinput = transpose(C_ECI2RAT) * transpose(C_RAT2Body) * [20 * sin(1.5 * time[iter]), 0, 0]
-        attictrlinput = transpose(C_ECI2Body) * [1, 0, 0]
+        attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
+        # attictrlinput = zeros(3)
 
         ############### coupling dynamics of the flexible spacecraft ###############
 
