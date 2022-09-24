@@ -84,15 +84,15 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # calculation of the LVLH frame and its transformation matrix
         C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
         C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
-        orbitdata.LVLH[iter] = C_ECI2RAT * RefFrame
+        orbitdata.LVLH[iter] = C_ECI2RAT * UnitFrame
 
         ############### attitude #####################################################
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(attidata.quaternion[iter])
-        attidata.bodyframe[iter] = C_ECI2Body * RefFrame
+        attidata.bodyframe[iter] = C_ECI2Body * UnitFrame
         # update the euler angle representations
         C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
-        attidata.RPYframe[iter] = C_RAT2Body * RefFrame
+        attidata.RPYframe[iter] = C_RAT2Body * LVLHref
         attidata.eulerangle[iter] = dcm2euler(C_RAT2Body)
 
         ############### flexible appendages state ####################################

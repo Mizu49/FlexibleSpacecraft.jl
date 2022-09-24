@@ -2,7 +2,7 @@ module Frames
 
 using StaticArrays
 
-export Frame, RefFrame, ECI_frame, initframes, getframe, ECI2BodyFrame
+export Frame, UnitFrame, ECI_frame, initframes, getframe, ECI2BodyFrame
 
 """
     struct Frame(x::Vector{Real}, y::Vector{Real}, z::Vector{Real})
@@ -15,7 +15,7 @@ struct Frame
     z::SVector{3, Real}
 end
 
-const RefFrame = Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
+const UnitFrame = Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
 
 """
     ECI_frame
