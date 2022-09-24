@@ -16,7 +16,7 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, T_UnitFrame2LVLHFrame, LVLHUnitFrame, setorbit, get_angular_velocity
+export OrbitInfo, OrbitData, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, setorbit, get_angular_velocity
 
 const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 

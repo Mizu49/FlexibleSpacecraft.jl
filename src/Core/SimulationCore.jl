@@ -52,28 +52,17 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     attitude_controller
     )::Tuple
 
-    # misc of the simulation implementation
+    ##### Constants
+    # Sampling time
     Ts = simconfig.samplingtime
-
-    # array of the time
-    time = 0:Ts:simconfig.simulationtime
-
-    # Numbers of simulation data
-    datanum = floor(Int, simconfig.simulationtime/Ts) + 1;
-
-    # Initialize data containers for the attitude dynamics
-    attidata = initattitudedata(datanum, initvalue)
-
-    # initialize data container for the structural motion of the flexible appendages
-    strdata = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
 
     # transformation matrix from ECI frame to orbital plane frame
     C_ECI2OrbitPlane = OrbitBase.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
 
-    # initialize orbit state data array
-    orbitdata = OrbitBase.initorbitdata(datanum, orbitinfo.planeframe)
+    # Data containers
+    (datanum, time, attidata, strdata, orbitdata) = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
-    # main loop of the simulation
+    ##### main loop of the simulation
     prog = Progress(datanum, 1, "Simulation running...", 50)   # progress meter
     for iter = 1:datanum
 
@@ -148,6 +137,25 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     end
 
     return (time, attidata, orbitdata, strdata)
+end
+
+function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
+
+    time = 0:simconfig.samplingtime:simconfig.simulationtime
+
+    # Numbers of simulation data
+    datanum = floor(Int, simconfig.simulationtime/simconfig.samplingtime) + 1;
+
+    # Initialize data containers for the attitude dynamics
+    attidata = initattitudedata(datanum, initvalue)
+
+    # initialize data container for the structural motion of the flexible appendages
+    strdata = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
+
+    # initialize orbit state data array
+    orbitdata = initorbitdata(datanum, orbitinfo.planeframe)
+
+    return (datanum, time, attidata, strdata, orbitdata)
 end
 
 end
