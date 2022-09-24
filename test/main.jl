@@ -19,7 +19,7 @@ plottime = @timed begin # measure time for post process
     fig3 = plot(time, strdata.physicalstate[:, 1])
     fig3 = plot!(time, strdata.physicalstate[:, 2])
 
-    anim = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 5e-1, FPS = 20)
+    anim = PlotRecipe.framegif(time, T_UnitFrame2LVLHFrame * UnitFrame, attitudedata.RPYframe, Tgif = 5e-1, FPS = 20)
 
     # file output
     # location = "output" # specify where to save your data

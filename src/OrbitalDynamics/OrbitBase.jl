@@ -1,7 +1,7 @@
 module OrbitBase
 
 using ..Frames, ..DataContainers
-using StaticArrays, Reexport
+using StaticArrays, Reexport, LinearAlgebra
 
 const GravityConstant = 6.673e-11
 const EarthMass = 5.974e24
@@ -16,7 +16,7 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2RPY, LVLHref, setorbit, get_angular_velocity
+export OrbitInfo, OrbitData, T_UnitFrame2LVLHFrame, LVLHUnitFrame, setorbit, get_angular_velocity
 
 const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 
@@ -89,11 +89,14 @@ function initorbitdata(datanum::Integer, orbitalframe::Frame)
 end
 
 """
-    LVLHref
-
-    Reference unit frame for the LVLH frame
+    transformation matrix from unit frame to LVLH referential frame
 """
-const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
+const T_UnitFrame2LVLHFrame = diagm([1, -1, -1])
+
+"""
+    LVLH referential frame
+"""
+const LVLHUnitFrame = T_UnitFrame2LVLHFrame * UnitFrame
 
 
 function get_angular_velocity(orbitmodel::CircularOrbit)
