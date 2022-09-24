@@ -83,23 +83,23 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         # calculation of the LVLH frame and its transformation matrix
         C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
-        C_ECI2LVLH = T_RAT2LVLH * C_OrbitPlane2RAT * C_ECI2OrbitPlane
-        orbitdata.LVLH[iter] = C_ECI2LVLH * RefFrame
+        C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
+        orbitdata.LVLH[iter] = C_ECI2RAT * RefFrame
 
         ############### attitude #####################################################
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(attidata.quaternion[iter])
         attidata.bodyframe[iter] = C_ECI2Body * RefFrame
         # update the euler angle representations
-        C_LVLH2Body = T_LVLHref2RPY * C_ECI2Body * transpose(C_ECI2LVLH)
-        attidata.RPYframe[iter] = C_LVLH2Body * LVLHref
-        attidata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
+        C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
+        attidata.RPYframe[iter] = C_RAT2Body * RefFrame
+        attidata.eulerangle[iter] = dcm2euler(C_RAT2Body)
 
         ############### flexible appendages state ####################################
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ############### disturbance torque input to the attitude dynamics ############
-        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[iter].z)
+        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
 
         ############### control and disturbance input to the flexible appendages
         strdistinput = calcstrdisturbance(strdistconfig, time[iter])
@@ -109,8 +109,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.disturbance[iter] = strdistinput
 
         # attictrlinput = control_input!(attitude_controller, 0.1, 0) #TODO: fix this for 3d control input
-        # attictrlinput = transpose(C_ECI2LVLH) * transpose(C_LVLH2Body) * [20 * sin(1.5 * time[iter]), 0, 0]
-        attictrlinput = transpose(C_ECI2Body) * [0, 1, 0]
+        # attictrlinput = transpose(C_ECI2RAT) * transpose(C_RAT2Body) * [20 * sin(1.5 * time[iter]), 0, 0]
+        attictrlinput = transpose(C_ECI2Body) * [1, 0, 0]
 
         ############### coupling dynamics of the flexible spacecraft ###############
 

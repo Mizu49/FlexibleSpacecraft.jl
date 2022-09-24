@@ -89,20 +89,6 @@ function initorbitdata(datanum::Integer, orbitalframe::Frame)
 end
 
 """
-    T_RAT2LVLH
-
-Transformation matrix from radial along track frame to LVLH frame. LVLH frame is defined with the replacement of the coordinate of the radial-along-track frame.
-"""
-const T_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
-
-"""
-    T_LVLHref2RPY
-
-Transformation matrix from LVLH reference frame to roll-pitch-yaw frame. This transformation matrix converts the reference frame from `UnitFrame` to `LVLHref`.
-"""
-const T_LVLHref2RPY = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
-
-"""
     LVLHref
 
     Reference unit frame for the LVLH frame

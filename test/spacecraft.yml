@@ -7,7 +7,7 @@ config:
     time length: 600 # Time length of simulation (second)
 
 initial value:
-    quaternion: [0, 0, 0, 1]
+    quaternion: [1, 0, 0, 0]
     angular velocity: [0, 0, 0]
 
 
