@@ -6,7 +6,7 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays, ProgressMeter
-using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase, ..AttitudeControlBase
+using ..Frames, ..OrbitBase, ..AttitudeDisturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase, ..AttitudeControlBase
 
 export runsimulation
 
@@ -91,8 +91,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ############### disturbance torque input to the attitude dynamics ############
-        # attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
-        attidistinput = transpose(C_ECI2Body) * [10 * sin(10 * time[iter]), 0, 0]
+        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
 
         ############### control and disturbance input to the flexible appendages
         strdistinput = calcstrdisturbance(strdistconfig, time[iter])

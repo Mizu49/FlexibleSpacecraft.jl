@@ -1,7 +1,7 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..Disturbance, ..StructuresBase, ..AttitudeControlBase
+using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
 
 export SimulationConfig, yamlread2matrix, readparamfile
 

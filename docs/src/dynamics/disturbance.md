@@ -24,7 +24,7 @@ gravitational torque: false
 ## Libraries
 
 ```@autodocs
-Modules = [Disturbance]
+Modules = [AttitudeDisturbance]
 Order   = [:type, :function]
-Pages   = ["Disturbance.jl"]
+Pages   = ["AttitudeDisturbance.jl"]
 ```
