@@ -1,9 +1,9 @@
 """
-    module Disturbance
+    module AttitudeDisturbance
 
 Module that includes functions related to the calculation of disturbance to the system
 """
-module Disturbance
+module AttitudeDisturbance
 
 using LinearAlgebra:norm
 using StaticArrays
