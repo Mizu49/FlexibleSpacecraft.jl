@@ -75,20 +75,5 @@ appendage:
         phase: [0, 0]
 
 attitude controller:
-    strategy: PID
+    strategy: none
     config:
-        Pgain: [
-            0.1, 0, 0,
-            0, 0.1, 0,
-            0, 0, 0.1
-        ]
-        Igain: [
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0
-        ]
-        Dgain: [
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0
-        ]
