@@ -7,7 +7,7 @@ module PID
 
 using ..Utilities
 
-export PIDController, control_input!
+export PIDController
 
 struct _Config
     # gains
