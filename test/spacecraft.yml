@@ -26,11 +26,22 @@ attitude dynamics:
     ]
 
 disturbance:
-    constant torque: [0.1, 0.0, 0.0]
+    constant torque: [0.0, 0.0, 0.0]
     gravitational torque: false
 
 Orbit:
-    Dynamics model: none
+    # Specify the model used in the simulation of orbital motion
+    Dynamics model: Circular
+    # Orbital elements
+    Orbital elements:
+        right ascension: 0
+        inclination: 0
+        semimajor axis: 421e3
+        eccentricity: 0
+        argument of perigee: 0
+        true anomaly at epoch: 0
+    # Note for this parameter setting
+    OrbitInfo: Test orbit parameters
 
 modeling: spring-mass
 

@@ -43,12 +43,14 @@ Load the configuration from YAML file and construct the appropriate model for th
 """
 function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
 
-    if orbitparamdict["Dynamics model"] == "none"
+    orbitalmodel = orbitparamdict["Dynamics model"]
+
+    if orbitalmodel == "none"
 
         elements = OrbitalElements(0, 0, 0, 0, 0, 0)
         orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
 
-    elseif orbitparamdict["Dynamics model"] == "Circular"
+    elseif orbitalmodel == "Circular"
         # set the orbital parameter for the circular orbit
 
         elements = setelements(orbitparamdict["Orbital elements"])
@@ -56,6 +58,8 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
         orbitalplaneframe = calc_orbitalframe(elements, ECI)
 
         orbitinfo = OrbitInfo(orbitmodel, elements, orbitalplaneframe)
+    else
+        error("orbital model \"$orbitalmodel\" not found")
     end
 
     return orbitinfo
