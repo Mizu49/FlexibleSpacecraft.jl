@@ -36,7 +36,7 @@ Orbit:
     Orbital elements:
         right ascension: 0
         inclination: 0
-        semimajor axis: 421e3
+        semimajor axis: 6371e3
         eccentricity: 0
         argument of perigee: 0
         true anomaly at epoch: 0
