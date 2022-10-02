@@ -102,12 +102,9 @@ const T_UnitFrame2LVLHFrame = diagm([1, -1, -1])
 """
 const LVLHUnitFrame = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 
-# const T_RAT2LVLH = [
-#     0  1   0
-#     0  0  -1
-#    -1  0   0
-# ]
-
+"""
+    rotational matrix that transfers from radial-along-track (RAT) to local-vertical local-horizontal (LVLH) attitude representation
+"""
 T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
 function get_angular_velocity(orbitmodel::CircularOrbit)
