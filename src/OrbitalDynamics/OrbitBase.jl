@@ -16,7 +16,7 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, setorbit, get_angular_velocity
+export OrbitInfo, OrbitData, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, get_angular_velocity
 
 const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 
@@ -100,8 +100,15 @@ const T_UnitFrame2LVLHFrame = diagm([1, -1, -1])
 """
     LVLH referential frame
 """
-const LVLHUnitFrame = T_UnitFrame2LVLHFrame * UnitFrame
+const LVLHUnitFrame = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 
+# const T_RAT2LVLH = [
+#     0  1   0
+#     0  0  -1
+#    -1  0   0
+# ]
+
+T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
 function get_angular_velocity(orbitmodel::CircularOrbit)
     Circular.get_angular_velocity(orbitmodel)

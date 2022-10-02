@@ -73,6 +73,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # calculation of the LVLH frame and its transformation matrix
         C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
         C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
+        C_ECI2LVLH = T_RAT2LVLH * C_ECI2RAT
 
         ############### attitude #####################################################
         # Update current attitude
@@ -81,11 +82,12 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         # update the roll-pitch-yaw representations
         C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
+        C_LVLH2Body = T_RAT2LVLH * C_ECI2Body * transpose(C_ECI2LVLH)
         # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
-        current_RPY = dcm2euler(C_RAT2Body)
+        current_RPY = dcm2euler(C_LVLH2Body)
         attidata.eulerangle[iter] = current_RPY
         # RPYframe representation can be obtained from the LVLH unit frame
-        attidata.RPYframe[iter] = C_RAT2Body * LVLHUnitFrame
+        attidata.RPYframe[iter] = C_LVLH2Body * LVLHUnitFrame
 
         ############### flexible appendages state ####################################
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
