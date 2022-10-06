@@ -92,8 +92,11 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         ############### flexible appendages state ####################################
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
-        ############### disturbance torque input to the attitude dynamics ############
-        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
+        ############### control and disturbance torque input to the attitude dynamics ############
+        # attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
+        attidistinput = transpose(C_ECI2Body) * [1, 0, 0]
+
+        attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
 
         ############### control and disturbance input to the flexible appendages
         strdistinput = calcstrdisturbance(strdistconfig, time[iter])
@@ -102,8 +105,6 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.controlinput[iter] = strctrlinput
         strdata.disturbance[iter] = strdistinput
 
-        attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
-        # attictrlinput = zeros(3)
 
         ############### coupling dynamics of the flexible spacecraft ###############
 
