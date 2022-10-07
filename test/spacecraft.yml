@@ -4,7 +4,7 @@ config:
     name: example spacecraft No. 2
     note: This model is for test purpose
     sampling time: 1e-3 # Sampling period of simulation (second)
-    time length: 600 # Time length of simulation (second)
+    time length: 100 # Time length of simulation (second)
 
 initial value:
     quaternion: [0, 0, 0, 1]

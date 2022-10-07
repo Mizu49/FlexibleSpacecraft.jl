@@ -73,7 +73,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # calculation of the LVLH frame and its transformation matrix
         C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
         C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
-        C_ECI2LVLH = T_RAT2LVLH * C_ECI2RAT
+        C_ECI2LVLH = C_ECI2RAT
 
         ############### attitude #####################################################
         # Update current attitude
@@ -82,7 +82,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         # update the roll-pitch-yaw representations
         C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
-        C_LVLH2Body = T_RAT2LVLH * C_ECI2Body * transpose(C_ECI2LVLH)
+        C_LVLH2Body = C_ECI2Body * transpose(C_ECI2LVLH)
         # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
         current_RPY = dcm2euler(C_LVLH2Body)
         attidata.eulerangle[iter] = current_RPY
@@ -94,7 +94,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         ############### control and disturbance torque input to the attitude dynamics ############
         # attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
-        attidistinput = transpose(C_ECI2Body) * [1, 0, 0]
+        attidistinput = transpose(C_ECI2Body) * [0, 0, 0]
 
         attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
 
