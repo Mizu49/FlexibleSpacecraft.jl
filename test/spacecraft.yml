@@ -31,7 +31,7 @@ disturbance:
 
 Orbit:
     # Specify the model used in the simulation of orbital motion
-    Dynamics model: Circular
+    Dynamics model: none
     # Orbital elements
     Orbital elements:
         right ascension: 0
