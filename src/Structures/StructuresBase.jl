@@ -113,7 +113,7 @@ function setstructure(configdata::AbstractDict)
     end
 
     if configdata["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = defmodel(configdata)
+        (structureparams, structuresimmodel) = SpringMass.defmodel(configdata)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
