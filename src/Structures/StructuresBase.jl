@@ -11,6 +11,9 @@ using ..Utilities, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
+include("NoAppendages.jl")
+@reexport using .NoAppendages
+
 export StructureSimData, initappendagedata, setstructure
 
 """
@@ -112,7 +115,9 @@ function setstructure(configdata::AbstractDict)
         throw(ErrorException("`modeling` is undefined in configuration"))
     end
 
-    if configdata["modeling"] == "spring-mass"
+    if configdata["modeling"] == "none"
+        (structureparams, structuresimmodel) = NoAppendages.defmodel()
+    elseif configdata["modeling"] == "spring-mass"
         (structureparams, structuresimmodel) = SpringMass.defmodel(configdata)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
