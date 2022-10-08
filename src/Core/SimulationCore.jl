@@ -62,11 +62,11 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
     # Data containers
     (datanum, time, attidata, strdata, orbitdata) = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
-    ##### main loop of the simulation
+    ### main loop of the simulation
     prog = Progress(datanum, 1, "Simulation running...", 50)   # progress meter
     for iter = 1:datanum
 
-        ############### orbit state ##################################################
+        ### orbit state
         orbitdata.angularvelocity[iter] = get_angular_velocity(orbitinfo.orbitmodel)
         orbitdata.angularposition[iter] = orbitdata.angularvelocity[iter] * time[iter]
 
@@ -75,7 +75,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
         C_ECI2LVLH = C_ECI2RAT
 
-        ############### attitude #####################################################
+        ### attitude state
         # Update current attitude
         C_ECI2Body = ECI2BodyFrame(attidata.quaternion[iter])
         attidata.bodyframe[iter] = C_ECI2Body * UnitFrame
@@ -89,24 +89,25 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # RPYframe representation can be obtained from the LVLH unit frame
         attidata.RPYframe[iter] = C_LVLH2Body * LVLHUnitFrame
 
-        ############### flexible appendages state ####################################
+        ### flexible appendages state
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
-        ############### control and disturbance torque input to the attitude dynamics ############
+        ### input to the attitude dynamics
+        # disturbance input
         attidistinput = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
-
+        # control input
         attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
 
-        ############### control and disturbance input to the flexible appendages
+        ### input to the structural dynamics
+        # disturbance input
         strdistinput = calcstrdisturbance(strdistconfig, time[iter])
+        # control input
         strctrlinput = 0
-
+        # data log
         strdata.controlinput[iter] = strctrlinput
         strdata.disturbance[iter] = strdistinput
 
-
-        ############### coupling dynamics of the flexible spacecraft ###############
-
+        ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
         currentstrstate = strdata.state[iter]
         if iter == 1
@@ -120,7 +121,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # angular velocity of the attitude dynamics for the structural coupling input
         attiinput = attidata.angularvelocity[iter]
 
-        ################## Time evolution of the system ##############################
+        ### Time evolution of the system
         if iter != datanum
 
             # Update angular velocity
@@ -133,8 +134,8 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
             strdata.state[iter+1] = updatestate(strmodel, Ts, time[iter], strdata.state[iter], attiinput, strctrlinput, strdistinput)
 
         end
-
-        next!(prog) # update the progress meter
+        # update the progress meter
+        next!(prog)
     end
 
     return (time, attidata, orbitdata, strdata)
