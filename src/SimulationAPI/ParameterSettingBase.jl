@@ -68,7 +68,7 @@ function readparamfile(filepath::String)
 
     # Disturbance for the attitude dynamics
     if haskey(paramread, "disturbance")
-        distconfig = setdisturbance(paramread["disturbance"])
+        distconfig = set_attitudedisturbance(paramread["disturbance"])
     else
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
     end

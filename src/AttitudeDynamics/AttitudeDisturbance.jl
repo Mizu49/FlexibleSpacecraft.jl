@@ -8,7 +8,7 @@ module AttitudeDisturbance
 using LinearAlgebra:norm
 using StaticArrays
 
-export DisturbanceConfig, disturbanceinput, setdisturbance
+export DisturbanceConfig, calc_attitudedisturbance, set_attitudedisturbance
 
 """
     struct DisturbanceConfig
@@ -32,11 +32,11 @@ struct DisturbanceConfig
 end
 
 """
-    setdisturbance
+    set_attitudedisturbance
 
 set disturbance configuration from YAML setting file
 """
-function setdisturbance(distconfigdict::AbstractDict)::DisturbanceConfig
+function set_attitudedisturbance(distconfigdict::AbstractDict)::DisturbanceConfig
 
     distconfig = DisturbanceConfig(
         constanttorque = distconfigdict["constant torque"],
@@ -98,9 +98,11 @@ function gravity_gradient_torque(inertia, orbit_angular_velocity, C_ECI2Body, C_
 end
 
 """
+    calc_attitudedisturbance
 
+calculate disturbance torque input to the attitude dynamics
 """
-function disturbanceinput(distconfig::DisturbanceConfig, inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)::Vector
+function calc_attitudedisturbance(distconfig::DisturbanceConfig, inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)::Vector
 
     disturbance = zeros(3) + constant_torque(C_ECI2Body, distconfig.consttorque)
 

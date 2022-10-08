@@ -93,8 +93,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ############### control and disturbance torque input to the attitude dynamics ############
-        # attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
-        attidistinput = transpose(C_ECI2Body) * [0, 0, 0]
+        attidistinput = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
 
         attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
 
