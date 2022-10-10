@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft2.yml"
+paramfilepath = "./test/spacecraft.yml"
 (simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
@@ -29,6 +29,7 @@ plottime = @timed begin # measure time for post process
     display(anim)
 
     if !isnothing(strmodel)
+        plotlyjs()
         fig3 = plot(time, strdata.physicalstate[:, 1])
         fig3 = plot!(time, strdata.physicalstate[:, 2])
         display(fig3)

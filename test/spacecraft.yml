@@ -14,9 +14,9 @@ initial value:
 attitude dynamics:
     model: Linear coupling
     inertia: [
-        1000, 0, 0,
-        0, 1000, 0,
-        0, 0, 1000
+        100, 0, 0,
+        0, 100, 0,
+        0, 0, 100
     ]
 
     coupling: [
@@ -86,5 +86,20 @@ appendage:
         phase: [0, 0]
 
 attitude controller:
-    strategy: none
+    strategy: PID
     config:
+        Pgain: [
+            100, 0, 0,
+            0, 100, 0,
+            0, 0, 100
+        ]
+        Igain: [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ]
+        Dgain: [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ]
