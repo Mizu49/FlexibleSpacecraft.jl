@@ -90,7 +90,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         attidata.RPYframe[iter] = C_LVLH2Body * LVLHUnitFrame
 
         ### flexible appendages state
-        strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
+        # strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
 
         ### input to the attitude dynamics
         # disturbance input
@@ -111,12 +111,24 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
         # calculation of the structural response input for the attitude dynamics
         currentstrstate = strdata.state[iter]
         if iter == 1
-            straccel = currentstrstate[(strmodel.DOF+1):end] / Ts
+            if typeof(currentstrstate) <: AbstractVector
+                straccel = currentstrstate[(strmodel.DOF+1):end] / Ts
+                strvelocity = currentstrstate[(strmodel.DOF+1):end]
+            else
+                straccel = currentstrstate / Ts
+                strvelocity = currentstrstate
+            end
         else
-            previousstrstate = strdata.state[iter-1]
-            straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
+            if typeof(currentstrstate) <: AbstractVector
+                previousstrstate = strdata.state[iter-1]
+                straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
+                strvelocity = currentstrstate[(strmodel.DOF+1):end]
+            else
+                previousstrstate = strdata.state[iter-1]
+                straccel = (currentstrstate - previousstrstate) / Ts
+                strvelocity = currentstrstate
+            end
         end
-        strvelocity = currentstrstate[(strmodel.DOF+1):end]
 
         # angular velocity of the attitude dynamics for the structural coupling input
         attiinput = attidata.angularvelocity[iter]
@@ -131,7 +143,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
             attidata.quaternion[iter+1] = update_quaternion(attidata.angularvelocity[iter], attidata.quaternion[iter], Ts)
 
             # Update the state of the flexible appendages
-            strdata.state[iter+1] = updatestate(strmodel, Ts, time[iter], strdata.state[iter], attiinput, strctrlinput, strdistinput)
+            strdata.state[iter+1] = update_strstate(strmodel, Ts, time[iter], strdata.state[iter], attiinput, strctrlinput, strdistinput)
 
         end
         # update the progress meter

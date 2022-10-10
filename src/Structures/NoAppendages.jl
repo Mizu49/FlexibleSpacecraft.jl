@@ -7,14 +7,14 @@ module NoAppendages
 using LinearAlgebra, StaticArrays
 using ..Utilities
 
-export NoAppendagesModel, NoAppendagesModel, updatestate
+export NoAppendagesModel, NoAppendagesModel
 
 """
     NoAppendagesModel
 
 """
 struct NoAppendagesModel
-    # Nothing
+    DOF::Int
 end
 
 """
@@ -52,8 +52,10 @@ end
 function defmodel()
     # define the parameters
 
+    DOF = 1
+
     params = NoAppendagesParam()
-    simmodel = NoAppendagesModel()
+    simmodel = NoAppendagesModel(DOF)
 
     return (params, simmodel)
 end
