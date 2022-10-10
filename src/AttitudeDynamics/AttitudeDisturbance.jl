@@ -10,6 +10,29 @@ using StaticArrays
 
 export DisturbanceConfig, calc_attitudedisturbance, set_attitudedisturbance
 
+struct StepTrajectoryConfig
+    confignum::Unsigned
+    stepvalue::AbstractVector{<:AbstractVector}
+    endurance::AbstractVector{<:Real}
+
+    # Constructor
+    StepTrajectoryConfig(stepvalue, endurance) = begin
+        # check the argument
+        if size(stepvalue, 1) != size(endurance, 1)
+            throw(ArgumentError("argument vector `stepvalue` and `endurance` have inconsisitent size"))
+        end
+        # set configuration
+        confignum = size(stepvalue, 1)
+
+        new(confignum, stepvalue, endurance)
+    end
+end
+
+mutable struct StepTrajectoryInternal
+    stepcnt::Unsigned
+    duration::Real
+end
+
 """
     struct DisturbanceConfig
 
@@ -19,6 +42,7 @@ struct DisturbanceConfig
 
     consttorque::Union{SVector{3, <:Real}, Nothing}
     gravitationaltorque::Bool
+    steptraj::Union{Nothing, StepTrajectoryConfig}
 
     # Constructor
     DisturbanceConfig(; constanttorque = zeros(3), gravitygradient = false) = begin
@@ -26,7 +50,10 @@ struct DisturbanceConfig
         # Create constant torque with respect to the body frame
         constanttorque = SVector{3, Float64}(constanttorque)
 
-        return new(constanttorque, gravitygradient)
+        # Configure step trajectory
+        steptraj = nothing #TODO: fix this interface
+
+        return new(constanttorque, gravitygradient, steptraj)
     end
 
 end
@@ -53,8 +80,18 @@ calculate disturbance torque input to the attitude dynamics
 """
 function calc_attitudedisturbance(distconfig::DisturbanceConfig, inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)::Vector
 
-    disturbance = zeros(3) + _constant_torque(distconfig.consttorque)
+    # initialize disturbance torque vector
+    disturbance = zeros(3)
 
+    # apply constant torque
+    disturbance = disturbance + _constant_torque(distconfig.consttorque)
+
+    # apply step trajectory torque
+    if !isnothing(distconfig.steptraj)
+        disturbance = disturbance + _step_trajectory!(distconfig.steptraj, distinternal.steptraj, currenttime, Tsampling)
+    end
+
+    # apply gravitational torque
     if distconfig.gravitationaltorque == true
         disturbance = disturbance + _gravity_gradient(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)
     end
@@ -110,6 +147,22 @@ function _gravity_gradient(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LV
     torque_vector = 3*orbit_angular_velocity^2 * nadir_skew * inertia * nadir_vector;
 
     return torque_vector
+end
+
+function _step_trajectory!(config::StepTrajectoryConfig, internal::StepTrajectoryInternal, currenttime::Real, Tsampling::Real)
+    # check the duration and predefined endurance
+    if internal.duration < config.endurance[internal.stepcnt]
+        currentinput = config.stepvalue[internal.stepcnt]
+        # increment duration time
+        internal.duration = internal.duration + Tsampling
+    else
+        currentinput = config.stepvalue[internal.stepcnt + 1]
+        internal.duration = 0
+        # increment `stepcnt` to move on to next sequence
+        internal.stepcnt = internal.stepcnt + 1
+    end
+
+    return currentinput
 end
 
 end
