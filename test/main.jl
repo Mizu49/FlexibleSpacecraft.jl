@@ -16,7 +16,7 @@ plottime = @timed begin # measure time for post process
 
     fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
     fig2 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
-    fig3 = plot(time, strdata.physicalstate[:, 1])
+    # fig3 = plot(time, strdata.physicalstate[:, 1])
     # fig3 = plot!(time, strdata.physicalstate[:, 2])
 
     anim = PlotRecipe.framegif(time, T_UnitFrame2LVLHFrame * UnitFrame, attitudedata.RPYframe, Tgif = 5e-1, FPS = 20)
@@ -28,7 +28,7 @@ plottime = @timed begin # measure time for post process
 
     display(fig1)
     display(fig2)
-    display(fig3)
+    # display(fig3)
     display(anim)
 end
 

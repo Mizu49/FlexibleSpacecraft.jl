@@ -29,12 +29,10 @@ struct of the data container for the states and inputs of the structural respons
 * `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
 struct StructureSimData
-
     state::AbstractVector{<:Union{AbstractVector, Real}}
     physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
     controlinput::AbstractVector{<:Union{AbstractVector, Real}}
     disturbance::AbstractVector{<:Union{AbstractVector, Real}}
-
 end
 
 """
@@ -48,21 +46,11 @@ initializer for the data container for structural simulation
 * `initphysicalstate::Vector`: initial physical state value of the flexible appendage
 * `datanum::Int`: numbers of the simulation data
 """
-function initappendagedata(model, initphysicalstate::Vector, datanum::Int)::StructureSimData
+function initappendagedata(model, initphysicalstate::Vector, datanum::Int)
 
     if typeof(model) == NoAppendagesModel
-
-        # physical state vector (physical coordinate)
-        physicalstate = [0.0 for _ in 1:datanum]
-
-        # state vector (modal coordinate)
-        state = [0.0 for _ in 1:datanum]
-
-        # inputs
-        controlinput = [0.0 for _ in 1:datanum]
-        disturbance = [0.0 for _ in 1:datanum]
-
-        return StructureSimData(state, physicalstate, controlinput, disturbance)
+        # nothing
+        return nothing
     else
         # physical state vector (physical coordinate)
         physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
@@ -155,7 +143,7 @@ function update_strstate(strmodel, Ts, currenttime, currentstate, attiinput, str
         StateSpace.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
     elseif strmodeltype == NoAppendagesModel
-        return 0
+        return nothing
     end
 end
 
