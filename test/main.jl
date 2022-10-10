@@ -5,10 +5,10 @@ using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
 paramfilepath = "./test/spacecraft.yml"
-(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitudecontroller) = readparamfile(paramfilepath)
+(simconfig, attitudemodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
-simtime = @timed (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, strdistconfig, simconfig, attitudecontroller)
+simtime = @timed (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, distinternals, strdistconfig, simconfig, attitudecontroller)
 
 @test quaternion_constraint(attitudedata.quaternion)
 

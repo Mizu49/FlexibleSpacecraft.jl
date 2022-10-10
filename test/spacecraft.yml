@@ -26,7 +26,7 @@ attitude dynamics:
     ]
 
 disturbance:
-    constant torque: [0.0, 0.0, 0.0]
+    constant torque: [10, 0.0, 0.0]
     gravitational torque: false
 
 Orbit:

@@ -78,14 +78,17 @@ end
 
 set disturbance configuration from YAML setting file
 """
-function set_attitudedisturbance(distconfigdict::AbstractDict)::DisturbanceConfig
+function set_attitudedisturbance(distconfigdict::AbstractDict)
 
+    # initialize configuration
     distconfig = DisturbanceConfig(
         constanttorque = distconfigdict["constant torque"],
         gravitygradient = distconfigdict["gravitational torque"]
     )
+    # initialize internals
+    distinternals = DisturbanceInternals()
 
-    return distconfig
+    return (distconfig, distinternals)
 end
 
 """
@@ -95,6 +98,7 @@ calculate disturbance torque input to the attitude dynamics
 """
 function calc_attitudedisturbance(
     distconfig::DisturbanceConfig,
+    distinternals::DisturbanceInternals,
     inertia,
     orbit_angular_velocity,
     C_ECI2Body,
@@ -110,7 +114,7 @@ function calc_attitudedisturbance(
 
     # apply step trajectory torque
     if !isnothing(distconfig.steptraj)
-        disturbance = disturbance + _step_trajectory!(distconfig.steptraj, distinternal.steptraj, currenttime, Tsampling)
+        disturbance = disturbance + _step_trajectory!(distconfig.steptraj, distinternals.steptraj, currenttime, Tsampling)
     end
 
     # apply gravitational torque
