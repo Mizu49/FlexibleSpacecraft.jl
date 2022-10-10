@@ -11,9 +11,6 @@ using ..Utilities, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-include("NoAppendages.jl")
-@reexport using .NoAppendages
-
 export StructureSimData, initappendagedata, setstructure, update_strstate
 
 """
@@ -48,7 +45,7 @@ initializer for the data container for structural simulation
 """
 function initappendagedata(model, initphysicalstate::Vector, datanum::Int)
 
-    if typeof(model) == NoAppendagesModel
+    if model === nothing
         # nothing
         return nothing
     else
@@ -119,7 +116,8 @@ function setstructure(configdata::AbstractDict)
     end
 
     if configdata["modeling"] == "none"
-        (structureparams, structuresimmodel) = NoAppendages.defmodel()
+        structureparams = nothing
+        structuresimmodel = nothing
     elseif configdata["modeling"] == "spring-mass"
         (structureparams, structuresimmodel) = SpringMass.defmodel(configdata)
     else
@@ -140,9 +138,9 @@ function update_strstate(strmodel, Ts, currenttime, currentstate, attiinput, str
     strmodeltype = typeof(strmodel)
 
     if strmodeltype == StateSpace
-        StateSpace.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
-
-    elseif strmodeltype == NoAppendagesModel
+        strstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+        return strstate
+    elseif isnothing(strmodeltype)
         return nothing
     end
 end
