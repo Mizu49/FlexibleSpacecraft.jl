@@ -1,6 +1,6 @@
 module ConstantInput
 
-export ConstantInputController, control_input!
+export ConstantInputController
 
 struct _Config
     # constant value

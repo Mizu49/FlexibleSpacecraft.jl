@@ -8,7 +8,7 @@ module SpringMass
 using LinearAlgebra, StaticArrays
 using ..Utilities
 
-export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams, defmodel
+export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams
 
 """
     PhysicalSystem

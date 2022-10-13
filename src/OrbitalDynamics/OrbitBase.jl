@@ -1,7 +1,7 @@
 module OrbitBase
 
-using ..Frames, ..DataContainers
-using StaticArrays, Reexport
+using ..Frames, ..DataContainers, ..Utilities
+using StaticArrays, Reexport, LinearAlgebra
 
 const GravityConstant = 6.673e-11
 const EarthMass = 5.974e24
@@ -16,7 +16,7 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit, get_angular_velocity
+export OrbitInfo, OrbitData, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, get_angular_velocity
 
 const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 
@@ -43,12 +43,14 @@ Load the configuration from YAML file and construct the appropriate model for th
 """
 function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
 
-    if orbitparamdict["Dynamics model"] == "none"
+    orbitalmodel = orbitparamdict["Dynamics model"]
+
+    if orbitalmodel == "none"
 
         elements = OrbitalElements(0, 0, 0, 0, 0, 0)
         orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
 
-    elseif orbitparamdict["Dynamics model"] == "Circular"
+    elseif orbitalmodel == "Circular"
         # set the orbital parameter for the circular orbit
 
         elements = setelements(orbitparamdict["Orbital elements"])
@@ -56,6 +58,8 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
         orbitalplaneframe = calc_orbitalframe(elements, ECI)
 
         orbitinfo = OrbitInfo(orbitmodel, elements, orbitalplaneframe)
+    else
+        error("orbital model \"$orbitalmodel\" not found")
     end
 
     return orbitinfo
@@ -89,26 +93,19 @@ function initorbitdata(datanum::Integer, orbitalframe::Frame)
 end
 
 """
-    T_RAT2LVLH
-
-Transformation matrix from radial along track frame to LVLH frame. LVLH frame is defined with the replacement of the coordinate of the radial-along-track frame.
+    transformation matrix from unit frame to LVLH referential frame
 """
-const T_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
+const T_UnitFrame2LVLHFrame = diagm([1, -1, -1])
 
 """
-    T_LVLHref2rollpitchyaw
-
-Transformation matrix from LVLH reference frame to roll-pitch-yaw frame. This transformation matrix converts the reference frame from `UnitFrame` to `LVLHref`.
+    LVLH referential frame
 """
-const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
+const LVLHUnitFrame = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 
 """
-    LVLHref
-
-    Reference unit frame for the LVLH frame
+    rotational matrix that transfers from radial-along-track (RAT) to local-vertical local-horizontal (LVLH) attitude representation
 """
-const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
-
+T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
 function get_angular_velocity(orbitmodel::CircularOrbit)
     Circular.get_angular_velocity(orbitmodel)

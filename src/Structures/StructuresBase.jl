@@ -11,7 +11,7 @@ using ..Utilities, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export StructureSimData, initappendagedata, setstructure
+export StructureSimData, initappendagedata, setstructure, update_strstate
 
 """
     StructureSimData
@@ -26,12 +26,10 @@ struct of the data container for the states and inputs of the structural respons
 * `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
 struct StructureSimData
-
-    state::AbstractVector{<:AbstractVector}
-    physicalstate::AbstractVector{<:AbstractVector}
+    state::AbstractVector{<:Union{AbstractVector, Real}}
+    physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
     controlinput::AbstractVector{<:Union{AbstractVector, Real}}
     disturbance::AbstractVector{<:Union{AbstractVector, Real}}
-
 end
 
 """
@@ -41,34 +39,39 @@ initializer for the data container for structural simulation
 
 # Arguments
 
-* `model::StateSpace`: simulation model for the flexible appendage
+* `model`: simulation model for the flexible appendage
 * `initphysicalstate::Vector`: initial physical state value of the flexible appendage
 * `datanum::Int`: numbers of the simulation data
 """
-function initappendagedata(model::StateSpace, initphysicalstate::Vector, datanum::Int)::StructureSimData
+function initappendagedata(model, initphysicalstate::Vector, datanum::Int)
 
-    # physical state vector (physical coordinate)
-    physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
-    physicalstate[1] = SVector{model.dimstate}(initphysicalstate)
-
-    # state vector (modal coordinate)
-    state = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
-    state[1] = physicalstate2modalstate(model, initphysicalstate)
-
-    # switch based on the dimension of the input
-    if model.dimctrlinput == 1
-        controlinput = [0.0 for _ in 1:datanum]
+    if model === nothing
+        # nothing
+        return nothing
     else
-        controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
-    end
+        # physical state vector (physical coordinate)
+        physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
+        physicalstate[1] = SVector{model.dimstate}(initphysicalstate)
 
-    if model.dimdistinput == 1
-        disturbance = [0.0 for _ in 1:datanum]
-    else
-        disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
-    end
+        # state vector (modal coordinate)
+        state = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
+        state[1] = physicalstate2modalstate(model, initphysicalstate)
 
-    return StructureSimData(state, physicalstate, controlinput, disturbance)
+        # switch based on the dimension of the input
+        if model.dimctrlinput == 1
+            controlinput = [0.0 for _ in 1:datanum]
+        else
+            controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
+        end
+
+        if model.dimdistinput == 1
+            disturbance = [0.0 for _ in 1:datanum]
+        else
+            disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
+        end
+
+        return StructureSimData(state, physicalstate, controlinput, disturbance)
+    end
 end
 
 """
@@ -112,8 +115,11 @@ function setstructure(configdata::AbstractDict)
         throw(ErrorException("`modeling` is undefined in configuration"))
     end
 
-    if configdata["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = defmodel(configdata)
+    if configdata["modeling"] == "none"
+        structureparams = nothing
+        structuresimmodel = nothing
+    elseif configdata["modeling"] == "spring-mass"
+        (structureparams, structuresimmodel) = SpringMass.defmodel(configdata)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
@@ -125,6 +131,18 @@ function setstructure(configdata::AbstractDict)
     end
 
     return (structureparams, structuresimmodel, strdistconfig)
+end
+
+function update_strstate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+
+    strmodeltype = typeof(strmodel)
+
+    if strmodeltype == StateSpace
+        strstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+        return strstate
+    elseif isnothing(strmodeltype)
+        return nothing
+    end
 end
 
 end

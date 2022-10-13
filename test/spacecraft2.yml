@@ -4,7 +4,7 @@ config:
     name: example spacecraft No. 2
     note: This model is for test purpose
     sampling time: 1e-3 # Sampling period of simulation (second)
-    time length: 600 # Time length of simulation (second)
+    time length: 100 # Time length of simulation (second)
 
 initial value:
     quaternion: [0, 0, 0, 1]
@@ -12,7 +12,7 @@ initial value:
 
 
 attitude dynamics:
-    model: Linear coupling
+    model: Rigid body
     inertia: [
         1000, 0, 0,
         0, 1000, 0,
@@ -26,57 +26,32 @@ attitude dynamics:
     ]
 
 disturbance:
-    constant torque: [0.0, 0.0, 0.0]
+    constant torque: [1.0, 0.0, 0.0]
     gravitational torque: false
 
 Orbit:
-    Dynamics model: Circular
+    # Specify the model used in the simulation of orbital motion
+    Dynamics model: none
+    # Orbital elements
     Orbital elements:
         right ascension: 0
         inclination: 0
-        semimajor axis: 6763e3
+        semimajor axis: 6371e3
         eccentricity: 0
         argument of perigee: 0
         true anomaly at epoch: 0
-
-modeling: spring-mass
+    # Note for this parameter setting
+    OrbitInfo: Test orbit parameters
 
 appendage:
-    modeling: spring-mass
-    system:
-        coord: physical
-        DOF: 2
-        mass: [
-            100, 0,
-            0, 50
-        ]
-        stiffness: [
-            6e4, -1e4,
-            -1e4, 1e4
-        ]
-        damping:
-            config: Rayleigh
-            alpha: 0
-            beta: 0.005
-        coupling: [
-                1, 0, 0,
-                0, 1, 0,
-            ]
-        control input:
-            dimension: 1
-            coefficient: [
-                    5,
-                    0
-                ]
-        disturbance input:
-            dimension: 1
-            coefficient: [
-                    3,
-                    0
-                ]
+    modeling: none
     disturbance:
-        type: vibration
+        type: no disturbance
         dimension: 1
-        angular velocity: [5, 20]
-        amplitude: [50, 50]
+        angular velocity: [1, 0]
+        amplitude: [5000, 0]
         phase: [0, 0]
+
+attitude controller:
+    strategy: none
+    config:

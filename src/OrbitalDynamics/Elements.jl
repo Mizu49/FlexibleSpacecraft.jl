@@ -1,7 +1,7 @@
 module Elements
 
 using StaticArrays
-using ..Frames, ..DataContainers
+using ..Frames, ..DataContainers, ..Utilities
 
 export OrbitalElements, ECI2OrbitalPlaneFrame, OrbitalPlaneFrame2RadialAlongTrack, OrbitalPlaneFrame2LVLH, calc_orbitalframe, update_radial_along_track, setelements
 
@@ -113,45 +113,6 @@ function update_radial_along_track(orbitframe::Frame, elem::OrbitalElements, tim
     C_RAT = OrbitalPlaneFrame2RadialAlongTrack(elem, angularvelocity, time)
 
     return C_RAT * orbitframe
-end
-
-"""
-    C1(theta::Real)::SMatrix
-
-Rotational matrix for 1-axis
-"""
-function C1(theta::Real)::SMatrix
-    return SMatrix{3, 3, <:Real}([
-        1 0 0
-        0 cos(theta) sin(theta)
-        0 -sin(theta) cos(theta)
-    ])
-end
-
-"""
-    C2(theta::Real)::SMatrix
-
-Rotational matrix for 2-axis
-"""
-function C2(theta::Real)::SMatrix
-    return SMatrix{3, 3, <:Real}([
-        cos(theta) 0 -sin(theta)
-        0 1 0
-        sin(theta) 0 cos(theta)
-    ])
-end
-
-"""
-    C3(theta::Real)::SMatrix
-
-Rotational matrix for 3-axis
-"""
-function C3(theta::Real)::SMatrix
-    return SMatrix{3, 3, <:Real}([
-        cos(theta) sin(theta) 0
-        -sin(theta) cos(theta) 0
-        0 0 1
-    ])
 end
 
 function setelements(paramdict::AbstractDict)::OrbitalElements

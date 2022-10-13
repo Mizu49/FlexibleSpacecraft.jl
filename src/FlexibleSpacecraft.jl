@@ -5,7 +5,7 @@ using Reexport
 @reexport using LinearAlgebra, Plots, StaticArrays
 
 include("Core/Utilities.jl")
-@reexport using.Utilities
+@reexport using .Utilities
 
 include("DataContainers/DataContainers.jl")
 @reexport using .DataContainers
@@ -17,9 +17,9 @@ include("DataContainers/Frames.jl")
 include("OrbitalDynamics/OrbitBase.jl")
 @reexport using .OrbitBase
 
-# Inculde module `Disturbance`
-include("Disturbances/Disturbance.jl")
-@reexport using .Disturbance
+# Inculde module `AttitudeDisturbance`
+include("AttitudeDynamics/AttitudeDisturbance.jl")
+@reexport using .AttitudeDisturbance
 
 include("AttitudeDynamics/DynamicsBase.jl")
 @reexport using .DynamicsBase

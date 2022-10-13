@@ -5,7 +5,9 @@ submodule that contains implementation of the Proportional-Integral-Differential
 """
 module PID
 
-export PIDController, control_input!
+using ..Utilities
+
+export PIDController
 
 struct _Config
     # gains
@@ -47,16 +49,16 @@ function _set_controller_config(config::AbstractDict)
     if !haskey(config, "Dgain") throw(KeyError("key \"Dgain\" is not configured")) end
 
     controller_config = _Config(
-        config["Pgain"],
-        config["Igain"],
-        config["Dgain"]
+        yamlread2matrix(config["Pgain"], (3, 3)),
+        yamlread2matrix(config["Igain"], (3, 3)),
+        yamlread2matrix(config["Dgain"], (3, 3))
     )
 
     return controller_config
 end
 
 function _init_controller_internals(config::AbstractDict)
-    return _Internals(0, 0)
+    return _Internals(zeros(3), zeros(3))
 end
 
 @inline function control_input!(controller::PIDController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})

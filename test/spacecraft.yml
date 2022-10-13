@@ -4,7 +4,7 @@ config:
     name: example spacecraft No. 2
     note: This model is for test purpose
     sampling time: 1e-3 # Sampling period of simulation (second)
-    time length: 600 # Time length of simulation (second)
+    time length: 100 # Time length of simulation (second)
 
 initial value:
     quaternion: [0, 0, 0, 1]
@@ -14,23 +14,34 @@ initial value:
 attitude dynamics:
     model: Linear coupling
     inertia: [
-        1000, 0, 0,
-        0, 1000, 0,
-        0, 0, 1000
+        100, 0, 0,
+        0, 100, 0,
+        0, 0, 100
     ]
 
     coupling: [
-        0, 0,
         1, 0,
-        0, 1
+        0, 1,
+        0, 0
     ]
 
 disturbance:
-    constant torque: [0.0, 0.0, 0.0]
+    constant torque: [10, 0.0, 0.0]
     gravitational torque: false
 
 Orbit:
+    # Specify the model used in the simulation of orbital motion
     Dynamics model: none
+    # Orbital elements
+    Orbital elements:
+        right ascension: 0
+        inclination: 0
+        semimajor axis: 6371e3
+        eccentricity: 0
+        argument of perigee: 0
+        true anomaly at epoch: 0
+    # Note for this parameter setting
+    OrbitInfo: Test orbit parameters
 
 modeling: spring-mass
 
@@ -52,8 +63,8 @@ appendage:
             alpha: 0
             beta: 0.005
         coupling: [
-                0, 1, 0,
-                0, 0, 1,
+                1, 0, 0,
+                0, 1, 0
             ]
         control input:
             dimension: 1
@@ -77,6 +88,18 @@ appendage:
 attitude controller:
     strategy: PID
     config:
-        Pgain: 1
-        Igain: 1
-        Dgain: 1
+        Pgain: [
+            100, 0, 0,
+            0, 100, 0,
+            0, 0, 100
+        ]
+        Igain: [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ]
+        Dgain: [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0
+        ]

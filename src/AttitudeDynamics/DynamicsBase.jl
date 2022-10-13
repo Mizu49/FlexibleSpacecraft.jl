@@ -66,10 +66,10 @@ function update_angularvelocity(
     angularvelocity::AbstractVector{<:Real},
     Tsampling::Real,
     currentbodyframe::Frame,
-    distinput::AbstractVector{<:Real},
-    ctrlinput::AbstractVector{<:Real},
-    straccel::AbstractVector{<:Real},
-    strvelocity::AbstractVector{<:Real}
+    distinput::Union{AbstractVector{<:Real}, Real},
+    ctrlinput::Union{AbstractVector{<:Real}, Real},
+    straccel::Union{AbstractVector{<:Real}, Real},
+    strvelocity::Union{AbstractVector{<:Real}, Real}
     )::SVector{3, <:Real}
 
     # switch based on the type of `model`

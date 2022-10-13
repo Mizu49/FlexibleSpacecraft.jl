@@ -1,7 +1,7 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..Disturbance, ..StructuresBase, ..AttitudeControlBase
+using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
 
 export SimulationConfig, yamlread2matrix, readparamfile
 
@@ -68,7 +68,7 @@ function readparamfile(filepath::String)
 
     # Disturbance for the attitude dynamics
     if haskey(paramread, "disturbance")
-        distconfig = setdisturbance(paramread["disturbance"])
+        (distconfig, distinternals) = set_attitudedisturbance(paramread["disturbance"])
     else
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
     end
@@ -92,7 +92,7 @@ function readparamfile(filepath::String)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitude_controller)
+    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitude_controller)
 end
 
 """
