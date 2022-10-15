@@ -16,12 +16,21 @@ struct StepTrajectoryConfig
     endurance::AbstractVector{<:Real}
 
     # Constructor
-    StepTrajectoryConfig(stepvalue, endurance) = begin
+    StepTrajectoryConfig(stepvalue::AbstractVector, endurance::AbstractVector) = begin
         # check the argument
         if size(stepvalue, 1) != size(endurance, 1)
             throw(ArgumentError("argument vector `stepvalue` and `endurance` have inconsisitent size"))
         end
         # set configuration
+        confignum = size(stepvalue, 1)
+
+        new(confignum, stepvalue, endurance)
+    end
+
+    StepTrajectoryConfig(configdict::AbstractDict) = begin
+        # read configuration from dictionary
+        stepvalue = configdict["value"]
+        endurance = configdict["endurance"]
         confignum = size(stepvalue, 1)
 
         new(confignum, stepvalue, endurance)
@@ -50,7 +59,7 @@ struct DisturbanceConfig
         if isnothing(step_trajectory)
             step_traj_config = nothing
         else
-            step_traj_config = 0 #TODO: implement this interface
+            step_traj_config = StepTrajectoryConfig(step_trajectory)
         end
 
         return new(constanttorque, gravitygradient, step_traj_config)
@@ -67,7 +76,7 @@ mutable struct DisturbanceInternals
 
     DisturbanceInternals() = begin
         # initialize `steptraj`
-        steptraj = StepTrajectoryInternals(0, 0)
+        steptraj = StepTrajectoryInternals(1, 0)
 
         new(steptraj)
     end
@@ -80,10 +89,22 @@ set disturbance configuration from YAML setting file
 """
 function set_attitudedisturbance(distconfigdict::AbstractDict)
 
+    # step trajectory
+    if haskey(distconfigdict, "step trajectory")
+        if distconfigdict["step trajectory"] == "nothing"
+            step_trajectory_config = nothing
+        else
+            step_trajectory_config = distconfigdict["step trajectory"]
+        end
+    else
+        step_trajectory_config = nothing
+    end
+
     # initialize configuration
     distconfig = DisturbanceConfig(
         constanttorque = distconfigdict["constant torque"],
-        gravitygradient = distconfigdict["gravitational torque"]
+        gravitygradient = distconfigdict["gravitational torque"],
+        step_trajectory = step_trajectory_config
     )
     # initialize internals
     distinternals = DisturbanceInternals()
@@ -100,10 +121,12 @@ function calc_attitudedisturbance(
     distconfig::DisturbanceConfig,
     distinternals::DisturbanceInternals,
     inertia,
+    currenttime::Real,
     orbit_angular_velocity,
     C_ECI2Body,
     C_ECI2LVLH,
-    LVLHframe_z
+    LVLHframe_z,
+    Tsampling::Real
     )::Vector
 
     # initialize disturbance torque vector
