@@ -89,6 +89,20 @@ set disturbance configuration from YAML setting file
 """
 function set_attitudedisturbance(distconfigdict::AbstractDict)
 
+    # constant torque
+    if haskey(distconfigdict, "constant torque")
+        if distconfigdict["constant torque"] == "nothing"
+            constant_torque_config = zeros(3)
+        else
+            constant_torque_config = distconfigdict["constant torque"]
+            if size(constant_torque_config, 1) != 3
+                error("size of the constant attitude disturbance torque is invalid. It must be 3")
+            end
+        end
+    else
+        constant_torque_config = zeros(3)
+    end
+
     # step trajectory
     if haskey(distconfigdict, "step trajectory")
         if distconfigdict["step trajectory"] == "nothing"
