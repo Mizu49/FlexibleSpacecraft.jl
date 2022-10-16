@@ -14,7 +14,7 @@ Before using any features provided by `DataAPI`, you need to run simulation with
 Then you get your simulation result as `StructVector`. You might want to convert that to the tabular data structure as `DataFrame` object. The following code will generate `DataFrame` object:
 
 ```julia
-outputdata = SimData(time, attitudedata, orbitdata)
+outputdata = SimLogData(time, attitudedata, orbitdata)
 ```
 
 You can export your simulation result as CSV files. Simply run the following code specifying the directory in which you may want to save:
@@ -33,10 +33,10 @@ module DataAPI
 using DataFrames, CSV, StaticArrays, Dates
 using ..Frames, ..OrbitBase, ..KinematicsBase
 
-export SimData
+export SimLogData
 
 """
-    SimData
+    SimLogData
 
 struct of the table data frame from simulation results
 
@@ -49,20 +49,20 @@ struct of the table data frame from simulation results
 # Usage
 
 use the following constructor:
-`SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::StructVector)`
+`SimLogData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::StructVector)`
 
 * `time`: time data
 * `attitudedata`: `StructVector` of the attitude data
 * `orbitdata`: `StructVector` of the orbit data
 """
-struct SimData
+struct SimLogData
 
     timestamp::String
     attitude::DataFrame
     orbit::DataFrame
 
     # Constructor
-    SimData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::OrbitData) = begin
+    SimLogData(time::AbstractRange{<:Real}, attitudedata::AttitudeData, orbitdata::OrbitData) = begin
 
         # Get current time stamp in UTC
         timestamp = Dates.format(Dates.now(), "yyyy-mm-dd--HH-MM-SS")
@@ -76,11 +76,11 @@ struct SimData
 end
 
 """
-    Base.write(path::AbstractString, simdata::SimData)
+    Base.write(path::AbstractString, simdata::SimLogData)
 
-save simulation result `simdata::SimData` as output files in CSV format
+save simulation result `simdata::SimLogData` as output files in CSV format
 """
-function Base.write(path::AbstractString, simdata::SimData)
+function Base.write(path::AbstractString, simdata::SimLogData)
 
     print("generating output file...")
 
