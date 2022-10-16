@@ -1,7 +1,7 @@
 """
-    module AttitudeDisturbance
+    AttitudeDisturbance
 
-Module that includes functions related to the calculation of disturbance to the system
+Submodule that provides the features for calculating the disturbance torque to the attitude dynamics
 """
 module AttitudeDisturbance
 
@@ -10,13 +10,18 @@ using StaticArrays
 
 export DisturbanceConfig, DisturbanceInternals, calc_attitudedisturbance, set_attitudedisturbance
 
-struct StepTrajectoryConfig
+"""
+    _ConfigStepTrajectory
+
+struct that configures the step trajectory of the disturbance torque input
+"""
+struct _ConfigStepTrajectory
     confignum::Unsigned
     stepvalue::AbstractVector{<:AbstractVector}
     endurance::AbstractVector{<:Real}
 
     # Constructor
-    StepTrajectoryConfig(stepvalue::AbstractVector, endurance::AbstractVector) = begin
+    _ConfigStepTrajectory(stepvalue::AbstractVector, endurance::AbstractVector) = begin
         # check the argument
         if size(stepvalue, 1) != size(endurance, 1)
             throw(ArgumentError("argument vector `stepvalue` and `endurance` have inconsisitent size"))
@@ -27,7 +32,7 @@ struct StepTrajectoryConfig
         new(confignum, stepvalue, endurance)
     end
 
-    StepTrajectoryConfig(configdict::AbstractDict) = begin
+    _ConfigStepTrajectory(configdict::AbstractDict) = begin
         # read configuration from dictionary
         stepvalue = configdict["value"]
         endurance = configdict["endurance"]
@@ -39,15 +44,22 @@ end
 
 
 """
-struct DisturbanceConfig
+    DisturbanceConfig
 
-    Struct that configures disturbance torque to the spacecraft
+struct that configures disturbance torque to the spacecraft
+
+# Fields
+
+* `consttorque::Union{SVector{3, <:Real}, Nothing}`: constant torque input
+* `gravitationaltorque::Bool`: gravity gradient disturbance torque, configure with the boolean (true OR false)
+* `steptraj::Union{Nothing, _ConfigStepTrajectory}`: configuration for the step disturbance trajectory
+
 """
 struct DisturbanceConfig
 
     consttorque::Union{SVector{3, <:Real}, Nothing}
     gravitationaltorque::Bool
-    steptraj::Union{Nothing, StepTrajectoryConfig}
+    steptraj::Union{Nothing, _ConfigStepTrajectory}
 
     # Constructor
     DisturbanceConfig(; constanttorque = zeros(3), gravitygradient = false, step_trajectory = nothing) = begin
@@ -59,24 +71,44 @@ struct DisturbanceConfig
         if isnothing(step_trajectory)
             step_traj_config = nothing
         else
-            step_traj_config = StepTrajectoryConfig(step_trajectory)
+            step_traj_config = _ConfigStepTrajectory(step_trajectory)
         end
 
         return new(constanttorque, gravitygradient, step_traj_config)
     end
 end
 
-mutable struct StepTrajectoryInternals
+"""
+    _InternalsStepTrajectory
+
+internals of the step trajectory
+
+# Fields
+
+* `stepcnt::Unsigned`: counter that specifies the current disturbance profile
+* `duration::Real`: duration time of the current disturbance profile
+
+"""
+mutable struct _InternalsStepTrajectory
     stepcnt::Unsigned
     duration::Real
 end
 
+"""
+    DisturbanceInternals
+
+internals of the disturbance torque for the attitude dynamics
+
+# Fields
+
+* `steptraj::_InternalsStepTrajectory`: internals of the step disturbance trajectory
+"""
 mutable struct DisturbanceInternals
-    steptraj::StepTrajectoryInternals
+    steptraj::_InternalsStepTrajectory
 
     DisturbanceInternals() = begin
         # initialize `steptraj`
-        steptraj = StepTrajectoryInternals(1, 0)
+        steptraj = _InternalsStepTrajectory(1, 0)
 
         new(steptraj)
     end
@@ -86,6 +118,21 @@ end
     set_attitudedisturbance
 
 set disturbance configuration from YAML setting file
+
+# YAML configuration format
+
+```yaml
+disturbance:
+    constant torque: {nothing OR "specify vector [0.0, 0.0, 0.0]"}
+    gravitational torque: {false OR true}
+    step trajectory:
+        {
+            nothing
+        OR
+            value: [[10, 0, 0], [0, 0, 0]]
+            endurance: [1, 100]
+        }
+```
 """
 function set_attitudedisturbance(distconfigdict::AbstractDict)
 
@@ -129,7 +176,20 @@ end
 """
     calc_attitudedisturbance
 
-calculate disturbance torque input to the attitude dynamics
+calculate disturbance torque input for the attitude dynamics
+
+# Arguments
+
+* `distconfig::DisturbanceConfig`: disturbance configuration
+* `distinternals::DisturbanceInternals`: disturbance internals
+* `inertia::AbstractMatrix`: inertia of the spacecraft body
+* `currenttime::Real`: current time
+* `orbit_angular_velocity::Real`: angular velocity of the orbital motion
+* `C_ECI2Body::AbstractMatrix`: rotation matrix from ECI to body
+* `C_ECI2LVLH::AbstractMatrix`: rotation matrix from ECI to LVLH
+* `LVLHframe_z::AbstractVector`: vector of the LVLH z-axix
+* `Tsampling::Real`: sampling time in simulation
+
 """
 function calc_attitudedisturbance(
     distconfig::DisturbanceConfig,
@@ -141,7 +201,7 @@ function calc_attitudedisturbance(
     C_ECI2LVLH::AbstractMatrix,
     LVLHframe_z::AbstractVector,
     Tsampling::Real
-    )::Vector
+    )::AbstractVector
 
     # initialize disturbance torque vector
     disturbance = SVector{3, Real}(zeros(3))
@@ -212,7 +272,7 @@ function _gravity_gradient(inertia::AbstractMatrix, orbit_angular_velocity::Real
     return torque_vector
 end
 
-function _step_trajectory!(config::StepTrajectoryConfig, internal::StepTrajectoryInternals, currenttime::Real, Tsampling::Real)
+function _step_trajectory!(config::_ConfigStepTrajectory, internal::_InternalsStepTrajectory, currenttime::Real, Tsampling::Real)
     # check the duration and predefined endurance
     if internal.duration < config.endurance[internal.stepcnt]
         currentinput = config.stepvalue[internal.stepcnt]
