@@ -11,10 +11,10 @@ using ..Utilities, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export StructureSimData, initappendagedata, setstructure, update_strstate
+export AppendageData, initappendagedata, setstructure, update_strstate
 
 """
-    StructureSimData
+    AppendageData
 
 struct of the data container for the states and inputs of the structural response of the flexible appendages
 
@@ -25,7 +25,7 @@ struct of the data container for the states and inputs of the structural respons
 * `controlinput::AbstractVector{<:AbstractVector}`: data container for the control input trajectory
 * `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
-struct StructureSimData
+struct AppendageData
     state::AbstractVector{<:Union{AbstractVector, Real}}
     physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
     controlinput::AbstractVector{<:Union{AbstractVector, Real}}
@@ -70,7 +70,7 @@ function initappendagedata(model, initphysicalstate::Vector, datanum::Int)
             disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
         end
 
-        return StructureSimData(state, physicalstate, controlinput, disturbance)
+        return AppendageData(state, physicalstate, controlinput, disturbance)
     end
 end
 
