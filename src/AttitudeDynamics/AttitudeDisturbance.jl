@@ -134,17 +134,17 @@ calculate disturbance torque input to the attitude dynamics
 function calc_attitudedisturbance(
     distconfig::DisturbanceConfig,
     distinternals::DisturbanceInternals,
-    inertia,
+    inertia::AbstractMatrix,
     currenttime::Real,
-    orbit_angular_velocity,
-    C_ECI2Body,
-    C_ECI2LVLH,
-    LVLHframe_z,
+    orbit_angular_velocity::Real,
+    C_ECI2Body::AbstractMatrix,
+    C_ECI2LVLH::AbstractMatrix,
+    LVLHframe_z::AbstractVector,
     Tsampling::Real
     )::Vector
 
     # initialize disturbance torque vector
-    disturbance = zeros(3)
+    disturbance = SVector{3, Real}(zeros(3))
 
     # apply constant torque
     disturbance = disturbance + _constant_torque(distconfig.consttorque)
@@ -190,7 +190,7 @@ Function that returns gravity gradient torque
 * Z-vector of LVLH frame
 
 """
-function _gravity_gradient(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)
+function _gravity_gradient(inertia::AbstractMatrix, orbit_angular_velocity::Real, C_ECI2Body::AbstractMatrix, C_ECI2LVLH::AbstractMatrix, LVLHframe_z::AbstractVector)
 
     # Transformation matrix from LVLH to spacecraft body frame
     C = C_ECI2Body * inv(C_ECI2LVLH)
@@ -225,7 +225,7 @@ function _step_trajectory!(config::StepTrajectoryConfig, internal::StepTrajector
         internal.stepcnt = internal.stepcnt + 1
     end
 
-    return currentinput
+    return SVector{3, Real}(currentinput)
 end
 
 end
