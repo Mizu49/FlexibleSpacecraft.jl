@@ -1,7 +1,7 @@
 module DynamicsBase
 
 using Reexport, StaticArrays
-using ..Frames, ..Utilities
+using ..Frames, ..UtilitiesBase
 
 export update_angularvelocity, setdynamicsmodel
 

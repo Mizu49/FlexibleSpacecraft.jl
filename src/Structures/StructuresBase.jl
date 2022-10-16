@@ -6,7 +6,7 @@ module for wrapping all the submodules for the structual dynamics for flexible s
 module StructuresBase
 
 using Reexport, YAML, StaticArrays
-using ..Utilities, ..StructureDisturbance
+using ..UtilitiesBase, ..StructureDisturbance
 
 include("SpringMass.jl")
 @reexport using .SpringMass

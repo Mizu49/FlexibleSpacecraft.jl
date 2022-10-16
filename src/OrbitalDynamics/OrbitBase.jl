@@ -1,6 +1,6 @@
 module OrbitBase
 
-using ..Frames, ..DataContainers, ..Utilities
+using ..Frames, ..DataContainers, ..UtilitiesBase
 using StaticArrays, Reexport, LinearAlgebra
 
 const GravityConstant = 6.673e-11

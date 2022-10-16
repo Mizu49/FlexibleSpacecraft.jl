@@ -6,7 +6,7 @@ submodule that contains all features for spring-mass modeling of flexible append
 module SpringMass
 
 using LinearAlgebra, StaticArrays
-using ..Utilities
+using ..UtilitiesBase
 
 export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams
 

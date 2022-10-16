@@ -1,7 +1,7 @@
 module AttitudeControlBase
 
 using Reexport
-using ..Utilities
+using ..UtilitiesBase
 
 include("NoAttitudeControl.jl")
 @reexport using .NoAttitudeControl

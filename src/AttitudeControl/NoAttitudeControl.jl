@@ -5,7 +5,7 @@ submodule that contains implementation of the no attitude controller
 """
 module NoAttitudeControl
 
-using ..Utilities
+using ..UtilitiesBase
 
 export NoAttitudeController
 
