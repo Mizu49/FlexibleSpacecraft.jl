@@ -99,7 +99,7 @@ Return is tuple of `(time, attidata, orbitdata, strdata``)`
 
         ### input to the attitude dynamics
         # disturbance input
-        attidistinput = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z)
+        attidistinput = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, time[iter], orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, orbitdata.LVLH[iter].z, Ts)
         # control input
         attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
 

@@ -26,8 +26,11 @@ attitude dynamics:
     ]
 
 disturbance:
-    constant torque: [10, 0.0, 0.0]
+    constant torque: [0.0, 0.0, 0.0]
     gravitational torque: false
+    step trajectory:
+        value: [[10, 0, 0], [0, 0, 0]]
+        endurance: [1, 100]
 
 Orbit:
     # Specify the model used in the simulation of orbital motion
@@ -42,8 +45,6 @@ Orbit:
         true anomaly at epoch: 0
     # Note for this parameter setting
     OrbitInfo: Test orbit parameters
-
-modeling: spring-mass
 
 appendage:
     modeling: spring-mass
