@@ -28,7 +28,7 @@ struct SimData
     time::StepRangeLen
     datanum::Unsigned
     attitude::AttitudeData
-    appendages::AppendageData
+    appendages::Union{AppendageData, Nothing}
     orbit::OrbitData
 end
 
