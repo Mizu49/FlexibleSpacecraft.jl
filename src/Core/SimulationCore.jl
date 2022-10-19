@@ -137,34 +137,15 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
 
         ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
-        if isnothing(strmodel)
-            straccel = 0
-            strvelocity = 0
-            attiinput = 0
+        if iter == 1
+            currentstrstate = tl.appendages.state[iter]
+            previousstrstate = tl.appendages.state[iter]
         else
             currentstrstate = tl.appendages.state[iter]
-            if iter == 1
-                if typeof(currentstrstate) <: AbstractVector
-                    straccel = currentstrstate[(strmodel.DOF+1):end] / Ts
-                    strvelocity = currentstrstate[(strmodel.DOF+1):end]
-                else
-                    straccel = currentstrstate / Ts
-                    strvelocity = currentstrstate
-                end
-            else
-                if typeof(currentstrstate) <: AbstractVector
-                    previousstrstate = tl.appendages.state[iter-1]
-                    straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
-                    strvelocity = currentstrstate[(strmodel.DOF+1):end]
-                else
-                    previousstrstate = tl.appendages.state[iter-1]
-                    straccel = (currentstrstate - previousstrstate) / Ts
-                    strvelocity = currentstrstate
-                end
-            end
-            # angular velocity of the attitude dynamics for the structural coupling input
-            attiinput = tl.attitude.angularvelocity[iter]
+            previousstrstate = tl.appendages.state[iter-1]
         end
+        (straccel, strvelocity) = _calc_coupling_term(strmodel, attitudemodel, currentstrstate, previousstrstate, Ts)
+        attiinput = tl.attitude.angularvelocity[iter]
 
         ### Time evolution of the system
         if iter != tl.datanum
@@ -210,5 +191,27 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
     return tl
 end
+
+"""
+    _calc_coupling_term
+
+calculate coupling term of the attitude an structural dynamics
+"""
+function _calc_coupling_term(strmodel::Nothing, attitudemodel, currentstrstate::AbstractVector, previousstrstate::AbstractVector, Ts::Real)
+    # if structural model is nothing, then the coupling term will be zero
+    straccel = 0
+    strvelocity = 0
+
+    return (straccel, strvelocity)
+end
+
+function _calc_coupling_term(strmodel::StateSpace, attitudemodel, currentstrstate::AbstractVector, previousstrstate::AbstractVector, Ts::Real)
+
+    straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
+    strvelocity = currentstrstate[(strmodel.DOF+1):end]
+
+    return (straccel, strvelocity)
+end
+
 
 end
