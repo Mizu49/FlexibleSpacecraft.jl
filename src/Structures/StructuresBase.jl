@@ -11,7 +11,7 @@ using ..UtilitiesBase, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate
+export AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
 
 """
     AppendageData
@@ -128,16 +128,17 @@ function setstructure(configdata::AbstractDict)
     return (strparams, strmodel, strdistconfig, strinternals)
 end
 
-function update_strstate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+function update_strstate!(strmodel::StateSpace, internals::AppendageInternals, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
-    strmodeltype = typeof(strmodel)
+    strstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
-    if strmodeltype == StateSpace
-        strstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
-        return strstate
-    elseif isnothing(strmodeltype)
-        return nothing
-    end
+    return strstate
 end
+
+function update_strstate!(strmodel::Nothing, internals::AppendageInternals, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+
+    return nothing
+end
+
 
 end

@@ -110,11 +110,9 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
         tl.attitude.RPYframe[iter] = C_LVLH2Body * LVLHUnitFrame
 
         ### flexible appendages state
-        if isnothing(strmodel)
-            # do nothing
-        else
-            tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, tl.appendages.state[iter])
-        end
+        strinternals.currentstate = tl.appendages.state[iter]
+        strinternals.currentaccel = (strinternals.currentstate[(strmodel.DOF+1):end] - strinternals.previousstate[(strmodel.DOF+1):end]) / Ts
+        tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, strinternals.currentstate)
 
         ### input to the attitude dynamics
         # disturbance input
@@ -138,14 +136,8 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
 
         ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
-        if iter == 1
-            currentstrstate = tl.appendages.state[iter]
-            previousstrstate = tl.appendages.state[iter]
-        else
-            currentstrstate = tl.appendages.state[iter]
-            previousstrstate = tl.appendages.state[iter-1]
-        end
-        (straccel, strvelocity) = _calc_coupling_term(strmodel, attitudemodel, currentstrstate, previousstrstate, Ts)
+        straccel = strinternals.currentaccel
+        strvelocity = strinternals.currentstate[(strmodel.DOF+1):end]
         attiinput = tl.attitude.angularvelocity[iter]
 
         ### Time evolution of the system
@@ -161,9 +153,13 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
             if isnothing(strmodel)
                 # do nothing
             else
-                tl.appendages.state[iter+1] = update_strstate(strmodel, Ts, tl.time[iter], tl.appendages.state[iter], attiinput, strctrlinput, strdistinput)
+                tl.appendages.state[iter+1] = update_strstate!(strmodel, strinternals, Ts, tl.time[iter], tl.appendages.state[iter], attiinput, strctrlinput, strdistinput)
             end
         end
+
+        ### calculation for the next step
+        strinternals.previousstate = strinternals.currentstate
+
         # update the progress meter
         next!(prog)
     end
@@ -192,27 +188,5 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
     return tl
 end
-
-"""
-    _calc_coupling_term
-
-calculate coupling term of the attitude an structural dynamics
-"""
-function _calc_coupling_term(strmodel::Nothing, attitudemodel, currentstrstate::AbstractVector, previousstrstate::AbstractVector, Ts::Real)
-    # if structural model is nothing, then the coupling term will be zero
-    straccel = 0
-    strvelocity = 0
-
-    return (straccel, strvelocity)
-end
-
-function _calc_coupling_term(strmodel::StateSpace, attitudemodel, currentstrstate::AbstractVector, previousstrstate::AbstractVector, Ts::Real)
-
-    straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
-    strvelocity = currentstrstate[(strmodel.DOF+1):end]
-
-    return (straccel, strvelocity)
-end
-
 
 end
