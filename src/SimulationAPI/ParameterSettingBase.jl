@@ -82,7 +82,7 @@ function readparamfile(filepath::String)
 
     # Flexible appendage
     if haskey(paramread, "appendage")
-        (strparam, strmodel, strdistconfig) = setstructure(paramread["appendage"])
+        (strparam, strmodel, strdistconfig, strinternals) = setstructure(paramread["appendage"])
     end
 
     # Attitude controller
@@ -92,7 +92,7 @@ function readparamfile(filepath::String)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitude_controller)
+    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
 end
 
 """

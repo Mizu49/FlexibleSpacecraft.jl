@@ -11,7 +11,7 @@ using ..UtilitiesBase, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export AppendageData, initappendagedata, setstructure, update_strstate
+export AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate
 
 """
     AppendageData
@@ -30,6 +30,25 @@ struct AppendageData
     physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
     controlinput::AbstractVector{<:Union{AbstractVector, Real}}
     disturbance::AbstractVector{<:Union{AbstractVector, Real}}
+end
+
+"""
+    AppendageInternals
+
+internals of the appendage data
+"""
+mutable struct AppendageInternals
+    previousstate::AbstractVector{<:Real}
+    currentstate::AbstractVector{<:Real}
+    currentaccel::AbstractVector{<:Real}
+
+    AppendageInternals(DOF::Integer) = begin
+
+        initstate = SVector{2*DOF, Real}(zeros(2*DOF))
+        initaccel = SVector{DOF, Real}(zeros(DOF))
+
+        new(initstate, initstate, initaccel)
+    end
 end
 
 """
@@ -77,32 +96,6 @@ end
 """
     setstructure
 
-API function to define the model of the flexible appendages. Argument is a file path for the configuration file. This function is expected to be used directly with the configuration file
-
-# Arguments
-
-* `configfilepath::String`: path for the configuration file for the structural appendages
-"""
-function setstructure(configfilepath::String)
-
-    lawread = YAML.load_file(configfilepath)
-
-    if haskey(lawread, "modeling") == false
-        throw(ErrorException("`model` is undefined in configuration file `$configfilepath`"))
-    end
-
-    if lawread["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = defmodel(lawread)
-    else
-        throw(ErrorException("no matching modeling method for \"$(lawread["modeling"])\""))
-    end
-
-    return (structureparams, structuresimmodel)
-end
-
-"""
-    setstructure
-
 API function to define the model of the flexible appendages. Argument is the dictionary type variable
 
 # Arguments
@@ -116,10 +109,12 @@ function setstructure(configdata::AbstractDict)
     end
 
     if configdata["modeling"] == "none"
-        structureparams = nothing
-        structuresimmodel = nothing
+        strparams = nothing
+        strmodel = nothing
+        strinternals = nothing
     elseif configdata["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = SpringMass.defmodel(configdata)
+        (strparams, strmodel) = SpringMass.defmodel(configdata)
+        strinternals = AppendageInternals(2)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
@@ -130,7 +125,7 @@ function setstructure(configdata::AbstractDict)
         throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
     end
 
-    return (structureparams, structuresimmodel, strdistconfig)
+    return (strparams, strmodel, strdistconfig, strinternals)
 end
 
 function update_strstate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)

@@ -67,6 +67,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
     distconfig::DisturbanceConfig,
     distinternals::DisturbanceInternals,
     strdistconfig::AbstractStrDistConfig,
+    strinternals::AppendageInternals,
     simconfig::SimulationConfig,
     attitude_controller
     )::SimData
