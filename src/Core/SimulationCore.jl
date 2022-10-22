@@ -89,7 +89,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     tl = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
     ### main loop of the simulation
-    prog = Progress(tl.datanum, 1, "Simulation running...", 50)   # progress meter
+    progress = Progress(tl.datanum, 1, "Simulation running...", 50)   # progress meter
     for simcnt = 1:tl.datanum
 
         # variables
@@ -112,16 +112,16 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
         C_LVLH2Body = C_ECI2Body * transpose(C_ECI2LVLH)
         # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
-        current_RPY = dcm2euler(C_LVLH2Body)
-        tl.attitude.eulerangle[simcnt] = current_RPY
+        RPYangle = dcm2euler(C_LVLH2Body)
+        tl.attitude.eulerangle[simcnt] = RPYangle
         # RPYframe representation can be obtained from the LVLH unit frame
         tl.attitude.RPYframe[simcnt] = C_LVLH2Body * LVLHUnitFrame
 
         ### input to the attitude dynamics
         # disturbance input
-        attidistinput = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, C_ECI2RAT, tl.orbit.LVLH[simcnt].z, Ts)
+        attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, C_ECI2RAT, tl.orbit.LVLH[simcnt].z, Ts)
         # control input
-        attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
+        attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, [0, 0, 0])
 
         ### flexible appendages state
         if !isnothing(strmodel)
@@ -130,47 +130,47 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 
         ### input to the structural dynamics
         if isnothing(strmodel)
-            strdistinput = nothing
-            strctrlinput = nothing
+            structure_disturbance_input = nothing
+            structure_control_input = nothing
         else
             # disturbance input
-            strdistinput = calcstrdisturbance(strdistconfig, currenttime)
+            structure_disturbance_input = calcstrdisturbance(strdistconfig, currenttime)
             # control input
-            strctrlinput = 0
+            structure_control_input = 0
             # data log
-            tl.appendages.controlinput[simcnt] = strctrlinput
-            tl.appendages.disturbance[simcnt] = strdistinput
+            tl.appendages.controlinput[simcnt] = structure_control_input
+            tl.appendages.disturbance[simcnt] = structure_disturbance_input
         end
 
         ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
         if isnothing(strinternals)
-            straccel = 0
-            strvelocity = 0
+            coupling_structure_accel = 0
+            coupling_structure_velocity = 0
         else
-            straccel = strinternals.currentaccel
-            strvelocity = strinternals.currentstate[(strmodel.DOF+1):end]
+            coupling_structure_accel = strinternals.currentaccel
+            coupling_structure_velocity = strinternals.currentstate[(strmodel.DOF+1):end]
         end
         # attitude dynamics
-        attiinput = tl.attitude.angularvelocity[simcnt]
+        coupling_angular_velocity = tl.attitude.angularvelocity[simcnt]
 
         ### Time evolution of the system
         if simcnt != tl.datanum
 
             # Update angular velocity
-            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, tl.attitude.bodyframe[simcnt], attidistinput, attictrlinput, straccel, strvelocity)
+            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, tl.attitude.bodyframe[simcnt], attitude_disturbance_input, attitude_control_input, coupling_structure_accel, coupling_structure_velocity)
 
             # Update quaternion
             tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
             # Update the state of the flexible appendages
             if !isnothing(strmodel)
-                tl.appendages.state[simcnt+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[simcnt], attiinput, strctrlinput, strdistinput)
+                tl.appendages.state[simcnt+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[simcnt], coupling_angular_velocity, structure_control_input, structure_disturbance_input)
             end
         end
 
         # update the progress meter
-        next!(prog)
+        next!(progress)
     end
 
     # return simulation data
