@@ -82,11 +82,6 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
 
     # Data containers
     tl = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
-    current_angularvelocity = tl.attitude.angularvelocity[1]
-    current_quaternion = tl.attitude.quaternion[1]
-    if !isnothing(strmodel)
-        currentstrstate = tl.appendages.state[1]
-    end
 
     ### main loop of the simulation
     prog = Progress(tl.datanum, 1, "Simulation running...", 50)   # progress meter
@@ -105,7 +100,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
 
         ### attitude state
         # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(current_quaternion)
+        C_ECI2Body = ECI2BodyFrame(tl.attitude.quaternion[iter])
         tl.attitude.bodyframe[iter] = C_ECI2Body * UnitFrame
 
         # update the roll-pitch-yaw representations
@@ -118,7 +113,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
         tl.attitude.RPYframe[iter] = C_LVLH2Body * LVLHUnitFrame
 
         ### flexible appendages state
-        strinternals.currentstate = currentstrstate
+        strinternals.currentstate = tl.appendages.state[iter]
         strinternals.currentaccel = (strinternals.currentstate[(strmodel.DOF+1):end] - strinternals.previousstate[(strmodel.DOF+1):end]) / Ts
         tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, strinternals.currentstate)
 
@@ -146,29 +141,27 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
         # calculation of the structural response input for the attitude dynamics
         straccel = strinternals.currentaccel
         strvelocity = strinternals.currentstate[(strmodel.DOF+1):end]
-        attiinput = current_angularvelocity
+        attiinput = tl.attitude.angularvelocity[iter]
 
         ### save current states
-        tl.attitude.angularvelocity[iter] = current_angularvelocity
-        tl.attitude.quaternion[iter] = current_quaternion
         if !isnothing(strmodel)
-            tl.appendages.state[iter] = currentstrstate
+            tl.appendages.state[iter] = tl.appendages.state[iter]
         end
 
         ### Time evolution of the system
         if iter != tl.datanum
 
             # Update angular velocity
-            current_angularvelocity = update_angularvelocity(attitudemodel, currenttime, current_angularvelocity, Ts, tl.attitude.bodyframe[iter], attidistinput, attictrlinput, straccel, strvelocity)
+            tl.attitude.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[iter], Ts, tl.attitude.bodyframe[iter], attidistinput, attictrlinput, straccel, strvelocity)
 
             # Update quaternion
-            current_quaternion = update_quaternion(current_angularvelocity, current_quaternion, Ts)
+            tl.attitude.quaternion[iter+1] = update_quaternion(tl.attitude.angularvelocity[iter], tl.attitude.quaternion[iter], Ts)
 
             # Update the state of the flexible appendages
             if isnothing(strmodel)
                 # do nothing
             else
-                currentstrstate = update_strstate!(strmodel, strinternals, Ts, currenttime, currentstrstate, attiinput, strctrlinput, strdistinput)
+                tl.appendages.state[iter+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[iter], attiinput, strctrlinput, strdistinput)
             end
         end
 
