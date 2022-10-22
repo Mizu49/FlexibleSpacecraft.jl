@@ -5,7 +5,7 @@ submodule that contains implementation of the Proportional-Integral-Differential
 """
 module PID
 
-using ..Utilities
+using ..UtilitiesBase
 
 export PIDController
 

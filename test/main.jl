@@ -5,24 +5,19 @@ using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
 paramfilepath = "./test/spacecraft.yml"
-(simconfig, attitudemodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, attitudecontroller) = readparamfile(paramfilepath)
+(simconfig, attitudemodel, distconfig, distinternals, initvalue, orbitinfo, orbitinternals, strparam, strmodel, strdistconfig, strinternals, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
-simtime = @timed (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, distinternals, strdistconfig, simconfig, attitudecontroller)
+simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinternals, distconfig, distinternals, strdistconfig, strinternals, simconfig, attitudecontroller)
 
-@test quaternion_constraint(attitudedata.quaternion)
+@test quaternion_constraint(simdata.attitude.quaternion)
 
 plottime = @timed begin # measure time for post process
 
-    fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
-    fig2 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
+    fig1 = PlotRecipe.angularvelocities(simdata.time, simdata.attitude.angularvelocity)
+    fig2 = PlotRecipe.eulerangles(simdata.time, simdata.attitude.eulerangle)
 
-    anim = PlotRecipe.framegif(time, T_UnitFrame2LVLHFrame * UnitFrame, attitudedata.RPYframe, Tgif = 5e-1, FPS = 20)
-
-    # file output
-    # location = "output" # specify where to save your data
-    # outputdata = SimData(time, attitudedata, orbitdata)
-    # write(location, outputdata)
+    anim = PlotRecipe.framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 5e-1, FPS = 20)
 
     display(fig1)
     display(fig2)
@@ -30,8 +25,8 @@ plottime = @timed begin # measure time for post process
 
     if !isnothing(strmodel)
         plotlyjs()
-        fig3 = plot(time, strdata.physicalstate[:, 1])
-        fig3 = plot!(time, strdata.physicalstate[:, 2])
+        fig3 = plot(simdata.time, simdata.appendages.physicalstate[:, 1])
+        fig3 = plot!(simdata.time, simdata.appendages.physicalstate[:, 2])
         display(fig3)
     end
 end

@@ -6,15 +6,17 @@ module for wrapping all the submodules for the structual dynamics for flexible s
 module StructuresBase
 
 using Reexport, YAML, StaticArrays
-using ..Utilities, ..StructureDisturbance
+using ..UtilitiesBase, ..StructureDisturbance
 
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export StructureSimData, initappendagedata, setstructure, update_strstate
+export AbstractStructuresModel, AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
+
+AbstractStructuresModel = Union{Nothing, StateSpace}
 
 """
-    StructureSimData
+    AppendageData
 
 struct of the data container for the states and inputs of the structural response of the flexible appendages
 
@@ -25,11 +27,30 @@ struct of the data container for the states and inputs of the structural respons
 * `controlinput::AbstractVector{<:AbstractVector}`: data container for the control input trajectory
 * `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
-struct StructureSimData
+struct AppendageData
     state::AbstractVector{<:Union{AbstractVector, Real}}
     physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
     controlinput::AbstractVector{<:Union{AbstractVector, Real}}
     disturbance::AbstractVector{<:Union{AbstractVector, Real}}
+end
+
+"""
+    AppendageInternals
+
+internals of the appendage data
+"""
+mutable struct AppendageInternals
+    previousstate::AbstractVector{<:Real}
+    currentstate::AbstractVector{<:Real}
+    currentaccel::AbstractVector{<:Real}
+
+    AppendageInternals(DOF::Integer) = begin
+
+        initstate = SVector{2*DOF, Real}(zeros(2*DOF))
+        initaccel = SVector{DOF, Real}(zeros(DOF))
+
+        new(initstate, initstate, initaccel)
+    end
 end
 
 """
@@ -70,34 +91,8 @@ function initappendagedata(model, initphysicalstate::Vector, datanum::Int)
             disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
         end
 
-        return StructureSimData(state, physicalstate, controlinput, disturbance)
+        return AppendageData(state, physicalstate, controlinput, disturbance)
     end
-end
-
-"""
-    setstructure
-
-API function to define the model of the flexible appendages. Argument is a file path for the configuration file. This function is expected to be used directly with the configuration file
-
-# Arguments
-
-* `configfilepath::String`: path for the configuration file for the structural appendages
-"""
-function setstructure(configfilepath::String)
-
-    lawread = YAML.load_file(configfilepath)
-
-    if haskey(lawread, "modeling") == false
-        throw(ErrorException("`model` is undefined in configuration file `$configfilepath`"))
-    end
-
-    if lawread["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = defmodel(lawread)
-    else
-        throw(ErrorException("no matching modeling method for \"$(lawread["modeling"])\""))
-    end
-
-    return (structureparams, structuresimmodel)
 end
 
 """
@@ -116,10 +111,12 @@ function setstructure(configdata::AbstractDict)
     end
 
     if configdata["modeling"] == "none"
-        structureparams = nothing
-        structuresimmodel = nothing
+        strparams = nothing
+        strmodel = nothing
+        strinternals = nothing
     elseif configdata["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = SpringMass.defmodel(configdata)
+        (strparams, strmodel) = SpringMass.defmodel(configdata)
+        strinternals = AppendageInternals(2)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
@@ -130,19 +127,25 @@ function setstructure(configdata::AbstractDict)
         throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
     end
 
-    return (structureparams, structuresimmodel, strdistconfig)
+    return (strparams, strmodel, strdistconfig, strinternals)
 end
 
-function update_strstate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+function update_strstate!(strmodel::StateSpace, internals::AppendageInternals, Ts::Real, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
-    strmodeltype = typeof(strmodel)
+    # time evolution
+    nextstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
-    if strmodeltype == StateSpace
-        strstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
-        return strstate
-    elseif isnothing(strmodeltype)
-        return nothing
-    end
+    internals.previousstate = currentstate
+    internals.currentstate = nextstate
+    internals.currentaccel = (nextstate[(strmodel.DOF+1):end] - currentstate[(strmodel.DOF+1):end]) / Ts
+
+    return nextstate
 end
+
+function update_strstate!(strmodel::Nothing, internals::AppendageInternals, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+
+    return nothing
+end
+
 
 end

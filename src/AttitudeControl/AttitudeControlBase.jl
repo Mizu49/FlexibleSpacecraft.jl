@@ -1,7 +1,7 @@
 module AttitudeControlBase
 
 using Reexport
-using ..Utilities
+using ..UtilitiesBase
 
 include("NoAttitudeControl.jl")
 @reexport using .NoAttitudeControl
@@ -10,9 +10,9 @@ include("PID.jl")
 include("ConstantInput.jl")
 @reexport using .ConstantInput
 
-export set_attitudecontroller, control_input!
+export AbstractAttitudeController, set_attitudecontroller, control_input!
 
-AttitudeControllers = Union{NoAttitudeController, PIDController, ConstantInputController}
+AbstractAttitudeController = Union{NoAttitudeController, PIDController, ConstantInputController}
 
 function set_attitudecontroller(paramdict::AbstractDict)
 
@@ -32,7 +32,7 @@ function set_attitudecontroller(paramdict::AbstractDict)
     return attitude_controller
 end
 
-@inline function control_input!(controller::AttitudeControllers, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function control_input!(controller::AbstractAttitudeController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
 
     strategy = typeof(controller)
     if strategy == NoAttitudeController

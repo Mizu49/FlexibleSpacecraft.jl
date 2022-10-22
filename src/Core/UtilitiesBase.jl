@@ -1,4 +1,4 @@
-module Utilities
+module UtilitiesBase
 
 using StaticArrays
 

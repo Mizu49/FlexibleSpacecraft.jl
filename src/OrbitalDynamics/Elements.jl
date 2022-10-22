@@ -1,7 +1,7 @@
 module Elements
 
 using StaticArrays
-using ..Frames, ..DataContainers, ..Utilities
+using ..Frames, ..DataContainers, ..UtilitiesBase
 
 export OrbitalElements, ECI2OrbitalPlaneFrame, OrbitalPlaneFrame2RadialAlongTrack, OrbitalPlaneFrame2LVLH, calc_orbitalframe, update_radial_along_track, setelements
 
