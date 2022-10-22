@@ -16,7 +16,7 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, get_angular_velocity
+export OrbitInfo, OrbitData, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
 
 const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 
@@ -41,7 +41,7 @@ end
 
 Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
 """
-function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
+function setorbit(orbitparamdict::AbstractDict, ECI::Frame)
 
     orbitalmodel = orbitparamdict["Dynamics model"]
 
@@ -49,6 +49,7 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
 
         elements = OrbitalElements(0, 0, 0, 0, 0, 0)
         orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
+        orbitinternals = OrbitInternals(0, 0)
 
     elseif orbitalmodel == "Circular"
         # set the orbital parameter for the circular orbit
@@ -57,12 +58,14 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
         orbitmodel = Circular.setorbit(elements)
         orbitalplaneframe = calc_orbitalframe(elements, ECI)
 
+        orbitinternals = OrbitInternals(0, 0)
+
         orbitinfo = OrbitInfo(orbitmodel, elements, orbitalplaneframe)
     else
         error("orbital model \"$orbitalmodel\" not found")
     end
 
-    return orbitinfo
+    return (orbitinfo, orbitinternals)
 end
 
 """
@@ -92,6 +95,29 @@ function initorbitdata(datanum::Integer, orbitalframe::Frame)
     )
 end
 
+mutable struct OrbitInternals
+    angularposition::Real
+    angularvelocity::Real
+end
+
+function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity::Real, angularposition::Real)
+
+    orbitinternals.angularvelocity = angularvelocity
+    orbitinternals.angularposition = angularposition
+
+    return
+end
+
+function update_orbitstate!(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)
+
+    angularvelocity = _get_angularvelocity(orbitinfo.orbitmodel)
+    angularposition = angularvelocity * currenttime
+
+    _update_orbitinternals!(orbitinternals, angularvelocity, angularposition)
+
+    return (angularvelocity, angularposition)
+end
+
 """
     transformation matrix from unit frame to LVLH referential frame
 """
@@ -107,11 +133,11 @@ const LVLHUnitFrame = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
 """
 T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
-function get_angular_velocity(orbitmodel::CircularOrbit)
+function _get_angularvelocity(orbitmodel::CircularOrbit)
     Circular.get_angular_velocity(orbitmodel)
 end
 
-function get_angular_velocity(orbitmodel::NoOrbitModel)
+function _get_angularvelocity(orbitmodel::NoOrbitModel)
     NoOrbit.get_angular_velocity(orbitmodel)
 end
 
