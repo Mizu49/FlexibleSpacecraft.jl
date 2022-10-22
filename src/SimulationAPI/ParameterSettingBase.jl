@@ -75,7 +75,7 @@ function readparamfile(filepath::String)
 
     # Orbital dynamics
     if haskey(paramread, "Orbit")
-        orbitinfo = setorbit(paramread["Orbit"], ECI_frame)
+        (orbitinfo, orbitinternals) = setorbit(paramread["Orbit"], ECI_frame)
     else
         throw(AssertionError("orbit configuration is not found on parameter setting file"))
     end
@@ -92,7 +92,7 @@ function readparamfile(filepath::String)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
+    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, orbitinternals, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
 end
 
 """

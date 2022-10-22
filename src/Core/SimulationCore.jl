@@ -64,6 +64,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
     strmodel,
     initvalue::KinematicsBase.InitData,
     orbitinfo::OrbitBase.OrbitInfo,
+    orbitinternals::OrbitBase.OrbitInternals,
     distconfig::DisturbanceConfig,
     distinternals::DisturbanceInternals,
     strdistconfig::AbstractStrDistConfig,
@@ -95,8 +96,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
         currenttime = tl.time[iter]
 
         ### orbit state
-        tl.orbit.angularvelocity[iter] = get_angular_velocity(orbitinfo.orbitmodel)
-        tl.orbit.angularposition[iter] = tl.orbit.angularvelocity[iter] * currenttime
+        (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
 
         # calculation of the LVLH frame and its transformation matrix
         C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, tl.orbit.angularvelocity[iter], currenttime)
