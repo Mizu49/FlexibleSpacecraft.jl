@@ -66,9 +66,9 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
     orbitinfo::OrbitBase.OrbitInfo,
     orbitinternals::OrbitBase.OrbitInternals,
     distconfig::DisturbanceConfig,
-    distinternals::DisturbanceInternals,
+    distinternals::Union{DisturbanceInternals, Nothing},
     strdistconfig::AbstractStrDistConfig,
-    strinternals::AppendageInternals,
+    strinternals::Union{AppendageInternals, Nothing},
     simconfig::SimulationConfig,
     attitude_controller
     )::SimData
@@ -119,7 +119,9 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
         attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
 
         ### flexible appendages state
-        tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, strinternals.currentstate)
+        if !isnothing(strmodel)
+            tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, strinternals.currentstate)
+        end
 
         ### input to the structural dynamics
         if isnothing(strmodel)
@@ -137,14 +139,15 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
 
         ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
-        straccel = strinternals.currentaccel
-        strvelocity = strinternals.currentstate[(strmodel.DOF+1):end]
-        attiinput = tl.attitude.angularvelocity[iter]
-
-        ### save current states
-        if !isnothing(strmodel)
-            tl.appendages.state[iter] = tl.appendages.state[iter]
+        if isnothing(strinternals)
+            straccel = 0
+            strvelocity = 0
+        else
+            straccel = strinternals.currentaccel
+            strvelocity = strinternals.currentstate[(strmodel.DOF+1):end]
         end
+        # attitude dynamics
+        attiinput = tl.attitude.angularvelocity[iter]
 
         ### Time evolution of the system
         if iter != tl.datanum
@@ -162,9 +165,6 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
                 tl.appendages.state[iter+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[iter], attiinput, strctrlinput, strdistinput)
             end
         end
-
-        ### calculation for the next step
-        strinternals.previousstate = strinternals.currentstate
 
         # update the progress meter
         next!(prog)
