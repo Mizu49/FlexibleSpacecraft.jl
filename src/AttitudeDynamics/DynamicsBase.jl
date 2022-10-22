@@ -3,7 +3,7 @@ module DynamicsBase
 using Reexport, StaticArrays
 using ..Frames, ..UtilitiesBase
 
-export update_angularvelocity, setdynamicsmodel
+export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel
 
 include("RigidBody.jl")
 @reexport using .RigidBody
@@ -11,7 +11,7 @@ include("RigidBody.jl")
 include("LinearCoupling.jl")
 @reexport using .LinearCoupling
 
-TypeModels = Union{RigidBodyModel, LinearCouplingModel}
+AbstractAttitudeDynamicsModel = Union{RigidBodyModel, LinearCouplingModel}
 
 """
     setdynamicsmodel
@@ -61,7 +61,7 @@ update the angular velocity of the angular velocity of the attitude dynamics. In
 
 """
 function update_angularvelocity(
-    model::TypeModels,
+    model::AbstractAttitudeDynamicsModel,
     currentTime::Real,
     angularvelocity::AbstractVector{<:Real},
     Tsampling::Real,

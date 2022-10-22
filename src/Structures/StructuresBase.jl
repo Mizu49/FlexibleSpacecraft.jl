@@ -11,9 +11,9 @@ using ..UtilitiesBase, ..StructureDisturbance
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
+export AbstractStructuresModel, AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
 
-AbstractStructures = Union{Nothing, StateSpace}
+AbstractStructuresModel = Union{Nothing, StateSpace}
 
 """
     AppendageData

@@ -41,12 +41,17 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 
 # Arguments
 
-* `attitudemodel`: KinematicsBase dynamics model of the system
-* `strmodel`: Structural model of the flexible appendages
-* `initvalue::InitData`: Inital value of the simulation physical states
-* `orbitinfo::OrbitBase.OrbitInfo`: information and model definition of the orbital dynamics
-* `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
-* `simconfig::SimulationConfig`: Simulation configuration ParameterSettingBase
+* `attitudemodel::AbstractAttitudeDynamicsModel`: dynamics model for the attitude motion
+* `strmodel::AbstractStructuresModel`: dynamics model for the flexible appendages motion
+* `initvalue::InitData`: struct of initial values for the simulation
+* `orbitinfo::OrbitInfo`: model and configuration for the orbital motion
+* `orbitinternals::OrbitInternals`: internals of the orbital model
+* `distconfig::DisturbanceConfig`: disturbance configuration for the attitude dynamics
+* `distinternals::Union{DisturbanceInternals, Nothing}`: internals of the disturbance calculation
+* `strdistconfig::AbstractStrDistConfig`: disturbance configuration for the structural dynamics
+* `strinternals::Union{AppendageInternals, Nothing}`: internals for the structural dynamics simulation
+* `simconfig::SimulationConfig`: configuration for the overall simulation
+* `attitude_controller::AbstractAttitudeController: configuration of the attitude controller
 
 # Return value
 
@@ -55,22 +60,22 @@ return value is the instance of `SimData`
 # Usage
 
 ```julia
-simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
+simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinternals, distconfig, distinternals, strdistconfig, strinternals, simconfig, attitudecontroller)
 ```
 
 """
 @inline function runsimulation(
-    attitudemodel,
-    strmodel,
-    initvalue::KinematicsBase.InitData,
-    orbitinfo::OrbitBase.OrbitInfo,
-    orbitinternals::OrbitBase.OrbitInternals,
+    attitudemodel::AbstractAttitudeDynamicsModel,
+    strmodel::AbstractStructuresModel,
+    initvalue::InitData,
+    orbitinfo::OrbitInfo,
+    orbitinternals::OrbitInternals,
     distconfig::DisturbanceConfig,
     distinternals::Union{DisturbanceInternals, Nothing},
     strdistconfig::AbstractStrDistConfig,
     strinternals::Union{AppendageInternals, Nothing},
     simconfig::SimulationConfig,
-    attitude_controller
+    attitude_controller::AbstractAttitudeController
     )::SimData
 
     ##### Constants
