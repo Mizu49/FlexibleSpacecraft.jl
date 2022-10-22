@@ -13,6 +13,8 @@ include("SpringMass.jl")
 
 export AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
 
+AbstractStructures = Union{Nothing, StateSpace}
+
 """
     AppendageData
 
@@ -128,11 +130,16 @@ function setstructure(configdata::AbstractDict)
     return (strparams, strmodel, strdistconfig, strinternals)
 end
 
-function update_strstate!(strmodel::StateSpace, internals::AppendageInternals, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+function update_strstate!(strmodel::StateSpace, internals::AppendageInternals, Ts::Real, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
-    strstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+    # time evolution
+    nextstate = SpringMass.updatestate(strmodel, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
-    return strstate
+    internals.previousstate = currentstate
+    internals.currentstate = nextstate
+    internals.currentaccel = (nextstate[(strmodel.DOF+1):end] - currentstate[(strmodel.DOF+1):end]) / Ts
+
+    return nextstate
 end
 
 function update_strstate!(strmodel::Nothing, internals::AppendageInternals, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)

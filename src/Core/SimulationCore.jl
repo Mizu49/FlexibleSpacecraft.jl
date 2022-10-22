@@ -112,16 +112,14 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfi
         # RPYframe representation can be obtained from the LVLH unit frame
         tl.attitude.RPYframe[iter] = C_LVLH2Body * LVLHUnitFrame
 
-        ### flexible appendages state
-        strinternals.currentstate = tl.appendages.state[iter]
-        strinternals.currentaccel = (strinternals.currentstate[(strmodel.DOF+1):end] - strinternals.previousstate[(strmodel.DOF+1):end]) / Ts
-        tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, strinternals.currentstate)
-
         ### input to the attitude dynamics
         # disturbance input
         attidistinput = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[iter], C_ECI2Body, C_ECI2RAT, tl.orbit.LVLH[iter].z, Ts)
         # control input
         attictrlinput = transpose(C_ECI2Body) * control_input!(attitude_controller, current_RPY, [0, 0, 0])
+
+        ### flexible appendages state
+        tl.appendages.physicalstate[iter] = modalstate2physicalstate(strmodel, strinternals.currentstate)
 
         ### input to the structural dynamics
         if isnothing(strmodel)
