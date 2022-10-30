@@ -1,9 +1,9 @@
 """
-    module PlotRecipe
+    module VisualizationBase
 
 module of functions that show us the beautiful figures of spacecraft attitude dynamics
 """
-module PlotRecipe
+module VisualizationBase
 
 include("FramePlot.jl")
 using .FramePlot
