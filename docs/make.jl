@@ -28,7 +28,7 @@ makedocs(
         "Libraries" => [
             "API" => "docs-module/docs-SimulationAPI.md",
             "Data containers" => "docs-module/docs-DataContainers.md",
-            "Plot recipe" => "docs-module/docs-PlotRecipe.md"
+            "Plot recipe" => "docs-module/docs-VisualizationBase.md"
         ],
         "Development" => [
             "Developer's Guideline" => "development/developer's-guideline.md",

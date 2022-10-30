@@ -42,18 +42,18 @@ Congrats! You have successfully run your simulation! Let's process your simulati
 Our visualization feature helps you to process your simulation effectively.
 
 ```julia
-fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
+fig1 = VisualizationBase.angularvelocities(time, attitudedata.angularvelocity)
 display(fig1)
 
-fig2 = PlotRecipe.quaternions(time, attitudedata.quaternion)
+fig2 = VisualizationBase.quaternions(time, attitudedata.quaternion)
 display(fig2)
 
 # Plot of the body frame with respect to ECI frame
-fig3 = PlotRecipe.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 20, FPS = 8)
+fig3 = VisualizationBase.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 20, FPS = 8)
 display(fig3)
 
 # Plot of the euler angle
-fig4 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
+fig4 = VisualizationBase.eulerangles(time, attitudedata.eulerangle)
 display(fig4)
 
 fig5 = plot(time, strdata.physicalstate[:, 1])
