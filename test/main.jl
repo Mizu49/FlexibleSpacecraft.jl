@@ -14,10 +14,10 @@ simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orb
 
 plottime = @timed begin # measure time for post process
 
-    fig1 = PlotRecipe.angularvelocities(simdata.time, simdata.attitude.angularvelocity)
-    fig2 = PlotRecipe.eulerangles(simdata.time, simdata.attitude.eulerangle)
+    fig1 = VisualizationBase.angularvelocities(simdata.time, simdata.attitude.angularvelocity)
+    fig2 = VisualizationBase.eulerangles(simdata.time, simdata.attitude.eulerangle)
 
-    anim = PlotRecipe.framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 5e-1, FPS = 20)
+    anim = VisualizationBase.framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 5e-1, FPS = 20)
 
     display(fig1)
     display(fig2)

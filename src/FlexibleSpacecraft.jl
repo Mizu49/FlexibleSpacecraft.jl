@@ -30,9 +30,9 @@ include("AttitudeDynamics/KinematicsBase.jl")
 include("AttitudeDynamics/Evaluation.jl")
 @reexport using .Evaluation
 
-# Include module `PlotRecipe`
-include("PlotRecipes/PlotRecipe.jl")
-@reexport using .PlotRecipe
+# Include module `VisualizationBase`
+include("Visualization/VisualizationBase.jl")
+@reexport using .VisualizationBase
 
 include("Structures/StructureDisturbance.jl")
 @reexport using .StructureDisturbance
