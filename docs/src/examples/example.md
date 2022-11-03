@@ -42,7 +42,7 @@ Congrats! You have successfully run your simulation! Let's process your simulati
 Our visualization feature helps you to process your simulation effectively.
 
 ```julia
-fig1 = VisualizationBase.angularvelocities(time, attitudedata.angularvelocity)
+fig1 = plot_angularvelocity(time, attitudedata.angularvelocity)
 display(fig1)
 
 fig2 = VisualizationBase.quaternions(time, attitudedata.quaternion)
@@ -53,7 +53,7 @@ fig3 = VisualizationBase.framegif(time, LVLHref, attitudedata.RPYframe, Tgif = 2
 display(fig3)
 
 # Plot of the euler angle
-fig4 = VisualizationBase.eulerangles(time, attitudedata.eulerangle)
+fig4 = plot_eulerangles(time, attitudedata.eulerangle)
 display(fig4)
 
 fig5 = plot(time, strdata.physicalstate[:, 1])

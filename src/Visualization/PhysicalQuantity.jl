@@ -6,16 +6,16 @@ using Plots
 import ...DataContainers
 using StaticArrays
 
-export angularvelocities, eulerangles, quaternions
+export plot_angularvelocity, plot_eulerangles, quaternions
 
 """
-    function angularvelocities(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+    function plot_angularvelocity(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
 Plots angular velocity of each axis in one figure
 """
-function angularvelocities(
+function plot_angularvelocity(
     time::StepRangeLen,
-    angularvelocity::Vector{StaticArrays.SVector{3, <:Real}};
+    angularvelocity::AbstractVector{SVector{3, <:Real}};
     timerange::Tuple{<:Real, <:Real} = (0, 0)
     )::AbstractPlot
 
@@ -31,14 +31,14 @@ function angularvelocities(
 end
 
 """
-    eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+    plot_eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
 
 Plots time history of euler angles
 
 """
-function eulerangles(
+function plot_eulerangles(
     time::StepRangeLen,
-    eulerangle::Vector{SVector{3, <:Real}};
+    eulerangle::AbstractVector{SVector{3, <:Real}};
     timerange::Tuple{<:Real, <:Real} = (0, 0)
     )::AbstractPlot
 

@@ -14,8 +14,8 @@ simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orb
 
 plottime = @timed begin # measure time for post process
 
-    fig1 = angularvelocities(simdata.time, simdata.attitude.angularvelocity)
-    fig2 = eulerangles(simdata.time, simdata.attitude.eulerangle)
+    fig1 = plot_angularvelocity(simdata.time, simdata.attitude.angularvelocity)
+    fig2 = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
 
     anim = framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 5e-1, FPS = 20)
 
