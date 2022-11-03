@@ -5,10 +5,12 @@ module of functions that show us the beautiful figures of spacecraft attitude dy
 """
 module VisualizationBase
 
+using Reexport
+
 include("FramePlot.jl")
-using .FramePlot
+@reexport using .FramePlot
 
 include("PhysicalQuantity.jl")
-using .PhysicalQuantity
+@reexport using .PhysicalQuantity
 
 end
