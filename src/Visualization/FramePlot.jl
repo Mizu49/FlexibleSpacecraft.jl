@@ -5,6 +5,14 @@ using ...DataContainers, ...Frames
 
 export dispframe, framegif
 
+# RGB color setting for frame plots
+axiscolor_x = RGB(colorant"#FF0000")
+axiscolor_y = RGB(colorant"#008000")
+axiscolor_z = RGB(colorant"#0000FF")
+axiscolor_ref_x = RGB(colorant"#FFA5A5")
+axiscolor_ref_y = RGB(colorant"#CCFECC")
+axiscolor_ref_z = RGB(colorant"#A5A5FF")
+
 """
     function dispframe(time, refCoordinate, coordinate)
 
@@ -22,7 +30,7 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
             [refCoordinate.x[1]],
             [refCoordinate.x[2]],
             [refCoordinate.x[3]]),
-        color = RGB(colorant"#FFA5A5"),
+        color = axiscolor_ref_x,
         linewidth = 2,)
 
     coordFig = quiver!(
@@ -31,7 +39,7 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
             [refCoordinate.y[1]],
             [refCoordinate.y[2]],
             [refCoordinate.y[3]]),
-        color = RGB(colorant"#CCFECC"),
+        color = axiscolor_ref_y,
         linewidth = 2,)
 
     coordFig = quiver!(
@@ -40,7 +48,7 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
             [refCoordinate.z[1]],
             [refCoordinate.z[2]],
             [refCoordinate.z[3]]),
-        color = RGB(colorant"#A5A5FF"),
+        color = axiscolor_ref_z,
         linewidth = 2,)
 
     # Plot of spacecraft fixed frame
@@ -50,7 +58,7 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
             [coordinate.x[1]],
             [coordinate.x[2]],
             [coordinate.x[3]]),
-        color = RGB(colorant"#FF0000"),
+        color = axiscolor_x,
         linewidth = 4,)
 
     coordFig = quiver!(
@@ -59,7 +67,7 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
             [coordinate.y[1]],
             [coordinate.y[2]],
             [coordinate.y[3]]),
-        color = RGB(colorant"#008000"),
+        color = axiscolor_y,
         linewidth = 4,)
 
     coordFig = quiver!(
@@ -68,7 +76,7 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
             [coordinate.z[1]],
             [coordinate.z[2]],
             [coordinate.z[3]]),
-        color = RGB(colorant"#0000FF"),
+        color = axiscolor_z,
         linewidth = 4,
         framestyle = :origin)
 
