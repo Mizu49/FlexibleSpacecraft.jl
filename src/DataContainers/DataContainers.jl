@@ -5,7 +5,7 @@ submodule for accomodating the features and interface functions for handling the
 
 # Main features
 
-* `function getdataindex`
+* `function timerange2indexrange`
 
 This submodule also includes the multiple dispatch for the `::AbstractVector{<:AbstractVector}` type data container used for simulation. Please be noted that you may need to pay attention to this feature when you manually code your simulation using the `::AbstractVector{<:AbstractVector}` type variables.
 """
@@ -13,14 +13,14 @@ module DataContainers
 
 using StaticArrays
 
-export getdataindex
+export timerange2indexrange
 
 """
-    function getdataindex(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Union{UnitRange{Int64}, Colon}
+    timerange2indexrange(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Union{UnitRange{Int64}, Colon}
 
 returns an `index::::Union{UnitRange{Int64}, Colon}` that corresponding to the given `timerange::Tuple{<:Real, <:Real}`
 """
-function getdataindex(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Union{UnitRange{Int64}, Colon}
+function timerange2indexrange(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Union{UnitRange{Int64}, Colon}
 
     if timerange == (0, 0)
         return :;
@@ -29,6 +29,27 @@ function getdataindex(timerange::Tuple{<:Real, <:Real}, samplingtime::Real)::Uni
             throw(DomainError(timerange, "setting for `timerange` is invalid"))
         end
 
+        startindex = convert(Int64, round(timerange[1]/samplingtime) + 1)
+        endindex = convert(Int64, round(timerange[2]/samplingtime) + 1)
+
+        return startindex:endindex
+    end
+end
+
+"""
+    timerange2indexrange(timerange::Tuple{<:Real, <:Real}, time::StepRangeLen)::Union{UnitRange{Int64}, Colon}
+returns an `index::::Union{UnitRange{Int64}, Colon}` that corresponding to the given `timerange::Tuple{<:Real, <:Real}`
+"""
+function timerange2indexrange(timerange::Tuple{<:Real, <:Real}, time::StepRangeLen)::Union{UnitRange{Int64}, Colon}
+
+    if timerange == (0, 0)
+        return :;
+    else
+        if timerange[1] >= timerange[2]
+            throw(DomainError(timerange, "setting for `timerange` is invalid"))
+        end
+
+        samplingtime = convert(Float64, time.step)
         startindex = convert(Int64, round(timerange[1]/samplingtime) + 1)
         endindex = convert(Int64, round(timerange[2]/samplingtime) + 1)
 

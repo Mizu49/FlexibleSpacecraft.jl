@@ -3,8 +3,7 @@ module PhysicalQuantity
 using Plots
 
 # Include module `DataContainers`
-import ...DataContainers
-using StaticArrays
+using ...DataContainers, StaticArrays
 
 export plot_angularvelocity, plot_eulerangles, quaternions
 
@@ -101,7 +100,7 @@ end
     titlefontsize --> 15
 
     # get the index for data
-    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = timerange2indexrange(timerange, time)
 
     return time[dataindex], quaternion[dataindex, axisindex]
 end
@@ -131,7 +130,7 @@ end
     titlefontsize --> 15
 
     # get the index for data
-    dataindex = DataContainers.getdataindex(timerange, convert(Float64, time.step))
+    dataindex = timerange2indexrange(timerange, time)
 
     return time[dataindex], anglevectors[dataindex, axisindex]
 end
