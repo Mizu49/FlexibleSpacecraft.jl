@@ -1,6 +1,6 @@
 module FramePlot
 
-using Plots, ProgressMeter
+using Plots, ProgressMeter, StaticArrays
 using ...DataContainers, ...Frames
 
 export dispframe, framegif
@@ -24,65 +24,17 @@ function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
     gr()
 
     # Plot of reference frame
-    coordFig = quiver(
-        [0], [0], [0],
-        quiver = (
-            [refCoordinate.x[1]],
-            [refCoordinate.x[2]],
-            [refCoordinate.x[3]]),
-        color = axiscolor_ref_x,
-        linewidth = 2,)
-
-    coordFig = quiver!(
-        [0], [0], [0],
-        quiver = (
-            [refCoordinate.y[1]],
-            [refCoordinate.y[2]],
-            [refCoordinate.y[3]]),
-        color = axiscolor_ref_y,
-        linewidth = 2,)
-
-    coordFig = quiver!(
-        [0], [0], [0],
-        quiver = (
-            [refCoordinate.z[1]],
-            [refCoordinate.z[2]],
-            [refCoordinate.z[3]]),
-        color = axiscolor_ref_z,
-        linewidth = 2,)
+    coordFig = plot()
+    coordFig = _frame_vector!(refCoordinate.x, axiscolor_ref_x)
+    coordFig = _frame_vector!(refCoordinate.y, axiscolor_ref_y)
+    coordFig = _frame_vector!(refCoordinate.z, axiscolor_ref_z)
 
     # Plot of spacecraft fixed frame
-    coordFig = quiver!(
-        [0], [0], [0],
-        quiver = (
-            [coordinate.x[1]],
-            [coordinate.x[2]],
-            [coordinate.x[3]]),
-        color = axiscolor_x,
-        linewidth = 4,)
+    coordFig = _frame_vector!(coordinate.x, axiscolor_x)
+    coordFig = _frame_vector!(coordinate.y, axiscolor_y)
+    coordFig = _frame_vector!(coordinate.z, axiscolor_z)
 
-    coordFig = quiver!(
-        [0], [0], [0],
-        quiver = (
-            [coordinate.y[1]],
-            [coordinate.y[2]],
-            [coordinate.y[3]]),
-        color = axiscolor_y,
-        linewidth = 4,)
 
-    coordFig = quiver!(
-        [0], [0], [0],
-        quiver = (
-            [coordinate.z[1]],
-            [coordinate.z[2]],
-            [coordinate.z[3]]),
-        color = axiscolor_z,
-        linewidth = 4,
-        framestyle = :origin)
-
-    xlims!(-1.0, 1.0)
-    ylims!(-1.0, 1.0)
-    zlims!(-1.0, 1.0)
     title!("Time: $time [s]")
 
     return coordFig
@@ -122,6 +74,24 @@ function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; 
     gifanime = gif(anim, "attitude.gif", fps = FPS)
 
     return gifanime
+end
+
+function _frame_vector!(vec::SVector{3, <:Real}, argcolor; arglinewidth = 4)
+    fig = quiver!(
+        [0], [0], [0],
+        quiver = (
+            [vec[1]],
+            [vec[2]],
+            [vec[3]]),
+        color = argcolor,
+        linewidth = arglinewidth,
+        framestyle = :origin)
+
+    xlims!(-1.0, 1.0)
+    ylims!(-1.0, 1.0)
+    zlims!(-1.0, 1.0)
+
+    return fig
 end
 
 end
