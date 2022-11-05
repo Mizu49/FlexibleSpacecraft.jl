@@ -1,4 +1,4 @@
-module PhysicalQuantity
+module AttitudeVisualization
 
 using Plots
 

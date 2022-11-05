@@ -10,7 +10,7 @@ using Reexport
 include("FramePlot.jl")
 @reexport using .FramePlot
 
-include("PhysicalQuantity.jl")
-@reexport using .PhysicalQuantity
+include("AttitudeVisualization.jl")
+@reexport using .AttitudeVisualization
 
 end
