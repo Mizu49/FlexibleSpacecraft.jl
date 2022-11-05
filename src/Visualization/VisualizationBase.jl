@@ -13,4 +13,7 @@ include("FramePlot.jl")
 include("AttitudeVisualization.jl")
 @reexport using .AttitudeVisualization
 
+include("AppendagesVisualization.jl")
+@reexport using .AppendagesVisualization
+
 end

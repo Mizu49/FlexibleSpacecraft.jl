@@ -24,9 +24,7 @@ plottime = @timed begin # measure time for post process
     display(anim)
 
     if !isnothing(strmodel)
-        plotlyjs()
-        fig3 = plot(simdata.time, simdata.appendages.physicalstate[:, 1])
-        fig3 = plot!(simdata.time, simdata.appendages.physicalstate[:, 2])
+        fig3 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
         display(fig3)
     end
 end
