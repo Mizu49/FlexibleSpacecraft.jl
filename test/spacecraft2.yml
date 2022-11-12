@@ -33,11 +33,11 @@ disturbance:
 
 Orbit:
     # Specify the model used in the simulation of orbital motion
-    Dynamics model: none
+    Dynamics model: Circular
     # Orbital elements
     Orbital elements:
         right ascension: 0
-        inclination: 0
+        inclination: 20
         semimajor axis: 6371e3
         eccentricity: 0
         argument of perigee: 0
