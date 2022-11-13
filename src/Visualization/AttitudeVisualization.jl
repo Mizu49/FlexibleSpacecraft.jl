@@ -5,7 +5,7 @@ using Plots
 # Include module `DataContainers`
 using ...DataContainers, StaticArrays
 
-export plot_angularvelocity, plot_eulerangles, quaternions
+export plot_angularvelocity, plot_eulerangles, plot_quaternion
 
 """
     function plot_angularvelocity(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
@@ -53,11 +53,11 @@ function plot_eulerangles(
 end
 
 """
-function quaternions(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
+function plot_quaternion(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
 
-    Plot quaternions in single plot
+    Plot plot_quaternion in single plot
 """
-function quaternions(
+function plot_quaternion(
     time::StepRangeLen,
     quaternion::AbstractVector{SVector{4, <:Real}};
     timerange::Tuple{<:Real, <:Real} = (0, 0)
@@ -77,12 +77,13 @@ end
 
 # type recipe for data container of quaternion
 @recipe function f(
-    plt::AbstractPlot,
     time::StepRangeLen,
     quaternion::AbstractVector{SVector{4, <:Real}},
     axisindex::Integer;
     timerange = (0, 0),
-    datalabel = "")
+    ylabelname = "no y-label",
+    datalabel = "no data label")
+
 
     # check the bounds for indexing
     if !(1 <= axisindex <= 4)
