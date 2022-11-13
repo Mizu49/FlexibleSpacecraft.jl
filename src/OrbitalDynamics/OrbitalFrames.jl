@@ -10,7 +10,7 @@ export ECI2OrbitalPlane, ECI2LVLH, OrbitalPlane2RadialAlongTrack, calc_orbitalfr
     function ECI2OrbitalPlane(elements::OrbitalElements)
 """
 function ECI2OrbitalPlane(elements::OrbitalElements)
-    return C1(elements.inclination) * C3(elements.ascention)
+    return C1(deg2rad(elements.inclination)) * C3(deg2rad(elements.ascention))
 end
 
 function ECI2OrbitalPlane(elements::Nothing)
@@ -20,14 +20,12 @@ end
 function ECI2LVLH(elements::OrbitalElements, orbitposition::Real)
 
     C_ECI2OrbitPlane = ECI2OrbitalPlane(elements)
+    C_OrbitalPlane2RAT = OrbitalPlane2RadialAlongTrack(elements, orbitposition)
 
-    M = SMatrix{3, 3}([
-        0  1  0
-        0  0 -1
-        -1 0  0
-    ])
+    # transformation matrix to match with the definition of the LVLH
+    M = C1(-pi/2) * C3(pi/2)
 
-    C_ECI2ORF = M * C3(orbitposition) * C_ECI2OrbitPlane
+    C_ECI2ORF = M * C_OrbitalPlane2RAT * C_ECI2OrbitPlane
 
     return SMatrix{3, 3}(C_ECI2ORF)
 end
