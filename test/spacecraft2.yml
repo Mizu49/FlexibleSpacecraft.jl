@@ -7,7 +7,7 @@ config:
     time length: 100 # Time length of simulation (second)
 
 initial value:
-    quaternion: [0, 0, 0, 1]
+    quaternion: [-0.5, -0.5, 0.5, 0.5]
     angular velocity: [0, 0, 0]
 
 
@@ -26,7 +26,7 @@ attitude dynamics:
     ]
 
 disturbance:
-    constant torque: [1.0, 0.0, 0.0]
+    constant torque: [0.0, 0.0, 0.0]
     gravitational torque: false
     step trajectory: nothing
 
@@ -37,7 +37,7 @@ Orbit:
     # Orbital elements
     Orbital elements:
         right ascension: 0
-        inclination: 20
+        inclination: 0
         semimajor axis: 6371e3
         eccentricity: 0
         argument of perigee: 0
