@@ -3,7 +3,7 @@ module Elements
 using StaticArrays
 using ..Frames, ..DataContainers, ..UtilitiesBase
 
-export OrbitalElements, ECI2OrbitalPlaneFrame, ECI2ORF, OrbitalPlaneFrame2RadialAlongTrack, OrbitalPlaneFrame2LVLH, calc_orbitalframe, update_radial_along_track, setelements
+export OrbitalElements, ECI2OrbitalPlaneFrame, ECI2LVLH, OrbitalPlaneFrame2RadialAlongTrack, OrbitalPlaneFrame2LVLH, calc_orbitalframe, update_radial_along_track, setelements
 
 """
     struct OrbitalElements
@@ -64,7 +64,7 @@ function ECI2OrbitalPlaneFrame(elements::Nothing)
     return C1(0) * C3(0)
 end
 
-function ECI2ORF(elements::OrbitalElements, orbitposition::Real)
+function ECI2LVLH(elements::OrbitalElements, orbitposition::Real)
 
     C_ECI2OrbitPlane = ECI2OrbitalPlaneFrame(elements)
 

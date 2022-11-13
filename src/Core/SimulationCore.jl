@@ -98,8 +98,8 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         ### orbit state
         (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
 
-        # calculation of the LVLH frame and its transformation matrix
-        C_ECI2ORF = ECI2ORF(orbitinfo.orbitalelement, 0)
+        # calculation of transformation matrix of the LVLH frame
+        C_ECI2LVLH = ECI2LVLH(orbitinfo.orbitalelement, orbit_angularposition)
 
         ### attitude state
         # Update current attitude
@@ -107,12 +107,12 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         tl.attitude.bodyframe[simcnt] = C_ECI2Body * UnitFrame
 
         # update the roll-pitch-yaw representations
-        C_ORB2BRF = C_ECI2Body * transpose(C_ECI2ORF)
+        C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)
         # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
-        RPYangle = dcm2euler(C_ORB2BRF)
+        RPYangle = dcm2euler(C_LVLH2BRF)
         tl.attitude.eulerangle[simcnt] = RPYangle
         # RPYframe representation can be obtained from the LVLH unit frame
-        tl.attitude.RPYframe[simcnt] = C_ORB2BRF * LVLHUnitFrame
+        tl.attitude.RPYframe[simcnt] = C_LVLH2BRF * LVLHUnitFrame
 
         ### input to the attitude dynamics
         # disturbance input
