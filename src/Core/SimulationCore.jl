@@ -104,7 +104,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         tl.attitude.bodyframe[simcnt] = C_ECI2Body * UnitFrame
 
         # update the roll-pitch-yaw representations
-        C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)
+        C_LVLH2BRF = C1(-pi/2) * C3(pi/2) * C_ECI2Body * transpose(C_ECI2LVLH)
         # euler angle from LVLH to Body frame is the roll-pitch-yaw angle of the spacecraft
         RPYangle = dcm2euler(C_LVLH2BRF)
         tl.attitude.eulerangle[simcnt] = RPYangle
@@ -113,7 +113,9 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, zeros(3,3), tl.orbit.LVLH[simcnt].z, Ts)
+        # attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, zeros(3,3), tl.orbit.LVLH[simcnt].z, Ts)
+        attitude_disturbance_input = transpose(C_ECI2Body) * [1, 0, 0]
+
         # control input
         attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, [0, 0, 0])
 

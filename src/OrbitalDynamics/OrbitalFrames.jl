@@ -1,6 +1,6 @@
 module OrbitalFrames
 
-using StaticArrays
+using StaticArrays, LinearAlgebra
 using ..OrbitBase, ..Elements
 using ..Frames, ..DataContainers, ..UtilitiesBase
 
@@ -21,13 +21,14 @@ function ECI2LVLH(elements::OrbitalElements, orbitposition::Real)
 
     C_ECI2OrbitPlane = ECI2OrbitalPlane(elements)
     C_OrbitalPlane2RAT = OrbitalPlane2RadialAlongTrack(elements, orbitposition)
+    C_ECI2RAT = C_OrbitalPlane2RAT * C_ECI2OrbitPlane
 
     # transformation matrix to match with the definition of the LVLH
     M = C1(-pi/2) * C3(pi/2)
 
-    C_ECI2ORF = M * C_OrbitalPlane2RAT * C_ECI2OrbitPlane
+    C_ECI2LVLH = SMatrix{3, 3}(M * C_ECI2RAT)
 
-    return SMatrix{3, 3}(C_ECI2ORF)
+    return C_ECI2LVLH
 end
 
 """
