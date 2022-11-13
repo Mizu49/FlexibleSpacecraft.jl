@@ -4,7 +4,7 @@ using StaticArrays
 using ..OrbitBase, ..Elements
 using ..Frames, ..DataContainers, ..UtilitiesBase
 
-export ECI2OrbitalPlane, ECI2LVLH, OrbitalPlane2RadialAlongTrack, calc_orbitalframe
+export ECI2OrbitalPlane, ECI2LVLH, OrbitalPlane2RadialAlongTrack, calc_orbitalframe, calc_inital_quaternion
 
 """
     function ECI2OrbitalPlane(elements::OrbitalElements)
@@ -52,6 +52,15 @@ function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame
     C = ECI2OrbitalPlane(elem)
 
     return C * ECI_frame
+end
+
+function calc_inital_quaternion(elem::OrbitalElements, initRPY::AbstractVector{<:Real})::SVector{4, <:Real}
+
+    C_ECI2LVLH = ECI2LVLH(elem, 0)
+    C_LVLH2BRF = euler2dcm(initRPY)
+    initquaternion = dcm2quaternion(C_LVLH2BRF * C_ECI2LVLH)
+
+    return initquaternion
 end
 
 end
