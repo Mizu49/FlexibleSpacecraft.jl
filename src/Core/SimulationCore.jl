@@ -82,9 +82,6 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     # Sampling tl.time
     Ts = simconfig.samplingtime
 
-    # transformation matrix from ECI frame to orbital plane frame
-    C_ECI2OrbitPlane = OrbitBase.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
-
     # Data containers
     tl = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
@@ -108,7 +105,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 
         # update the roll-pitch-yaw representations
         C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)
-        # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
+        # euler angle from LVLH to Body frame is the roll-pitch-yaw angle of the spacecraft
         RPYangle = dcm2euler(C_LVLH2BRF)
         tl.attitude.eulerangle[simcnt] = RPYangle
         # RPYframe representation can be obtained from the LVLH unit frame
