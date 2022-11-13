@@ -43,7 +43,7 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 
 * `attitudemodel::AbstractAttitudeDynamicsModel`: dynamics model for the attitude motion
 * `strmodel::AbstractStructuresModel`: dynamics model for the flexible appendages motion
-* `initvalue::InitData`: struct of initial values for the simulation
+* `initvalue::InitKinematicsData`: struct of initial values for the simulation
 * `orbitinfo::OrbitInfo`: model and configuration for the orbital motion
 * `orbitinternals::OrbitInternals`: internals of the orbital model
 * `distconfig::DisturbanceConfig`: disturbance configuration for the attitude dynamics
@@ -67,7 +67,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 @inline function runsimulation(
     attitudemodel::AbstractAttitudeDynamicsModel,
     strmodel::AbstractStructuresModel,
-    initvalue::InitData,
+    initvalue::InitKinematicsData,
     orbitinfo::OrbitInfo,
     orbitinternals::OrbitInternals,
     distconfig::DisturbanceConfig,

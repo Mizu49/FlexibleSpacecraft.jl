@@ -8,7 +8,7 @@ module KinematicsBase
 using StaticArrays
 using ..Frames
 
-export InitData, AttitudeData, initattitudedata, update_quaternion, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
+export InitKinematicsData, AttitudeData, initattitudedata, update_quaternion
 
 """
     function _initangularvelocity(simdata_num, initital_value::Vector)
@@ -37,11 +37,11 @@ function _initquaternion(datanum, initialvalue::SVector{4, <:Real})
 end
 
 """
-    struct InitData
+    struct InitKinematicsData
 
 Struct that consists of the initial state value of the time-variant physical amounts in simulation
 """
-struct InitData
+struct InitKinematicsData
 
     # Spacecraft state variable
     quaternion::SVector{4, Real}
@@ -60,11 +60,11 @@ struct AttitudeData
 end
 
 """
-    initattitudedata(datanum::Int, initialdata::InitData)
+    initattitudedata(datanum::Int, initialdata::InitKinematicsData)
 
 Initialize the data container for the attitude dynamics
 """
-function initattitudedata(datanum::Int, initialdata::InitData)
+function initattitudedata(datanum::Int, initialdata::InitKinematicsData)
 
     return AttitudeData(
         datanum,
