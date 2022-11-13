@@ -54,11 +54,13 @@ function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame
     return C * ECI_frame
 end
 
-function calc_inital_quaternion(elem::OrbitalElements, initRPY::AbstractVector{<:Real})::SVector{4, <:Real}
+function calc_inital_quaternion(elements::OrbitalElements, initRPY::AbstractVector{<:Real})::SVector{4, <:Real}
 
-    C_ECI2LVLH = ECI2LVLH(elem, 0)
+    C_ECI2OrbitPlane = ECI2OrbitalPlane(elements)
+    C_OrbitalPlane2RAT = OrbitalPlane2RadialAlongTrack(elements, 0)
     C_LVLH2BRF = euler2dcm(initRPY)
-    initquaternion = dcm2quaternion(C_LVLH2BRF * C_ECI2LVLH)
+
+    initquaternion = dcm2quaternion(C_LVLH2BRF * C_OrbitalPlane2RAT * C_ECI2OrbitPlane)
 
     return initquaternion
 end
