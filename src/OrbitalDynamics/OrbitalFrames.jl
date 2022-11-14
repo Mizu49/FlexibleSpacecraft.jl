@@ -4,7 +4,7 @@ using StaticArrays, LinearAlgebra
 using ..OrbitBase, ..Elements
 using ..Frames, ..DataContainers, ..UtilitiesBase
 
-export ECI2OrbitalPlane, ECI2LVLH, OrbitalPlane2RadialAlongTrack, calc_orbitalframe, calc_inital_quaternion
+export ECI2OrbitalPlane, ECI2ORF, OrbitalPlane2RadialAlongTrack, calc_orbitalframe, calc_inital_quaternion
 
 """
     function ECI2OrbitalPlane(elements::OrbitalElements)
@@ -17,18 +17,13 @@ function ECI2OrbitalPlane(elements::Nothing)
     return C1(0) * C3(0)
 end
 
-function ECI2LVLH(elements::OrbitalElements, orbitposition::Real)
+function ECI2ORF(elements::OrbitalElements, orbitposition::Real)
 
     C_ECI2OrbitPlane = ECI2OrbitalPlane(elements)
     C_OrbitalPlane2RAT = OrbitalPlane2RadialAlongTrack(elements, orbitposition)
-    C_ECI2RAT = C_OrbitalPlane2RAT * C_ECI2OrbitPlane
+    C_ECI2ORF = C_OrbitalPlane2RAT * C_ECI2OrbitPlane
 
-    # transformation matrix to match with the definition of the LVLH
-    M = C1(-pi/2) * C3(pi/2)
-
-    C_ECI2LVLH = SMatrix{3, 3}(M * C_ECI2RAT)
-
-    return C_ECI2LVLH
+    return C_ECI2ORF
 end
 
 """
@@ -41,11 +36,12 @@ function OrbitalPlane2RadialAlongTrack(elements::OrbitalElements, orbitalpositio
     # current angle of spacecraft relative to ascending axis of orbital plane frame
     current_position = deg2rad(elements.true_anomaly) + orbitalposition
 
-    return C3(current_position)
+    # calculate the radial along track
+    return C2(-current_position)
 end
 
 function OrbitalPlane2RadialAlongTrack(elements::Nothing, orbitalposition::Real)
-    return C3(0)
+    return C2(0)
 end
 
 function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame
