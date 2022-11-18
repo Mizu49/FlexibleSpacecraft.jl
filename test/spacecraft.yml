@@ -34,7 +34,7 @@ disturbance:
 
 Orbit:
     # Specify the model used in the simulation of orbital motion
-    Dynamics model: Circular
+    Dynamics model: none
     # Orbital elements
     Orbital elements:
         right ascension: 0
@@ -80,10 +80,10 @@ appendage:
                     0
                 ]
     disturbance:
-        type: no disturbance
+        type: vibration
         dimension: 1
         angular velocity: [1, 0]
-        amplitude: [5000, 0]
+        amplitude: [20, 0]
         phase: [0, 0]
 
 attitude controller:
