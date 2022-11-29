@@ -4,7 +4,7 @@ config:
     name: example spacecraft No. 2
     note: This model is for test purpose
     sampling time: 1e-3 # Sampling period of simulation (second)
-    time length: 100 # Time length of simulation (second)
+    time length: 300 # Time length of simulation (second)
 
 initial value:
     roll-pitch-yaw: [0, 0, 0]
@@ -30,11 +30,11 @@ disturbance:
     gravitational torque: false
     step trajectory:
         value: [[0, 0, 0], [0, 0, 0]]
-        endurance: [1, 100]
+        endurance: [1, 300]
 
 Orbit:
     # Specify the model used in the simulation of orbital motion
-    Dynamics model: none
+    Dynamics model: Circular
     # Orbital elements
     Orbital elements:
         right ascension: 0
@@ -83,7 +83,7 @@ appendage:
         type: vibration
         dimension: 1
         angular velocity: [1, 0]
-        amplitude: [20, 0]
+        amplitude: [0, 0]
         phase: [0, 0]
 
 attitude controller:
