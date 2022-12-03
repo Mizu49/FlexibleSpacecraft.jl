@@ -112,7 +112,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         tl.attitude.RPYframe[simcnt] = C_LVLH2BRF * LVLHUnitFrame
 
         # calculate angular momentum
-        L = calc_angular_momentum(attitudemodel, tl.attitude.angularvelocity[simcnt])
+        tl.attitude.angularmomentum[simcnt] = calc_angular_momentum(attitudemodel, tl.attitude.angularvelocity[simcnt])
 
         ### input to the attitude dynamics
         # disturbance input

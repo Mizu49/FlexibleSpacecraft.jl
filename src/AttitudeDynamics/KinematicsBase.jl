@@ -54,6 +54,7 @@ struct AttitudeData
     datanum::Int
     quaternion::Vector{SVector{4, <:Real}}
     angularvelocity::Vector{SVector{3, <:Real}}
+    angularmomentum::Vector{SVector{3, <:Real}}
     bodyframe::Vector{<:Frame}
     RPYframe::Vector{<:Frame}
     eulerangle::Vector{SVector{3, <:Real}}
@@ -70,6 +71,7 @@ function initattitudedata(datanum::Int, initialdata::InitKinematicsData)
         datanum,
         _initquaternion(datanum, initialdata.quaternion),
         _initangularvelocity(datanum, initialdata.angularvelocity),
+        [SVector{3}(0.0, 0.0, 0.0) for _ in 1:datanum],
         initframes(datanum, initialdata.bodyframe),
         initframes(datanum, initialdata.bodyframe),
         [SVector{3}(0.0, 0.0, 0.0) for _ in 1:datanum]
