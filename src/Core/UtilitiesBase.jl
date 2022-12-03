@@ -33,6 +33,22 @@ check size of the matrix
 end
 
 """
+    Base.:~(x::AbstractVector)
+
+operator for calculating the skew-symmetric matrix. It will be used for internal calculation of the calculation of the attitude dynamics of `FlexibleSpacecraft.jl`.
+"""
+@inline function Base.:~(x::AbstractVector)
+
+    check_size(x, 3)
+
+    return SMatrix{3, 3, <:Real}([
+        0 -x[3] x[2]
+        x[3] 0 -x[1]
+        -x[2] x[1] 0
+    ])
+end
+
+"""
     C1(theta::Real)::SMatrix
 
 Rotational matrix for 1-axis
