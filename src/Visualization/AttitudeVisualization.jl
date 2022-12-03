@@ -1,6 +1,6 @@
 module AttitudeVisualization
 
-using Plots
+using Plots, LinearAlgebra
 
 # Include module `DataContainers`
 using ...DataContainers, StaticArrays
@@ -81,6 +81,9 @@ function plot_angular_momentum(
     timerange::Tuple{<:Real, <:Real} = (0, 0)
     )
 
+    # calculate norm of the angular momentum
+    momentum_norm = norm.(angular_momentum)
+
     plotlyjs()
 
     # using type recipe
@@ -88,6 +91,9 @@ function plot_angular_momentum(
     plt = plot!(plt, time, angular_momentum, 1, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "1-axis");
     plt = plot!(plt, time, angular_momentum, 2, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "2-axis");
     plt = plot!(plt, time, angular_momentum, 3, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "3-axis");
+
+    # plot norm
+    plt = plot!(plt, time, momentum_norm, linewidth = 2, label = "Norm");
 
     return plt
 end
