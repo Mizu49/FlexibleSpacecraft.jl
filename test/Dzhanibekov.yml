@@ -1,0 +1,53 @@
+# parameter configuration file for `FlexibleSpacecraft.jl`
+
+config:
+    name: Dzhanibekov
+    note: Dzhanibekov effect demonstration
+    sampling time: 5e-4 # Sampling period of simulation (second)
+    time length: 100 # Time length of simulation (second)
+
+initial value:
+    roll-pitch-yaw: [0, 0, 0]
+    angular velocity: [0.1, 2, 0.1]
+
+
+attitude dynamics:
+    model: Rigid body
+    inertia: [
+        20, 0, 0,
+        0, 10, 0,
+        0, 0, 5
+    ]
+
+disturbance:
+    constant torque: [0.0, 0.0, 0.0]
+    gravitational torque: false
+    step trajectory:
+        value: [[0, 0, 0], [0, 0, 0]]
+        endurance: [1, 100]
+
+Orbit:
+    # Specify the model used in the simulation of orbital motion
+    Dynamics model: none
+    # Orbital elements
+    Orbital elements:
+        right ascension: 0
+        inclination: 0
+        semimajor axis: 6371e3
+        eccentricity: 0
+        argument of perigee: 0
+        true anomaly at epoch: 0
+    # Note for this parameter setting
+    OrbitInfo: Test orbit parameters
+
+appendage:
+    modeling: none
+    disturbance:
+        type: no disturbance
+        dimension: 1
+        angular velocity: [0, 0]
+        amplitude: [0, 0]
+        phase: [0, 0]
+
+attitude controller:
+    strategy: none
