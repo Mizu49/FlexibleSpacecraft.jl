@@ -10,6 +10,9 @@ const EarthGravityConstant = GravityConstant * EarthMass
 include("Elements.jl")
 @reexport using .Elements
 
+include("OrbitalFrames.jl")
+@reexport using .OrbitalFrames
+
 include("NoOrbit.jl")
 @reexport using .NoOrbit
 

@@ -14,17 +14,19 @@ simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orb
 @test quaternion_constraint(simdata.attitude.quaternion)
 
 fig1 = plot_angularvelocity(simdata.time, simdata.attitude.angularvelocity)
-fig2 = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
+fig2 = plot_quaternion(simdata.time, simdata.attitude.quaternion)
+fig3 = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
 
 anim = framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 5e-1, FPS = 20)
 
 display(fig1)
 display(fig2)
+display(fig3)
 display(anim)
 
 if !isnothing(strmodel)
-    fig3 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
-    display(fig3)
+    fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
+    display(fig4)
 end
 
 println("Simulation time : $(simtime.time) (s)")

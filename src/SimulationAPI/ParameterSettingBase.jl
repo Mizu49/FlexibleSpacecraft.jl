@@ -52,9 +52,16 @@ function readparamfile(filepath::String)
         throw(AssertionError("simulation configuration is not found on parameter setting file"))
     end
 
+    # Orbital dynamics
+    if haskey(paramread, "Orbit")
+        (orbitinfo, orbitinternals) = setorbit(paramread["Orbit"], ECI_frame)
+    else
+        throw(AssertionError("orbit configuration is not found on parameter setting file"))
+    end
+
     # initial value
     if haskey(paramread, "initial value")
-        initvalue = _setinitvalue(paramread["initial value"])
+        initvalue = _setkinematics(orbitinfo, paramread["initial value"])
     else
         throw(AssertionError("initial value configuration is not found on parameter setting file"))
     end
@@ -71,13 +78,6 @@ function readparamfile(filepath::String)
         (distconfig, distinternals) = set_attitudedisturbance(paramread["disturbance"])
     else
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
-    end
-
-    # Orbital dynamics
-    if haskey(paramread, "Orbit")
-        (orbitinfo, orbitinternals) = setorbit(paramread["Orbit"], ECI_frame)
-    else
-        throw(AssertionError("orbit configuration is not found on parameter setting file"))
     end
 
     # Flexible appendage
@@ -117,14 +117,17 @@ function _setsimconfig(simconfigdict::AbstractDict)::SimulationConfig
 end
 
 """
-    _setinitvalue(filepath::String)::InitData
+    _setkinematics(filepath::String)::InitKinematicsData
 
 Define the initial value for simulation
 """
-function _setinitvalue(initvaluedict::AbstractDict)::InitData
+function _setkinematics(orbitinfo, initvaluedict::AbstractDict)::InitKinematicsData
 
-    initvalue = InitData(
-        initvaluedict["quaternion"],
+    # calculate the inital quaternion value based on the orbital reference frame
+    initquaternion = calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
+
+    initvalue = InitKinematicsData(
+        initquaternion,
         initvaluedict["angular velocity"],
         ECI_frame
     )

@@ -6,7 +6,7 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays, ProgressMeter
-using ..Frames, ..OrbitBase, ..AttitudeDisturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase, ..AttitudeControlBase
+using ..UtilitiesBase, ..Frames, ..OrbitBase, ..AttitudeDisturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase, ..AttitudeControlBase
 
 export SimData, runsimulation
 
@@ -43,7 +43,7 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 
 * `attitudemodel::AbstractAttitudeDynamicsModel`: dynamics model for the attitude motion
 * `strmodel::AbstractStructuresModel`: dynamics model for the flexible appendages motion
-* `initvalue::InitData`: struct of initial values for the simulation
+* `initvalue::InitKinematicsData`: struct of initial values for the simulation
 * `orbitinfo::OrbitInfo`: model and configuration for the orbital motion
 * `orbitinternals::OrbitInternals`: internals of the orbital model
 * `distconfig::DisturbanceConfig`: disturbance configuration for the attitude dynamics
@@ -67,7 +67,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 @inline function runsimulation(
     attitudemodel::AbstractAttitudeDynamicsModel,
     strmodel::AbstractStructuresModel,
-    initvalue::InitData,
+    initvalue::InitKinematicsData,
     orbitinfo::OrbitInfo,
     orbitinternals::OrbitInternals,
     distconfig::DisturbanceConfig,
@@ -82,9 +82,6 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     # Sampling tl.time
     Ts = simconfig.samplingtime
 
-    # transformation matrix from ECI frame to orbital plane frame
-    C_ECI2OrbitPlane = OrbitBase.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
-
     # Data containers
     tl = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
@@ -98,10 +95,8 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         ### orbit state
         (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
 
-        # calculation of the LVLH frame and its transformation matrix
-        C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, tl.orbit.angularvelocity[simcnt], currenttime)
-        C_ECI2RAT = C_OrbitPlane2RAT * C_ECI2OrbitPlane
-        C_ECI2LVLH = C_ECI2RAT
+        # calculation of transformation matrix of the LVLH frame
+        C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
 
         ### attitude state
         # Update current attitude
@@ -109,17 +104,17 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         tl.attitude.bodyframe[simcnt] = C_ECI2Body * UnitFrame
 
         # update the roll-pitch-yaw representations
-        C_RAT2Body = C_ECI2Body * transpose(C_ECI2RAT)
-        C_LVLH2Body = C_ECI2Body * transpose(C_ECI2LVLH)
-        # euler angle from RAT to Body frame is the roll-pitch-yaw angle of the spacecraft
-        RPYangle = dcm2euler(C_LVLH2Body)
+        C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)
+        # euler angle from LVLH to Body frame is the roll-pitch-yaw angle of the spacecraft
+        RPYangle = dcm2euler(C_LVLH2BRF)
         tl.attitude.eulerangle[simcnt] = RPYangle
         # RPYframe representation can be obtained from the LVLH unit frame
-        tl.attitude.RPYframe[simcnt] = C_LVLH2Body * LVLHUnitFrame
+        tl.attitude.RPYframe[simcnt] = C_LVLH2BRF * LVLHUnitFrame
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, C_ECI2RAT, tl.orbit.LVLH[simcnt].z, Ts)
+        attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, zeros(3,3), tl.orbit.LVLH[simcnt].z, Ts)
+
         # control input
         attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, [0, 0, 0])
 
