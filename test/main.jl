@@ -29,4 +29,7 @@ if !isnothing(strmodel)
     display(fig4)
 end
 
+fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
+display(fig5)
+
 println("Simulation time : $(simtime.time) (s)")
