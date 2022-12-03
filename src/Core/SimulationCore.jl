@@ -111,6 +111,9 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         # RPYframe representation can be obtained from the LVLH unit frame
         tl.attitude.RPYframe[simcnt] = C_LVLH2BRF * LVLHUnitFrame
 
+        # calculate angular momentum
+        L = calc_angular_momentum(attitudemodel, tl.attitude.angularvelocity[simcnt])
+
         ### input to the attitude dynamics
         # disturbance input
         attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, zeros(3,3), tl.orbit.LVLH[simcnt].z, Ts)

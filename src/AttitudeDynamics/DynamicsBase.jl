@@ -3,7 +3,7 @@ module DynamicsBase
 using Reexport, StaticArrays
 using ..Frames, ..UtilitiesBase
 
-export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel
+export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel, calc_angular_momentum
 
 include("RigidBody.jl")
 @reexport using .RigidBody
@@ -84,6 +84,24 @@ function update_angularvelocity(
     return angularvelocity
 end
 
+function calc_angular_momentum(
+    model::AbstractAttitudeDynamicsModel,
+    angular_velocity::AbstractVector{<:Real}
+    )::SVector{3, <:Real}
 
+    # check size of the vector
+    check_size(angular_velocity, 3)
+
+    # switch based on the type of model
+    if typeof(model) == RigidBodyModel
+        L = RigidBody.calc_angular_momentum(model, angular_velocity)
+    elseif typeof(model) == LinearCouplingModel
+        L = LinearCoupling.calc_angular_momentum(model, angular_velocity)
+    else
+        error("given model is invalid")
+    end
+
+    return L
+end
 
 end
