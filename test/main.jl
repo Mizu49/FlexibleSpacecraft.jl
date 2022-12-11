@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft.yml"
+paramfilepath = "./test/Dzhanibekov.yml"
 (simconfig, attitudemodel, distconfig, distinternals, initvalue, orbitinfo, orbitinternals, strparam, strmodel, strdistconfig, strinternals, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
@@ -17,7 +17,7 @@ fig1 = plot_angularvelocity(simdata.time, simdata.attitude.angularvelocity)
 fig2 = plot_quaternion(simdata.time, simdata.attitude.quaternion)
 fig3 = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
 
-anim = framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 5e-1, FPS = 20)
+anim = framegif(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe, Tgif = 1e-1, FPS = 20)
 
 display(fig1)
 display(fig2)

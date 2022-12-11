@@ -8,15 +8,15 @@ config:
 
 initial value:
     roll-pitch-yaw: [0, 0, 0]
-    angular velocity: [0.1, 2, 0.1]
+    angular velocity: [0.05, 2.0, 0.05]
 
 
 attitude dynamics:
     model: Rigid body
     inertia: [
-        20, 0, 0,
-        0, 10, 0,
-        0, 0, 5
+        300, 0, 0,
+        0, 200, 0,
+        0, 0, 100
     ]
 
 disturbance:
