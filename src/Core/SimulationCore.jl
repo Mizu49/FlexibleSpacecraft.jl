@@ -117,9 +117,11 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         ### input to the attitude dynamics
         # disturbance input
         attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, zeros(3,3), tl.orbit.LVLH[simcnt].z, Ts)
+        attitude_disturbance_input = SVector{3}(attitude_disturbance_input)
 
         # control input
         attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, [0, 0, 0])
+        attitude_control_input = SVector{3}(attitude_control_input)
 
         ### flexible appendages state
         if !isnothing(strmodel)
@@ -156,7 +158,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         if simcnt != tl.datanum
 
             # Update angular velocity
-            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, tl.attitude.bodyframe[simcnt], attitude_disturbance_input, attitude_control_input, coupling_structure_accel, coupling_structure_velocity)
+            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input, coupling_structure_accel, coupling_structure_velocity)
 
             # Update quaternion
             tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)

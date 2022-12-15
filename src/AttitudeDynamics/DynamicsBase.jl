@@ -65,18 +65,22 @@ function update_angularvelocity(
     currentTime::Real,
     angularvelocity::AbstractVector{<:Real},
     Tsampling::Real,
-    currentbodyframe::Frame,
-    distinput::Union{AbstractVector{<:Real}, Real},
-    ctrlinput::Union{AbstractVector{<:Real}, Real},
+    distinput::AbstractVector{<:Real},
+    ctrlinput::AbstractVector{<:Real},
     straccel::Union{AbstractVector{<:Real}, Real},
     strvelocity::Union{AbstractVector{<:Real}, Real}
     )::SVector{3, <:Real}
 
+    # check size of vectors
+    check_size(angularvelocity, 3)
+    check_size(distinput, 3)
+    check_size(ctrlinput, 3)
+
     # switch based on the type of `model`
     if typeof(model) == RigidBodyModel
-        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput)
+        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
     elseif typeof(model) == LinearCouplingModel
-        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput, straccel, strvelocity)
+        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, straccel, strvelocity)
     else
         error("given model is invalid")
     end
