@@ -1,11 +1,11 @@
 module AttitudeVisualization
 
-using Plots
+using Plots, LinearAlgebra
 
 # Include module `DataContainers`
 using ...DataContainers, StaticArrays
 
-export plot_angularvelocity, plot_eulerangles, plot_quaternion
+export plot_angularvelocity, plot_eulerangles, plot_quaternion, plot_angular_momentum
 
 """
     function plot_angularvelocity(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
@@ -71,6 +71,29 @@ function plot_quaternion(
     plt = plot!(plt, time, quaternion, 2, timerange = timerange, ylabelname = "Quaternion", datalabel = "q2");
     plt = plot!(plt, time, quaternion, 3, timerange = timerange, ylabelname = "Quaternion", datalabel = "q3");
     plt = plot!(plt, time, quaternion, 4, timerange = timerange, ylabelname = "Quaternion", datalabel = "q4");
+
+    return plt
+end
+
+function plot_angular_momentum(
+    time::StepRangeLen,
+    angular_momentum::AbstractVector{SVector{3, <:Real}};
+    timerange::Tuple{<:Real, <:Real} = (0, 0)
+    )
+
+    # calculate norm of the angular momentum
+    momentum_norm = norm.(angular_momentum)
+
+    plotlyjs()
+
+    # using type recipe
+    plt = plot();
+    plt = plot!(plt, time, angular_momentum, 1, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "1-axis");
+    plt = plot!(plt, time, angular_momentum, 2, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "2-axis");
+    plt = plot!(plt, time, angular_momentum, 3, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "3-axis");
+
+    # plot norm
+    plt = plot!(plt, time, momentum_norm, linewidth = 2, label = "Norm");
 
     return plt
 end

@@ -121,4 +121,12 @@ function update_angularvelocity(
     return nextOmega
 end
 
+function calc_angular_momentum(model::LinearCouplingModel, angular_velocity::AbstractVector{<:Real})::SVector{3, <:Real}
+
+    momentum = model.inertia * angular_velocity
+
+    return SVector{3}(momentum)
+end
+
+
 end

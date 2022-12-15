@@ -2,7 +2,51 @@ module UtilitiesBase
 
 using StaticArrays
 
-export C1, C2, C3, yamlread2matrix, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
+export check_size, C1, C2, C3, yamlread2matrix, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
+
+"""
+    check_size
+
+check size of the vector
+"""
+@inline function check_size(vector::AbstractVector, givensize::Integer)::Nothing
+
+    if size(vector, 1) != givensize
+        throw(DimensionMismatch("size of given vector should be $givensize"))
+    end
+
+    return
+end
+
+"""
+    check_size
+
+check size of the matrix
+"""
+@inline function check_size(matrix::AbstractMatrix, givensize::Tuple{<:Integer, <:Integer})::Nothing
+
+    if size(matrix) != givensize
+        throw(DimensionMismatch("size of given matrix should be $givensize"))
+    end
+
+    return
+end
+
+"""
+    Base.:~(x::AbstractVector)
+
+operator for calculating the skew-symmetric matrix. It will be used for internal calculation of the calculation of the attitude dynamics of `FlexibleSpacecraft.jl`.
+"""
+@inline function Base.:~(x::AbstractVector)
+
+    check_size(x, 3)
+
+    return SMatrix{3, 3, <:Real}([
+        0 -x[3] x[2]
+        x[3] 0 -x[1]
+        -x[2] x[1] 0
+    ])
+end
 
 """
     C1(theta::Real)::SMatrix

@@ -3,7 +3,7 @@ module DynamicsBase
 using Reexport, StaticArrays
 using ..Frames, ..UtilitiesBase
 
-export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel
+export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel, calc_angular_momentum
 
 include("RigidBody.jl")
 @reexport using .RigidBody
@@ -84,22 +84,24 @@ function update_angularvelocity(
     return angularvelocity
 end
 
-"""
-    Base.:~(x::AbstractVector)
+function calc_angular_momentum(
+    model::AbstractAttitudeDynamicsModel,
+    angular_velocity::AbstractVector{<:Real}
+    )::SVector{3, <:Real}
 
-operator for calculating the skew-symmetric matrix. It will be used for internal calculation of the calculation of the attitude dynamics of `FlexibleSpacecraft.jl`.
-"""
-@inline function Base.:~(x::AbstractVector)
+    # check size of the vector
+    check_size(angular_velocity, 3)
 
-    if size(x, 1) != 3
-        throw(DimensionMismatch("dimension of vector `x` should be 3"))
+    # switch based on the type of model
+    if typeof(model) == RigidBodyModel
+        L = RigidBody.calc_angular_momentum(model, angular_velocity)
+    elseif typeof(model) == LinearCouplingModel
+        L = LinearCoupling.calc_angular_momentum(model, angular_velocity)
+    else
+        error("given model is invalid")
     end
 
-    return SMatrix{3, 3, <:Real}([
-        0 -x[3] x[2]
-        x[3] 0 -x[1]
-        -x[2] x[1] 0
-    ])
+    return L
 end
 
 end
