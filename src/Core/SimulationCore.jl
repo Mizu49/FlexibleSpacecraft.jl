@@ -120,8 +120,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         attitude_disturbance_input = SVector{3}(attitude_disturbance_input)
 
         # control input
-        attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, [0, 0, 0])
-        attitude_control_input = SVector{3}(attitude_control_input)
+        attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, SVector{3}([0.0, 0.0, 0.0]))
 
         ### flexible appendages state
         if !isnothing(strmodel)
