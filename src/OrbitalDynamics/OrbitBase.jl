@@ -89,7 +89,7 @@ struct OrbitData
     LVLH::Vector{<:Frame}
 end
 
-function initorbitdata(datanum::Integer, orbitalframe::Frame)
+function initorbitdata(datanum::Integer, orbitalframe::Frame)::OrbitData
 
     return OrbitData(
         zeros(datanum),
@@ -103,7 +103,7 @@ mutable struct OrbitInternals
     angularvelocity::Real
 end
 
-function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity::Real, angularposition::Real)
+function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity::Real, angularposition::Real)::Nothing
 
     orbitinternals.angularvelocity = angularvelocity
     orbitinternals.angularposition = angularposition
@@ -111,7 +111,7 @@ function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity
     return
 end
 
-function update_orbitstate!(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)
+function update_orbitstate!(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)::Tuple
 
     angularvelocity = _get_angularvelocity(orbitinfo.orbitmodel)
     angularposition = angularvelocity * currenttime
@@ -124,39 +124,39 @@ end
 """
     transformation matrix from unit frame to LVLH referential frame
 """
-const T_UnitFrame2LVLHFrame = diagm([1, -1, -1])
+const T_UnitFrame2LVLHFrame = diagm([1.0, -1.0, -1.0])
 
 """
     LVLH referential frame
 """
-const LVLHUnitFrame = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
+const LVLHUnitFrame = Frame([1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0])
 
 """
     rotational matrix that transfers from radial-along-track (RAT) to local-vertical local-horizontal (LVLH) attitude representation
 """
 T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
-function _get_angularvelocity(orbitmodel::CircularOrbit)
+function _get_angularvelocity(orbitmodel::CircularOrbit)::Real
     Circular.get_angular_velocity(orbitmodel)
 end
 
-function _get_angularvelocity(orbitmodel::NoOrbitModel)
+function _get_angularvelocity(orbitmodel::NoOrbitModel)::Real
     NoOrbit.get_angular_velocity(orbitmodel)
 end
 
-function get_velocity(orbitmodel::CircularOrbit)
+function get_velocity(orbitmodel::CircularOrbit)::Real
     CircularOrbit.get_velocity(orbitmodel)
 end
 
-function get_velocity(orbitmodel::NoOrbitModel)
+function get_velocity(orbitmodel::NoOrbitModel)::Real
     NoOrbit.get_velocity(orbitmodel)
 end
 
-function get_timeperiod(orbitmodel::CircularOrbit; unit = "second")
+function get_timeperiod(orbitmodel::CircularOrbit; unit = "second")::Real
     CircularOrbit.get_timeperiod(orbitmodel, unit)
 end
 
-function get_timeperiod(orbitmodel::NoOrbitModel; unit = "second")
+function get_timeperiod(orbitmodel::NoOrbitModel; unit = "second")::Real
     NoOrbit.get_timeperiod(orbitmodel, unit = unit)
 end
 
