@@ -107,7 +107,7 @@ end
 
 calculate quaternion from direction cosine matrix (DCM) `dcm`
 """
-function dcm2quaternion(dcm::SMatrix{3, 3, <:AbstractFloat})::SVector{4, Real}
+function dcm2quaternion(dcm::SMatrix{3, 3, Float64})::SVector{4, Real}
 
     _checkdcm(dcm)
 
@@ -144,7 +144,7 @@ function dcm2quaternion(dcm::SMatrix{3, 3, <:AbstractFloat})::SVector{4, Real}
 end
 
 """
-    function eular2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3, 3, <:AbstractFloat}
+    function eular2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3, 3, Float64}
 
 calculate direction cosine matrix from the vector of z-y-x eular angles.
 
@@ -152,7 +152,7 @@ calculate direction cosine matrix from the vector of z-y-x eular angles.
 
 * `euler::Union{SVector{3, <:Real}, Vector{<:Real}}`: each element represents the rotation with z, y, x axis, respectively
 """
-function euler2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3, 3, <:AbstractFloat}
+function euler2dcm(euler::Union{SVector{3, <:Real}, Vector{<:Real}})::SMatrix{3, 3, Float64}
     s1 = sin(euler[1])
     s2 = sin(euler[2])
     s3 = sin(euler[3])
@@ -172,7 +172,7 @@ end
 
 calculates direction cosine matrix from quaternion
 """
-function quaternion2dcm(q::Union{Vector{<:Real}, SVector{4, <:Real}})::SMatrix{3, 3, <:AbstractFloat}
+function quaternion2dcm(q::Union{Vector{<:Real}, SVector{4, <:Real}})::SMatrix{3, 3, Float64}
     q2 = q.^2;
 
     dcm = SMatrix{3, 3}([
