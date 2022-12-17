@@ -144,11 +144,12 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
         if isnothing(strinternals)
-            coupling_structure_accel = 0
-            coupling_structure_velocity = 0
+            # no simulation for flexible appendages
+            coupling_structure_accel = nothing
+            coupling_structure_velocity = nothing
         else
-            coupling_structure_accel = strinternals.currentaccel
-            coupling_structure_velocity = strinternals.currentstate[(strmodel.DOF+1):end]
+            coupling_structure_accel    = SVector{2}(strinternals.currentaccel)
+            coupling_structure_velocity = SVector{2}(strinternals.currentstate[(strmodel.DOF+1):end])
         end
         # attitude dynamics
         coupling_angular_velocity = tl.attitude.angularvelocity[simcnt]

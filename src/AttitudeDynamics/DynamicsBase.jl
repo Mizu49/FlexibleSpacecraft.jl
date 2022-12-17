@@ -63,13 +63,13 @@ update the angular velocity of the angular velocity of the attitude dynamics. In
 function update_angularvelocity(
     model::AbstractAttitudeDynamicsModel,
     currentTime::Real,
-    angularvelocity::AbstractVector{<:Real},
+    angularvelocity::SVector{3, Float64},
     Tsampling::Real,
-    distinput::AbstractVector{<:Real},
-    ctrlinput::AbstractVector{<:Real},
-    straccel::Union{AbstractVector{<:Real}, Real},
-    strvelocity::Union{AbstractVector{<:Real}, Real}
-    )::SVector{3, <:Real}
+    distinput::SVector{3, Float64},
+    ctrlinput::SVector{3, Float64},
+    straccel::Union{SVector, Nothing},
+    strvelocity::Union{SVector, Nothing}
+    )::SVector{3, Float64}
 
     # check size of vectors
     check_size(angularvelocity, 3)
@@ -90,8 +90,8 @@ end
 
 function calc_angular_momentum(
     model::AbstractAttitudeDynamicsModel,
-    angular_velocity::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    angular_velocity::SVector{3, Float64}
+    )::SVector{3, Float64}
 
     # check size of the vector
     check_size(angular_velocity, 3)
