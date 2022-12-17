@@ -96,20 +96,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit_state(orbitinfo, orbitinternals, currenttime)
 
         ### attitude state
-        # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(tl.attitude.quaternion[simcnt])
-        tl.attitude.bodyframe[simcnt] = C_ECI2Body * UnitFrame
-
-        # update the roll-pitch-yaw representations
-        C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)
-        # euler angle from LVLH to Body frame is the roll-pitch-yaw angle of the spacecraft
-        RPYangle = dcm2euler(C_LVLH2BRF)
-        tl.attitude.eulerangle[simcnt] = RPYangle
-        # RPYframe representation can be obtained from the LVLH unit frame
-        tl.attitude.RPYframe[simcnt] = C_LVLH2BRF * LVLHUnitFrame
-
-        # calculate angular momentum
-        tl.attitude.angularmomentum[simcnt] = calc_angular_momentum(attitudemodel, tl.attitude.angularvelocity[simcnt])
+        (C_ECI2Body, C_LVLH2BRF, RPYangle) = _calculate_attitude_state!(attitudemodel, tl.attitude, simcnt, C_ECI2LVLH)
 
         ### input to the attitude dynamics
         # disturbance input
@@ -215,6 +202,35 @@ function _calculate_orbit_state(orbitinfo::OrbitInfo, orbitinternals::OrbitInter
     C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
 
     return (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition)
+end
+
+"""
+    _calculate_attitude_state!
+
+calculate the states of the attitude dynamics and kinematics
+"""
+function _calculate_attitude_state!(attitudemodel::AbstractAttitudeDynamicsModel, attidata::AttitudeData, simcnt::Integer, C_ECI2LVLH::SMatrix{3, 3})
+
+    # obtain current quaternion
+    quaternion = attidata.quaternion[simcnt]
+
+    # Update current attitude
+    C_ECI2Body = ECI2BodyFrame(quaternion)
+    attidata.bodyframe[simcnt] = C_ECI2Body * UnitFrame
+
+    # update the roll-pitch-yaw representations
+    C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)
+
+    # euler angle from LVLH to Body frame is the roll-pitch-yaw angle of the spacecraft
+    RPYangle = dcm2euler(C_LVLH2BRF)
+    attidata.eulerangle[simcnt] = RPYangle
+    # RPYframe representation can be obtained from the LVLH unit frame
+    attidata.RPYframe[simcnt] = C_LVLH2BRF * LVLHUnitFrame
+
+    # calculate angular momentum
+    attidata.angularmomentum[simcnt] = calc_angular_momentum(attitudemodel, attidata.angularvelocity[simcnt])
+
+    return (C_ECI2Body, C_LVLH2BRF, RPYangle)
 end
 
 end
