@@ -93,10 +93,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         currenttime = tl.time[simcnt]
 
         ### orbit state
-        (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
-
-        # calculation of transformation matrix of the LVLH frame
-        C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+        (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit_state(orbitinfo, orbitinternals, currenttime)
 
         ### attitude state
         # Update current attitude
@@ -177,6 +174,12 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     return tl
 end
 
+### supporting functions
+"""
+    _init_datacontainers
+
+initialize data container
+"""
 function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
@@ -197,6 +200,21 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
     tl = SimData(time, datanum, attitude, appendages, orbit)
 
     return tl
+end
+
+"""
+    _calculate_orbit_state
+
+calculate the states of the orbital dynamics of spacecraft
+"""
+function _calculate_orbit_state(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)
+
+    (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
+
+    # calculation of transformation matrix of the LVLH frame
+    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+
+    return (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition)
 end
 
 end
