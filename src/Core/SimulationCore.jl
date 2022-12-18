@@ -105,25 +105,8 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         # control input
         attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)
 
-
         ### flexible appendages state
-        if !isnothing(strmodel)
-            tl.appendages.physicalstate[simcnt] = modalstate2physicalstate(strmodel, strinternals.currentstate)
-        end
-
-        ### input to the structural dynamics
-        if isnothing(strmodel)
-            structure_disturbance_input = nothing
-            structure_control_input = nothing
-        else
-            # disturbance input
-            structure_disturbance_input = calcstrdisturbance(strdistconfig, currenttime)
-            # control input
-            structure_control_input = 0
-            # data log
-            tl.appendages.controlinput[simcnt] = structure_control_input
-            tl.appendages.disturbance[simcnt] = structure_disturbance_input
-        end
+        (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(strmodel, strinternals, strdistconfig, tl.appendages, currenttime, simcnt)
 
         ### attitude-structure coupling dynamics
         # calculation of the structural response input for the attitude dynamics
@@ -273,6 +256,45 @@ function _calculate_attitude_control(
     input = transpose(C_ECI2BRF) * control_input!(controller, currentRPYangle, targetRPYangle)
 
     return input
+end
+
+"""
+    _calculate_flexible_appendages!
+
+calculate the state of the flexible appendages.
+
+This function is the interface to the flexible appendages simulation
+"""
+function _calculate_flexible_appendages!(
+    strmodel::AbstractStructuresModel,
+    strinternals::Union{AppendageInternals, Nothing},
+    strdistconfig::AbstractStrDistConfig,
+    datacontainer::AppendageData,
+    currenttime::Real,
+    simcnt::Integer
+    )::Tuple
+
+    # check if the flexible appendages exist
+    if isnothing(strmodel)
+        # return nothing if flexible appendages don't exist
+        distinput = nothing
+        ctrlinput = nothing
+    else
+        # obtain state of the flexible appendages
+        datacontainer.physicalstate[simcnt] = modalstate2physicalstate(strmodel, strinternals.currentstate)
+
+        # disturbance input
+        distinput = calcstrdisturbance(strdistconfig, currenttime)
+
+        # controller of the flexible appendages (for future development)
+        ctrlinput = 0
+
+        # data log
+        datacontainer.controlinput[simcnt] = ctrlinput
+        datacontainer.disturbance[simcnt] = distinput
+    end
+
+    return (distinput, ctrlinput)
 end
 
 end
