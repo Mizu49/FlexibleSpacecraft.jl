@@ -100,11 +100,11 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = transpose(C_ECI2Body) * calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, tl.orbit.angularvelocity[simcnt], C_ECI2Body, zeros(3,3), tl.orbit.LVLH[simcnt].z, Ts)
-        attitude_disturbance_input = SVector{3}(attitude_disturbance_input)
+        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, distconfig, distinternals, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
 
         # control input
         attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, SVector{3}([0.0, 0.0, 0.0]))
+
 
         ### flexible appendages state
         if !isnothing(strmodel)
@@ -231,6 +231,31 @@ function _calculate_attitude_state!(attitudemodel::AbstractAttitudeDynamicsModel
     attidata.angularmomentum[simcnt] = calc_angular_momentum(attitudemodel, attidata.angularvelocity[simcnt])
 
     return (C_ECI2Body, C_LVLH2BRF, RPYangle)
+end
+
+"""
+    _calculate_attitude_disturbance
+
+calculate the disturbance input torque for the attitude dynamics
+"""
+function _calculate_attitude_disturbance(
+    simconfig::SimulationConfig,
+    distconfig::DisturbanceConfig,
+    distinternals::DisturbanceInternals,
+    currenttime::Real,
+    attitudemodel::AbstractAttitudeDynamicsModel,
+    orbit_angularvelocity::Real,
+    LVLHframe::Frame,
+    C_ECI2Body::SMatrix{3, 3}
+    )::SVector{3, Float64}
+
+    # disturbance input calculation
+    distinput = calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, zeros(3,3), LVLHframe.z, simconfig.samplingtime)
+
+    # apply transformation matrix
+    distinput = C_ECI2Body * distinput
+
+    return distinput
 end
 
 end
