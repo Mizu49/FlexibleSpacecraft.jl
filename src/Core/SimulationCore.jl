@@ -103,7 +103,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, distconfig, distinternals, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
 
         # control input
-        attitude_control_input = transpose(C_ECI2Body) * control_input!(attitude_controller, RPYangle, SVector{3}([0.0, 0.0, 0.0]))
+        attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)
 
 
         ### flexible appendages state
@@ -256,6 +256,23 @@ function _calculate_attitude_disturbance(
     distinput = C_ECI2Body * distinput
 
     return distinput
+end
+
+"""
+    _calculate_attitude_control
+
+calculate the attitude control input torque
+"""
+function _calculate_attitude_control(
+    controller::AbstractAttitudeController,
+    currentRPYangle::SVector{3, Float64},
+    targetRPYangle::SVector{3, Float64},
+    C_ECI2BRF::SMatrix{3, 3, Float64}
+    )::SVector{3, Float64}
+
+    input = transpose(C_ECI2BRF) * control_input!(controller, currentRPYangle, targetRPYangle)
+
+    return input
 end
 
 end
