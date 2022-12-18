@@ -250,7 +250,7 @@ function _calculate_attitude_disturbance(
     )::SVector{3, Float64}
 
     # disturbance input calculation
-    distinput = calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, zeros(3,3), LVLHframe.z, simconfig.samplingtime)
+    distinput = calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, SMatrix{3,3}(zeros(3,3)), LVLHframe, simconfig.samplingtime)
 
     # apply transformation matrix
     distinput = C_ECI2Body * distinput
