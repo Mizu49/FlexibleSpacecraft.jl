@@ -109,17 +109,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(strmodel, strinternals, strdistconfig, tl.appendages, currenttime, simcnt)
 
         ### attitude-structure coupling dynamics
-        # calculation of the structural response input for the attitude dynamics
-        if isnothing(strinternals)
-            # no simulation for flexible appendages
-            coupling_structure_accel = nothing
-            coupling_structure_velocity = nothing
-        else
-            coupling_structure_accel    = SVector{2}(strinternals.currentaccel)
-            coupling_structure_velocity = SVector{2}(strinternals.currentstate[(strmodel.DOF+1):end])
-        end
-        # attitude dynamics
-        coupling_angular_velocity = tl.attitude.angularvelocity[simcnt]
+        (coupling_structure_accel, coupling_structure_velocity, coupling_angular_velocity) = _calculate_coupling_input(strmodel, strinternals, tl.attitude, simcnt)
 
         ### Time evolution of the system
         if simcnt != tl.datanum
@@ -295,6 +285,34 @@ function _calculate_flexible_appendages!(
     end
 
     return (distinput, ctrlinput)
+end
+
+"""
+    _calculate_coupling_input
+
+calculate the coupling term of the attitude dynamics and structural dynamics
+"""
+function _calculate_coupling_input(
+    strmodel::AbstractStructuresModel,
+    strinternals::Union{AppendageInternals, Nothing},
+    attitudedata::AttitudeData,
+    simcnt::Integer
+    )::Tuple
+
+    # calculation of the structural response input for the attitude dynamics
+    if isnothing(strinternals)
+        # no simulation for flexible appendages
+        coupling_structure_accel = nothing
+        coupling_structure_velocity = nothing
+    else
+        coupling_structure_accel    = SVector{2}(strinternals.currentaccel)
+        coupling_structure_velocity = SVector{2}(strinternals.currentstate[(strmodel.DOF+1):end])
+    end
+
+    # attitude dynamics
+    coupling_angular_velocity = attitudedata.angularvelocity[simcnt]
+
+    return (coupling_structure_accel, coupling_structure_velocity, coupling_angular_velocity)
 end
 
 end
