@@ -109,20 +109,20 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(strmodel, strinternals, strdistconfig, tl.appendages, currenttime, simcnt)
 
         ### attitude-structure coupling dynamics
-        (coupling_structure_accel, coupling_structure_velocity, coupling_angular_velocity) = _calculate_coupling_input(strmodel, strinternals, tl.attitude, simcnt)
+        (structure2attitude, attitude2structure) = _calculate_coupling_input(strmodel, strinternals, tl.attitude, simcnt)
 
         ### Time evolution of the system
         if simcnt != tl.datanum
 
             # Update angular velocity
-            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input, coupling_structure_accel, coupling_structure_velocity)
+            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input, structure2attitude.accel, structure2attitude.velocity)
 
             # Update quaternion
             tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
             # Update the state of the flexible appendages
             if !isnothing(strmodel)
-                tl.appendages.state[simcnt+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[simcnt], coupling_angular_velocity, structure_control_input, structure_disturbance_input)
+                tl.appendages.state[simcnt+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
             end
         end
 
@@ -302,17 +302,21 @@ function _calculate_coupling_input(
     # calculation of the structural response input for the attitude dynamics
     if isnothing(strinternals)
         # no simulation for flexible appendages
-        coupling_structure_accel = nothing
-        coupling_structure_velocity = nothing
+        str_accel = nothing
+        str_velocity = nothing
     else
-        coupling_structure_accel    = SVector{2}(strinternals.currentaccel)
-        coupling_structure_velocity = SVector{2}(strinternals.currentstate[(strmodel.DOF+1):end])
+        str_accel    = SVector{2}(strinternals.currentaccel)
+        str_velocity = SVector{2}(strinternals.currentstate[(strmodel.DOF+1):end])
     end
 
     # attitude dynamics
-    coupling_angular_velocity = attitudedata.angularvelocity[simcnt]
+    attitude_angular_velocity = attitudedata.angularvelocity[simcnt]
 
-    return (coupling_structure_accel, coupling_structure_velocity, coupling_angular_velocity)
+    # create named tuple
+    structure2attitude = (accel = str_accel, velocity = str_velocity)
+    attitude2structure = (angularvelocity = attitude_angular_velocity,)
+
+    return (structure2attitude, attitude2structure)
 end
 
 end
