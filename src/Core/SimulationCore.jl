@@ -69,8 +69,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     strmodel::AbstractStructuresModel,
     initvalue::InitKinematicsData,
     orbitinfo::OrbitInfo,
-    distconfig::DisturbanceConfig,
-    distinternals::Union{DisturbanceInternals, Nothing},
+    attidistinfo::AttitudeDisturbanceInfo,
     strdistconfig::AbstractStrDistConfig,
     strinternals::Union{AppendageInternals, Nothing},
     simconfig::SimulationConfig,
@@ -99,7 +98,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, distconfig, distinternals, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
+        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
 
         # control input
         attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)
@@ -212,8 +211,7 @@ calculate the disturbance input torque for the attitude dynamics
 """
 function _calculate_attitude_disturbance(
     simconfig::SimulationConfig,
-    distconfig::DisturbanceConfig,
-    distinternals::DisturbanceInternals,
+    attidistinfo::AttitudeDisturbanceInfo,
     currenttime::Real,
     attitudemodel::AbstractAttitudeDynamicsModel,
     orbit_angularvelocity::Real,
@@ -222,7 +220,7 @@ function _calculate_attitude_disturbance(
     )::SVector{3, Float64}
 
     # disturbance input calculation
-    distinput = calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, SMatrix{3,3}(zeros(3,3)), LVLHframe, simconfig.samplingtime)
+    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, SMatrix{3,3}(zeros(3,3)), LVLHframe, simconfig.samplingtime)
 
     # apply transformation matrix
     distinput = C_ECI2Body * distinput

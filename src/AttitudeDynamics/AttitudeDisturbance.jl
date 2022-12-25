@@ -9,7 +9,7 @@ using LinearAlgebra:norm
 using StaticArrays
 using ..Frames
 
-export DisturbanceConfig, DisturbanceInternals, calc_attitudedisturbance, set_attitudedisturbance
+export AttitudeDisturbanceInfo, calc_attitudedisturbance, set_attitudedisturbance
 
 """
     _ConfigStepTrajectory
@@ -116,6 +116,16 @@ mutable struct DisturbanceInternals
 end
 
 """
+    AttitudeDisturbanceInfo
+
+struct that contains information of the disturbance input torque of the
+"""
+struct AttitudeDisturbanceInfo
+    config::DisturbanceConfig
+    internals::DisturbanceInternals
+end
+
+"""
     set_attitudedisturbance
 
 set disturbance configuration from YAML setting file
@@ -171,7 +181,10 @@ function set_attitudedisturbance(distconfigdict::AbstractDict)
     # initialize internals
     distinternals = DisturbanceInternals()
 
-    return (distconfig, distinternals)
+    # summarize into single struct
+    distinfo = AttitudeDisturbanceInfo(distconfig, distinternals)
+
+    return distinfo
 end
 
 """
@@ -181,8 +194,7 @@ calculate disturbance torque input for the attitude dynamics
 
 # Arguments
 
-* `distconfig::DisturbanceConfig`: disturbance configuration
-* `distinternals::DisturbanceInternals`: disturbance internals
+* `attidistinfo::AttitudeDisturbanceInfo`: disturbance information
 * `inertia::AbstractMatrix`: inertia of the spacecraft body
 * `currenttime::Real`: current time
 * `orbit_angular_velocity::Real`: angular velocity of the orbital motion
@@ -193,8 +205,7 @@ calculate disturbance torque input for the attitude dynamics
 
 """
 function calc_attitudedisturbance(
-    distconfig::DisturbanceConfig,
-    distinternals::DisturbanceInternals,
+    info::AttitudeDisturbanceInfo,
     inertia::SMatrix{3, 3, <:Real},
     currenttime::Real,
     orbit_angularvelocity::Real,
@@ -208,15 +219,15 @@ function calc_attitudedisturbance(
     disturbance = SVector{3, Float64}(zeros(3))
 
     # apply constant torque
-    disturbance = disturbance + _constant_torque(distconfig.consttorque)
+    disturbance = disturbance + _constant_torque(info.config.consttorque)
 
     # apply step trajectory torque
-    if !isnothing(distconfig.steptraj)
-        disturbance = disturbance + _step_trajectory!(distconfig.steptraj, distinternals.steptraj, currenttime, Tsampling)
+    if !isnothing(info.config.steptraj)
+        disturbance = disturbance + _step_trajectory!(info.config.steptraj, distinternals.steptraj, currenttime, Tsampling)
     end
 
     # apply gravitational torque
-    if distconfig.gravitationaltorque == true
+    if info.config.gravitationaltorque == true
         disturbance = disturbance + _gravity_gradient(inertia, orbit_angularvelocity, C_ECI2Body, C_ECI2LVLH, LVLHframe.z)
     end
 

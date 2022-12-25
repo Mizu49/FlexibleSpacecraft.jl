@@ -76,7 +76,7 @@ function readparamfile(filepath::String)
 
     # Disturbance for the attitude dynamics
     if haskey(paramread, "disturbance")
-        (distconfig, distinternals) = set_attitudedisturbance(paramread["disturbance"])
+        attidistinfo = set_attitudedisturbance(paramread["disturbance"])
     else
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
     end
@@ -93,7 +93,7 @@ function readparamfile(filepath::String)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
+    return (simconfig, attimodel, attidistinfo, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
 end
 
 """
