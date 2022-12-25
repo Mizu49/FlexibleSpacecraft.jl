@@ -12,13 +12,13 @@ abstract type AbstractOrbitalDynamics end
 export AbstractOrbitalDynamics, OrbitInfo, OrbitData, OrbitInternals, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
 
 include("Elements.jl")
-@reexport using .Elements
+using .Elements
+
+include("Circular.jl")
+using .Circular
 
 include("OrbitalFrames.jl")
 @reexport using .OrbitalFrames
-
-include("Circular.jl")
-@reexport using .Circular
 
 """
     OrbitInfo
