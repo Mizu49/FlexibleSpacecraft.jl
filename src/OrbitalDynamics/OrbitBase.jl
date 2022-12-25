@@ -21,22 +21,6 @@ include("OrbitalFrames.jl")
 @reexport using .OrbitalFrames
 
 """
-    OrbitInfo
-
-struct that contains the information about the orbital dynamics of the spacecraft
-"""
-struct OrbitInfo
-    dynamicsmodel::AbstractOrbitalDynamics
-    orbitalelement::OrbitalElements
-    planeframe::Frame
-    info::String
-
-    OrbitInfo(dynamicsmodel::AbstractOrbitalDynamics, orbitalelement::OrbitalElements, planeframe::Frame; info::String = "") = begin
-        new(dynamicsmodel, orbitalelement, planeframe, info)
-    end
-end
-
-"""
     OrbitInternals
 
 struct that contains the information about the current state of the orbital dynamics
@@ -45,6 +29,31 @@ mutable struct OrbitInternals
     angularposition::Float64
     angularvelocity::Float64
 end
+
+"""
+    OrbitInfo
+
+struct that contains the information about the orbital dynamics of the spacecraft
+"""
+struct OrbitInfo
+    dynamicsmodel::AbstractOrbitalDynamics
+    orbitalelement::OrbitalElements
+    internals::OrbitInternals
+    planeframe::Frame
+    info::String
+
+    # Constructor
+    OrbitInfo(
+        dynamicsmodel::AbstractOrbitalDynamics,
+        orbitalelement::OrbitalElements,
+        internals::OrbitInternals,
+        planeframe::Frame;
+        info::String = ""
+        )= begin
+            new(dynamicsmodel, orbitalelement, internals, planeframe, info)
+    end
+end
+
 
 """
     OrbitData
@@ -78,7 +87,7 @@ end
 
 Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
 """
-function setorbit(orbitparamdict::AbstractDict, ECI::Frame)
+function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
 
     orbitalmodel = orbitparamdict["Dynamics model"]
 
@@ -88,19 +97,16 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)
 
     elseif orbitalmodel == "Circular"
         # set the orbital parameter for the circular orbit
-
-        elements = setelements(orbitparamdict["Orbital elements"])
+        elements = Elements.setelements(orbitparamdict["Orbital elements"])
         dynamicsmodel = Circular.setorbit(elements)
-        orbitalplaneframe = calc_orbitalframe(elements, ECI)
-
+        orbitalplaneframe = OrbitalFrames.calc_orbitalframe(elements, ECI)
         orbitinternals = OrbitInternals(0, 0)
 
-        orbitinfo = OrbitInfo(dynamicsmodel, elements, orbitalplaneframe)
+        orbitinfo = OrbitInfo(dynamicsmodel, elements, orbitinternals, orbitalplaneframe)
 
-        return (orbitinfo, orbitinternals)
+        return orbitinfo
     else
         error("orbital model \"$orbitalmodel\" not found")
-        return
     end
 end
 
@@ -112,12 +118,12 @@ function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity
     return
 end
 
-function update_orbitstate!(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)::Tuple
+function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
 
     angularvelocity = _get_angularvelocity(orbitinfo.dynamicsmodel)
     angularposition = angularvelocity * currenttime
 
-    _update_orbitinternals!(orbitinternals, angularvelocity, angularposition)
+    _update_orbitinternals!(orbitinfo.internals, angularvelocity, angularposition)
 
     return (angularvelocity, angularposition)
 end

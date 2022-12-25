@@ -1,7 +1,8 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
+using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
+import ..OrbitBase
 
 export SimulationConfig, yamlread2matrix, readparamfile
 
@@ -54,7 +55,7 @@ function readparamfile(filepath::String)
 
     # Orbital dynamics
     if haskey(paramread, "Orbit")
-        (orbitinfo, orbitinternals) = setorbit(paramread["Orbit"], ECI_frame)
+        orbitinfo = OrbitBase.setorbit(paramread["Orbit"], ECI_frame)
     else
         throw(AssertionError("orbit configuration is not found on parameter setting file"))
     end
@@ -92,7 +93,7 @@ function readparamfile(filepath::String)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, orbitinternals, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
+    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
 end
 
 """
@@ -124,7 +125,7 @@ Define the initial value for simulation
 function _setkinematics(orbitinfo, initvaluedict::AbstractDict)::InitKinematicsData
 
     # calculate the inital quaternion value based on the orbital reference frame
-    initquaternion = calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
+    initquaternion = OrbitBase.calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
 
     initvalue = InitKinematicsData(
         initquaternion,

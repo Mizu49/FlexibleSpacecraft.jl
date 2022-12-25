@@ -69,7 +69,6 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     strmodel::AbstractStructuresModel,
     initvalue::InitKinematicsData,
     orbitinfo::OrbitInfo,
-    orbitinternals::OrbitInternals,
     distconfig::DisturbanceConfig,
     distinternals::Union{DisturbanceInternals, Nothing},
     strdistconfig::AbstractStrDistConfig,
@@ -93,7 +92,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         currenttime = tl.time[simcnt]
 
         ### orbit state
-        (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit_state(orbitinfo, orbitinternals, currenttime)
+        (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit!(orbitinfo, currenttime)
 
         ### attitude state
         (C_ECI2Body, C_LVLH2BRF, RPYangle) = _calculate_attitude_state!(attitudemodel, tl.attitude, simcnt, C_ECI2LVLH)
@@ -163,13 +162,13 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 end
 
 """
-    _calculate_orbit_state
+    _calculate_orbit!
 
 calculate the states of the orbital dynamics of spacecraft
 """
-function _calculate_orbit_state(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)
+function _calculate_orbit!(orbitinfo::OrbitInfo, currenttime::Real)
 
-    (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
+    (orbit_angularvelocity, orbit_angularposition) = OrbitBase.update_orbitstate!(orbitinfo, currenttime)
 
     # calculation of transformation matrix of the LVLH frame
     C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)

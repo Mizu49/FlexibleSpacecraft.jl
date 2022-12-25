@@ -4,11 +4,11 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft.yml"
-(simconfig, attitudemodel, distconfig, distinternals, initvalue, orbitinfo, orbitinternals, strparam, strmodel, strdistconfig, strinternals, attitudecontroller) = readparamfile(paramfilepath)
+paramfilepath = "./test/spacecraft2.yml"
+(simconfig, attitudemodel, distconfig, distinternals, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
-simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinternals, distconfig, distinternals, strdistconfig, strinternals, simconfig, attitudecontroller)
+simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, distinternals, strdistconfig, strinternals, simconfig, attitudecontroller)
 
 # test the quaternion value to check the stability of the simulation
 @test quaternion_constraint(simdata.attitude.quaternion)
