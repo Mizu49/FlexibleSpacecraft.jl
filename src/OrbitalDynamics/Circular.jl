@@ -22,7 +22,7 @@ orbit = OrbitBase.CircularOrbit(6370e+3, 3.986e+14)
 ```
 
 """
-struct CircularOrbit
+struct CircularOrbit<:AbstractOrbitalDynamics
 
     _radius::Real
     _gravityconstant::Real

@@ -7,6 +7,10 @@ const GravityConstant = 6.673e-11
 const EarthMass = 5.974e24
 const EarthGravityConstant = GravityConstant * EarthMass
 
+abstract type AbstractOrbitalDynamics end
+
+export AbstractOrbitalDynamics, OrbitInfo, OrbitData, OrbitInternals, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
+
 include("Elements.jl")
 @reexport using .Elements
 
@@ -19,22 +23,18 @@ include("NoOrbit.jl")
 include("Circular.jl")
 @reexport using .Circular
 
-export OrbitInfo, OrbitData, OrbitInternals, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
-
-const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
-
 """
     OrbitInfo
 
 struct that contains the information about the orbital dynamics of the spacecraft
 """
 struct OrbitInfo
-    dynamicsmodel::AbstractOrbitModel
+    dynamicsmodel::AbstractOrbitalDynamics
     orbitalelement::OrbitalElements
     planeframe::Frame
     info::String
 
-    OrbitInfo(dynamicsmodel::AbstractOrbitModel, orbitalelement::OrbitalElements, planeframe::Frame; info::String = "") = begin
+    OrbitInfo(dynamicsmodel::AbstractOrbitalDynamics, orbitalelement::OrbitalElements, planeframe::Frame; info::String = "") = begin
         new(dynamicsmodel, orbitalelement, planeframe, info)
     end
 end
