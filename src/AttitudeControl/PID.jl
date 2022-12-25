@@ -5,6 +5,7 @@ submodule that contains implementation of the Proportional-Integral-Differential
 """
 module PID
 
+using StaticArrays
 using ..UtilitiesBase
 
 export PIDController
@@ -61,10 +62,10 @@ function _init_controller_internals(config::AbstractDict)
     return _Internals(zeros(3), zeros(3))
 end
 
-@inline function control_input!(controller::PIDController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function control_input!(controller::PIDController, currentRPY::SVector{3, <:AbstractFloat}, targetRPY::SVector{3, <:AbstractFloat})::SVector{3, Float64}
 
-    error = _calc_error(state, target)
-    error_diff = (error - controller._internals.previouserror)/0.1
+    error = currentRPY - targetRPY
+    error_diff = error - controller._internals.previouserror
 
     # process internal calculation
     controller._internals.previouserror = error
@@ -76,13 +77,6 @@ end
         - controller._config.Dgain * error_diff
 
     return input
-end
-
-@inline function _calc_error(state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
-
-    error = state - target
-
-    return error
 end
 
 end

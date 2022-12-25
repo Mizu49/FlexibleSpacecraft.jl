@@ -24,11 +24,11 @@ orbit = OrbitBase.CircularOrbit(6370e+3, 3.986e+14)
 """
 struct CircularOrbit
 
-    _radius::Float64
-    _gravityconstant::Float64
+    _radius::Real
+    _gravityconstant::Real
 
     # Constructor
-    CircularOrbit(_radius::Float64, _gravityconstant::Float64) = begin
+    CircularOrbit(_radius::Real, _gravityconstant::Real) = begin
         # check if the field is appropriatelly configured
         if _radius < 0
             error("OrbitBase radius should be non-negative.")
@@ -46,7 +46,7 @@ end
 
 Calculates orbit angular velocity of a circular orbit
 """
-function get_angular_velocity(orbit::CircularOrbit)
+function get_angular_velocity(orbit::CircularOrbit)::Float64
 
     return sqrt(orbit._gravityconstant / orbit._radius^3)
 
@@ -57,7 +57,7 @@ end
 
 Calculates orbit velocity of a circular orbit. This is not angular velocity!
 """
-function get_velocity(orbit::CircularOrbit)
+function get_velocity(orbit::CircularOrbit)::Float64
 
     return sqrt(orbit._gravityconstant / orbit._radius)
 
@@ -75,7 +75,7 @@ Calculates orbit time period (second)
 * second
 * minute
 """
-function get_timeperiod(orbit::CircularOrbit; unit = "second")
+function get_timeperiod(orbit::CircularOrbit; unit = "second")::Float64
 
     if unit == "second"
 

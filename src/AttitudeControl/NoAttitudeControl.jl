@@ -5,6 +5,7 @@ submodule that contains implementation of the no attitude controller
 """
 module NoAttitudeControl
 
+using StaticArrays
 using ..UtilitiesBase
 
 export NoAttitudeController
@@ -19,9 +20,9 @@ mutable struct NoAttitudeController
     end
 end
 
-@inline function control_input!(controller::NoAttitudeController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function control_input!(controller::NoAttitudeController, currentRPY::SVector{3, <:AbstractFloat}, targetRPY::SVector{3, <:AbstractFloat})
 
-    return [0, 0, 0]
+    return SVector{3, Float64}([0.0, 0.0, 0.0])
 end
 
 end

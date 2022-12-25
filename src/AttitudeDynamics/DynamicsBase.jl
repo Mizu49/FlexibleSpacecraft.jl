@@ -63,20 +63,24 @@ update the angular velocity of the angular velocity of the attitude dynamics. In
 function update_angularvelocity(
     model::AbstractAttitudeDynamicsModel,
     currentTime::Real,
-    angularvelocity::AbstractVector{<:Real},
+    angularvelocity::SVector{3, Float64},
     Tsampling::Real,
-    currentbodyframe::Frame,
-    distinput::Union{AbstractVector{<:Real}, Real},
-    ctrlinput::Union{AbstractVector{<:Real}, Real},
-    straccel::Union{AbstractVector{<:Real}, Real},
-    strvelocity::Union{AbstractVector{<:Real}, Real}
-    )::SVector{3, <:Real}
+    distinput::SVector{3, Float64},
+    ctrlinput::SVector{3, Float64},
+    straccel::Union{SVector, Nothing},
+    strvelocity::Union{SVector, Nothing}
+    )::SVector{3, Float64}
+
+    # check size of vectors
+    check_size(angularvelocity, 3)
+    check_size(distinput, 3)
+    check_size(ctrlinput, 3)
 
     # switch based on the type of `model`
     if typeof(model) == RigidBodyModel
-        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput)
+        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
     elseif typeof(model) == LinearCouplingModel
-        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, ctrlinput, straccel, strvelocity)
+        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, straccel, strvelocity)
     else
         error("given model is invalid")
     end
@@ -86,8 +90,8 @@ end
 
 function calc_angular_momentum(
     model::AbstractAttitudeDynamicsModel,
-    angular_velocity::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    angular_velocity::SVector{3, Float64}
+    )::SVector{3, Float64}
 
     # check size of the vector
     check_size(angular_velocity, 3)

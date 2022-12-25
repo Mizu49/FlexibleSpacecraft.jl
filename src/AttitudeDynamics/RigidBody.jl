@@ -23,34 +23,35 @@ Data container of rigid body spacecraft model. Used to specify and configure the
 
 ## Fields of struct `RigidBodyModel`
 
-* `inertia::SMatrix{3, 3, <:Real}`: Inertia matrix of spacecraft platform
+* `inertia::SMatrix{3, 3, Float64}`: Inertia matrix of spacecraft platform
 """
 struct RigidBodyModel
     # Inertia Matrix
-    inertia::SMatrix{3, 3, <:Real}
+    inertia::SMatrix{3, 3, Float64}
 
-    RigidBodyModel(inertia::Union{Matrix{<:Real}, SMatrix{3, 3, <:Real}}) = begin
+    RigidBodyModel(inertia::Union{AbstractMatrix{<:Real}, SMatrix{3, 3, <:Real}}) = begin
 
         if size(inertia) != (3, 3)
             throw(DimensionMismatch("dimension of `inertia` is invalid, it should be 3x3."))
         end
 
-        inertiamat = SMatrix{3, 3}(inertia)
-        return new(inertiamat)
+        inertia = SMatrix{3, 3, Float64}(inertia)
+        return new(inertia)
     end
 end
 
 # Equation of dynamics
 """
-    function _calc_differential_dynamics(model::RigidBodyModel, currentTime::Real, angularvelocity::SVector{3, <:Real}, current_body_frame::StaticArrays.SMatrix{3, 3, Real, 9}, disturbance::Vector{<:Real})
+    function _calc_differential_dynamics(model::RigidBodyModel, currentTime::Real, angularvelocity::SVector{3, Float64}, current_body_frame::StaticArrays.SMatrix{3, 3, Real, 9}, disturbance::Vector{<:Real})
 
 Get the differential of equation of dynamics. Internal function for module `RigidBody`
 
 # Arguments
-- model::RigidBodyModel
-- currentTime: current time of system [s]
-- angularvelocity: angular velocity of body frame with respect to ECI frame [rad/s]
-- current_body_frame: current body frame [b1 b2 b3]
+- `model::RigidBodyModel`
+- `currentTime`: current time of system [s]
+- `angularvelocity`: angular velocity of body frame with respect to ECI frame [rad/s]
+- `disturbance`: disturbance input torque
+- `control_torque`: control input torque
 
 # return
 - differential: differential of equation of motion
@@ -58,47 +59,52 @@ Get the differential of equation of dynamics. Internal function for module `Rigi
 function _calc_differential_dynamics(
     model::RigidBodyModel,
     currentTime::Real,
-    angularvelocity::SVector{3, <:Real},
-    current_body_frame::StaticArrays.SMatrix{3, 3, <:Real, 9},
-    disturbance::AbstractVector{<:Real},
-    ctrlinput::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    angularvelocity::SVector{3, Float64},
+    disturbance::SVector{3, Float64},
+    control_torque::SVector{3, Float64}
+    )::SVector{3, Float64}
 
     # calculate differential of equation of motion
-    differential = SVector{3}(inv(model.inertia) * (ctrlinput + disturbance - current_body_frame' * model.inertia * ~(angularvelocity) * current_body_frame * current_body_frame' * angularvelocity))
+    differential = inv(model.inertia) * (control_torque + disturbance - ~(angularvelocity) * model.inertia * angularvelocity)
 
-    return differential
+    return SVector{3, Float64}(differential)
 end
 
 """
-    function update_angularvelocity(model::RigidBodyModel, currentTime::Real, angularvelocity::Union{Vector{<:Real}, SVector{3, <:Real}}, Tsampling::Real, currentbodyframe::Frame, disturbance::Union{Vector{<:Real}, SVector{3, <:Real}})::SVector{3, <:Real}
+    update_angularvelocity
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
 function update_angularvelocity(
     model::RigidBodyModel,
     currentTime::Real,
-    angularvelocity::AbstractVector{<:Real},
+    angularvelocity::SVector{3, Float64},
     Tsampling::Real,
-    currentbodyframe::Frame,
-    disturbance::AbstractVector{<:Real},
-    ctrlinput::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    disturbance::SVector{3, Float64},
+    ctrlinput::SVector{3, Float64}
+    )::SVector{3, Float64}
 
-    # define body frame matrix from struct `Frame`
-    bodyframematrix = SMatrix{3, 3}(hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z))
+    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , disturbance, ctrlinput)
+    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, disturbance, ctrlinput)
+    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, disturbance, ctrlinput)
+    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, disturbance, ctrlinput)
 
-    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , bodyframematrix, disturbance, ctrlinput)
-    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, bodyframematrix, disturbance, ctrlinput)
-    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, bodyframematrix, disturbance, ctrlinput)
-    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, bodyframematrix, disturbance, ctrlinput)
+    updated_angularvelocity = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 
-    nextOmega = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return nextOmega
+    return updated_angularvelocity
 end
 
-function calc_angular_momentum(model::RigidBodyModel, angular_velocity::AbstractVector{<:Real})::SVector{3, <:Real}
+"""
+    calc_angular_momentum
+
+calculate the angular momentum
+
+# Arguments
+
+* `model::RigidBodyModel`: object of the attitude dynamics model
+* `angularvelocity::SVector{3, Float64}`: angular velocity of the attitude dynamics
+"""
+function calc_angular_momentum(model::RigidBodyModel, angular_velocity::SVector{3, Float64})::SVector{3, Float64}
 
     momentum = model.inertia * angular_velocity
 

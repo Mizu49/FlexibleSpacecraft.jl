@@ -1,5 +1,6 @@
 module ConstantInput
 
+using StaticArrays
 export ConstantInputController
 
 struct _Config
@@ -27,7 +28,7 @@ function _set_controller_config(config::AbstractDict)
     return controller_config
 end
 
-@inline function control_input!(controller::ConstantInputController, state::Union{AbstractVector, Real}, target::Union{AbstractVector, Real})
+@inline function control_input!(controller::ConstantInputController, currentRPY::SVector{3, <:AbstractFloat}, targetRPY::SVector{3, <:AbstractFloat})
 
     input = controller._config.constant_input
 

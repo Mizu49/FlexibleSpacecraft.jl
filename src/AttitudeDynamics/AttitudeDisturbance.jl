@@ -7,6 +7,7 @@ module AttitudeDisturbance
 
 using LinearAlgebra:norm
 using StaticArrays
+using ..Frames
 
 export DisturbanceConfig, DisturbanceInternals, calc_attitudedisturbance, set_attitudedisturbance
 
@@ -194,17 +195,17 @@ calculate disturbance torque input for the attitude dynamics
 function calc_attitudedisturbance(
     distconfig::DisturbanceConfig,
     distinternals::DisturbanceInternals,
-    inertia::AbstractMatrix,
+    inertia::SMatrix{3, 3, <:Real},
     currenttime::Real,
-    orbit_angular_velocity::Real,
-    C_ECI2Body::AbstractMatrix,
-    C_ECI2LVLH::AbstractMatrix,
-    LVLHframe_z::AbstractVector,
+    orbit_angularvelocity::Real,
+    C_ECI2Body::SMatrix{3, 3, <:Real},
+    C_ECI2LVLH::SMatrix{3, 3, <:Real},
+    LVLHframe::Frame,
     Tsampling::Real
-    )::AbstractVector
+    )::SVector{3, Float64}
 
     # initialize disturbance torque vector
-    disturbance = SVector{3, Real}(zeros(3))
+    disturbance = SVector{3, Float64}(zeros(3))
 
     # apply constant torque
     disturbance = disturbance + _constant_torque(distconfig.consttorque)
@@ -216,7 +217,7 @@ function calc_attitudedisturbance(
 
     # apply gravitational torque
     if distconfig.gravitationaltorque == true
-        disturbance = disturbance + _gravity_gradient(inertia, orbit_angular_velocity, C_ECI2Body, C_ECI2LVLH, LVLHframe_z)
+        disturbance = disturbance + _gravity_gradient(inertia, orbit_angularvelocity, C_ECI2Body, C_ECI2LVLH, LVLHframe.z)
     end
 
     return disturbance
