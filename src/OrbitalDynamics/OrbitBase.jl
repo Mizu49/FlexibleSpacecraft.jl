@@ -17,9 +17,6 @@ include("Elements.jl")
 include("OrbitalFrames.jl")
 @reexport using .OrbitalFrames
 
-include("NoOrbit.jl")
-@reexport using .NoOrbit
-
 include("Circular.jl")
 @reexport using .Circular
 
@@ -87,9 +84,7 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)
 
     if orbitalmodel == "none"
 
-        elements = OrbitalElements(0, 0, 0, 0, 0, 0)
-        orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
-        orbitinternals = OrbitInternals(0, 0)
+        return nothing
 
     elseif orbitalmodel == "Circular"
         # set the orbital parameter for the circular orbit
@@ -101,11 +96,12 @@ function setorbit(orbitparamdict::AbstractDict, ECI::Frame)
         orbitinternals = OrbitInternals(0, 0)
 
         orbitinfo = OrbitInfo(dynamicsmodel, elements, orbitalplaneframe)
+
+        return (orbitinfo, orbitinternals)
     else
         error("orbital model \"$orbitalmodel\" not found")
+        return
     end
-
-    return (orbitinfo, orbitinternals)
 end
 
 function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity::Real, angularposition::Real)::Nothing
@@ -141,28 +137,29 @@ const LVLHUnitFrame = Frame([1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0])
 """
 T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
-function _get_angularvelocity(dynamicsmodel::CircularOrbit)::Real
+function _get_angularvelocity(dynamicsmodel::CircularOrbit)::Float64
     Circular.get_angular_velocity(dynamicsmodel)
 end
 
-function _get_angularvelocity(dynamicsmodel::NoOrbitModel)::Real
-    NoOrbit.get_angular_velocity(dynamicsmodel)
+function _get_angularvelocity(dynamicsmodel::Nothing)::Float64
+    return 0.0
 end
 
-function get_velocity(dynamicsmodel::CircularOrbit)::Real
+function get_velocity(dynamicsmodel::CircularOrbit)::Float64
     CircularOrbit.get_velocity(dynamicsmodel)
 end
 
-function get_velocity(dynamicsmodel::NoOrbitModel)::Real
-    NoOrbit.get_velocity(dynamicsmodel)
+function get_velocity(dynamicsmodel::Nothing)::Float64
+    return 0.0
 end
 
-function get_timeperiod(dynamicsmodel::CircularOrbit; unit = "second")::Real
-    CircularOrbit.get_timeperiod(dynamicsmodel, unit)
+function get_timeperiod(dynamicsmodel::CircularOrbit; unit = "second")::Float64
+    timeperiod = CircularOrbit.get_timeperiod(dynamicsmodel, unit)
+    return timeperiod
 end
 
-function get_timeperiod(dynamicsmodel::NoOrbitModel; unit = "second")::Real
-    NoOrbit.get_timeperiod(dynamicsmodel, unit = unit)
+function get_timeperiod(dynamicsmodel::Nothing; unit = "second")::Float64
+    return 0.0
 end
 
 end
