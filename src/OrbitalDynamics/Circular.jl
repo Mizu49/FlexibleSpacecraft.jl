@@ -101,9 +101,9 @@ function setorbit(elements::OrbitalElements)::CircularOrbit
     # set radius of the orbit from orbital elements
     radius = elements.semimajor_axis
 
-    orbitmodel = CircularOrbit(radius, OrbitBase.EarthGravityConstant)
+    dynamicsmodel = CircularOrbit(radius, OrbitBase.EarthGravityConstant)
 
-    return orbitmodel
+    return dynamicsmodel
 end
 
 end
