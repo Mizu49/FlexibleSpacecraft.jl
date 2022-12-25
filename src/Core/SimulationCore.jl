@@ -259,7 +259,7 @@ function _calculate_flexible_appendages!(
     strmodel::AbstractStructuresModel,
     strinternals::Union{AppendageInternals, Nothing},
     strdistconfig::AbstractStrDistConfig,
-    datacontainer::AppendageData,
+    datacontainer::Union{AppendageData, Nothing},
     currenttime::Real,
     simcnt::Integer
     )::Tuple
