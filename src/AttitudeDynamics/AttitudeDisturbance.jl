@@ -223,7 +223,7 @@ function calc_attitudedisturbance(
 
     # apply step trajectory torque
     if !isnothing(info.config.steptraj)
-        disturbance = disturbance + _step_trajectory!(info.config.steptraj, distinternals.steptraj, currenttime, Tsampling)
+        disturbance = disturbance + _step_trajectory!(info.config.steptraj, info.internals.steptraj, currenttime, Tsampling)
     end
 
     # apply gravitational torque
