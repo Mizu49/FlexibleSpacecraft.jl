@@ -122,7 +122,7 @@ end
 
 Define the initial value for simulation
 """
-function _setkinematics(orbitinfo, initvaluedict::AbstractDict)::InitKinematicsData
+function _setkinematics(orbitinfo::OrbitBase.OrbitInfo, initvaluedict::AbstractDict)::InitKinematicsData
 
     # calculate the inital quaternion value based on the orbital reference frame
     initquaternion = OrbitBase.calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
@@ -136,5 +136,18 @@ function _setkinematics(orbitinfo, initvaluedict::AbstractDict)::InitKinematicsD
     return initvalue
 end
 
+function _setkinematics(orbitinfo::Nothing, initvaluedict::AbstractDict)::InitKinematicsData
+
+    # initialize quaternion
+    initquaternion = [0.0, 0.0, 0.0, 1.0]
+
+    initvalue = InitKinematicsData(
+        initquaternion,
+        initvaluedict["angular velocity"],
+        ECI_frame
+    )
+
+    return initvalue
+end
 
 end

@@ -73,21 +73,35 @@ struct OrbitData
     LVLH::Vector{<:Frame}
 end
 
-function initorbitdata(datanum::Integer, orbitalframe::Frame)::OrbitData
+"""
+    initorbitdata
+
+initialize data container for orbital dynamics
+"""
+function initorbitdata(datanum::Integer, orbitinfo::OrbitInfo)::OrbitData
 
     return OrbitData(
         zeros(datanum),
         zeros(datanum),
-        initframes(datanum, orbitalframe)
+        initframes(datanum, orbitinfo.planeframe)
     )
 end
+
+function initorbitdata(datanum::Integer, orbitinfo::Nothing)::OrbitData
+    return OrbitData(
+        zeros(datanum),
+        zeros(datanum),
+        initframes(datanum, Frames.UnitFrame)
+    )
+end
+
 
 """
     setorbit
 
 Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
 """
-function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
+function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::Union{OrbitInfo, Nothing}
 
     orbitalmodel = orbitparamdict["Dynamics model"]
 
@@ -125,7 +139,20 @@ function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
 
     _update_orbitinternals!(orbitinfo.internals, angularvelocity, angularposition)
 
-    return (angularvelocity, angularposition)
+    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+
+    return (C_ECI2LVLH, angularvelocity, angularposition)
+end
+
+function update_orbitstate!(orbitinfo::Nothing, currenttime::Real)::Tuple
+
+    angularvelocity = 0.0
+    angularposition = 0.0
+
+    # rotation matrix is identity
+    C_ECI2LVLH = SMatrix{3, 3}(I)
+
+    return (C_ECI2LVLH, angularvelocity, angularposition)
 end
 
 """

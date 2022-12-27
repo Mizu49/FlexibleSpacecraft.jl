@@ -29,7 +29,7 @@ struct SimData
     datanum::Unsigned
     attitude::AttitudeData
     appendages::Union{AppendageData, Nothing}
-    orbit::OrbitData
+    orbit::Union{OrbitData, Nothing}
 end
 
 
@@ -68,7 +68,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     attitudemodel::AbstractAttitudeDynamicsModel,
     strmodel::AbstractStructuresModel,
     initvalue::InitKinematicsData,
-    orbitinfo::OrbitInfo,
+    orbitinfo::Union{OrbitInfo, Nothing},
     attidistinfo::AttitudeDisturbanceInfo,
     strdistconfig::AbstractStrDistConfig,
     strinternals::Union{AppendageInternals, Nothing},
@@ -152,7 +152,7 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
     appendages = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
 
     # initialize orbit state data array
-    orbit = initorbitdata(datanum, orbitinfo.planeframe)
+    orbit = initorbitdata(datanum, orbitinfo)
 
     # initialize simulation data container
     tl = SimData(time, datanum, attitude, appendages, orbit)
@@ -165,12 +165,11 @@ end
 
 calculate the states of the orbital dynamics of spacecraft
 """
-function _calculate_orbit!(orbitinfo::OrbitInfo, currenttime::Real)
+function _calculate_orbit!(
+    orbitinfo::Union{OrbitInfo, Nothing},
+    currenttime::Real)
 
-    (orbit_angularvelocity, orbit_angularposition) = OrbitBase.update_orbitstate!(orbitinfo, currenttime)
-
-    # calculation of transformation matrix of the LVLH frame
-    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+    (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = OrbitBase.update_orbitstate!(orbitinfo, currenttime)
 
     return (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition)
 end
