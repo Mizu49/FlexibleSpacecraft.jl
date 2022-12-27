@@ -8,12 +8,15 @@ module StructuresBase
 using Reexport, YAML, StaticArrays
 using ..UtilitiesBase, ..StructureDisturbance
 
+export AbstractAppendageModel, AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
+
+# abstract types for the flexible appendages
+abstract type AbstractAppendageParameters end
+abstract type AbstractAppendageModel end
+abstract type AbstractAppendageInternals end
+
 include("SpringMass.jl")
 @reexport using .SpringMass
-
-export AbstractStructuresModel, AppendageData, AppendageInternals, initappendagedata, setstructure, update_strstate!
-
-AbstractStructuresModel = Union{Nothing, StateSpace}
 
 """
     AppendageData
@@ -39,7 +42,7 @@ end
 
 internals of the appendage data
 """
-mutable struct AppendageInternals
+mutable struct AppendageInternals<:AbstractAppendageInternals
     previousstate::AbstractVector{<:Real}
     currentstate::AbstractVector{<:Real}
     currentaccel::AbstractVector{<:Real}
@@ -96,6 +99,18 @@ function initappendagedata(model, initphysicalstate::Vector, datanum::Int)
 end
 
 """
+    AppendageInfo
+
+information of the flexible appendages
+"""
+struct AppendageInfo
+    params::AbstractAppendageParameters
+    model::AbstractAppendageModel
+    internals::AbstractAppendageInternals
+    disturbance::StructureDisturbance.AbstractAppendageDisturbance
+end
+
+"""
     setstructure
 
 API function to define the model of the flexible appendages. Argument is the dictionary type variable
@@ -111,23 +126,27 @@ function setstructure(configdata::AbstractDict)
     end
 
     if configdata["modeling"] == "none"
-        strparams = nothing
-        strmodel = nothing
-        strinternals = nothing
+
+        params = nothing
+        model = nothing
+        internals = nothing
+        disturbance = nothing
+
     elseif configdata["modeling"] == "spring-mass"
-        (strparams, strmodel) = SpringMass.defmodel(configdata)
-        strinternals = AppendageInternals(2)
+        (params, model) = SpringMass.defmodel(configdata)
+        internals = AppendageInternals(2)
+
+        # configure disturbance input to the flexible appendage
+        if haskey(configdata, "disturbance")
+            disturbance = setstrdistconfig(configdata["disturbance"])
+        else
+            throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
+        end
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
 
-    if haskey(configdata, "disturbance")
-        strdistconfig = setstrdistconfig(configdata["disturbance"])
-    else
-        throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
-    end
-
-    return (strparams, strmodel, strdistconfig, strinternals)
+    return AppendageInfo(params, model, internals, disturbance)
 end
 
 function update_strstate!(strmodel::StateSpace, internals::AppendageInternals, Ts::Real, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
