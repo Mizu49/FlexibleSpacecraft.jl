@@ -4,11 +4,11 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft2.yml"
-(simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, strparam, strmodel, strdistconfig, strinternals, attitudecontroller) = readparamfile(paramfilepath)
+paramfilepath = "./test/spacecraft.yml"
+(simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
-simtime = @timed simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, attidistinfo, strdistconfig, strinternals, simconfig, attitudecontroller)
+simtime = @timed simdata = runsimulation(attitudemodel, initvalue, orbitinfo, attidistinfo, appendageinfo, simconfig, attitudecontroller)
 
 # test the quaternion value to check the stability of the simulation
 @test quaternion_constraint(simdata.attitude.quaternion)
@@ -24,7 +24,7 @@ display(fig2)
 display(fig3)
 # display(anim)
 
-if !isnothing(strmodel)
+if !isnothing(appendageinfo.model)
     fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
     display(fig4)
 end
