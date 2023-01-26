@@ -29,7 +29,7 @@ struct SimData
     datanum::Unsigned
     attitude::AttitudeData
     appendages::Union{AppendageData, Nothing}
-    orbit::OrbitData
+    orbit::Union{OrbitData, Nothing}
 end
 
 
@@ -42,14 +42,12 @@ Function that runs simulation of the spacecraft attitude-structure coupling prob
 # Arguments
 
 * `attitudemodel::AbstractAttitudeDynamicsModel`: dynamics model for the attitude motion
-* `strmodel::AbstractStructuresModel`: dynamics model for the flexible appendages motion
 * `initvalue::InitKinematicsData`: struct of initial values for the simulation
 * `orbitinfo::OrbitInfo`: model and configuration for the orbital motion
 * `orbitinternals::OrbitInternals`: internals of the orbital model
 * `distconfig::DisturbanceConfig`: disturbance configuration for the attitude dynamics
 * `distinternals::Union{DisturbanceInternals, Nothing}`: internals of the disturbance calculation
-* `strdistconfig::AbstractStrDistConfig`: disturbance configuration for the structural dynamics
-* `strinternals::Union{AppendageInternals, Nothing}`: internals for the structural dynamics simulation
+*
 * `simconfig::SimulationConfig`: configuration for the overall simulation
 * `attitude_controller::AbstractAttitudeController: configuration of the attitude controller
 
@@ -66,14 +64,10 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 """
 @inline function runsimulation(
     attitudemodel::AbstractAttitudeDynamicsModel,
-    strmodel::AbstractStructuresModel,
     initvalue::InitKinematicsData,
-    orbitinfo::OrbitInfo,
-    orbitinternals::OrbitInternals,
-    distconfig::DisturbanceConfig,
-    distinternals::Union{DisturbanceInternals, Nothing},
-    strdistconfig::AbstractStrDistConfig,
-    strinternals::Union{AppendageInternals, Nothing},
+    orbitinfo::Union{OrbitInfo, Nothing},
+    attidistinfo::AttitudeDisturbanceInfo,
+    appendageinfo::StructuresBase.AppendageInfo,
     simconfig::SimulationConfig,
     attitude_controller::AbstractAttitudeController
     )::SimData
@@ -83,7 +77,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     Ts = simconfig.samplingtime
 
     # Data containers
-    tl = _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
+    tl = _init_datacontainers(simconfig, initvalue, appendageinfo.model, orbitinfo)
 
     ### main loop of the simulation
     progress = Progress(tl.datanum, 1, "Simulation running...", 50)   # progress meter
@@ -93,23 +87,23 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         currenttime = tl.time[simcnt]
 
         ### orbit state
-        (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit_state(orbitinfo, orbitinternals, currenttime)
+        (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit!(orbitinfo, currenttime)
 
         ### attitude state
         (C_ECI2Body, C_LVLH2BRF, RPYangle) = _calculate_attitude_state!(attitudemodel, tl.attitude, simcnt, C_ECI2LVLH)
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, distconfig, distinternals, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
+        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
 
         # control input
         attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)
 
         ### flexible appendages state
-        (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(strmodel, strinternals, strdistconfig, tl.appendages, currenttime, simcnt)
+        (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(appendageinfo, tl.appendages, currenttime, simcnt)
 
         ### attitude-structure coupling dynamics
-        (structure2attitude, attitude2structure) = _calculate_coupling_input(strmodel, strinternals, tl.attitude, simcnt)
+        (structure2attitude, attitude2structure) = _calculate_coupling_input(appendageinfo.model, appendageinfo.internals, tl.attitude, simcnt)
 
         ### Time evolution of the system
         if simcnt != tl.datanum
@@ -121,8 +115,8 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
             tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
             # Update the state of the flexible appendages
-            if !isnothing(strmodel)
-                tl.appendages.state[simcnt+1] = update_strstate!(strmodel, strinternals, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
+            if !isnothing(appendageinfo.model)
+                tl.appendages.state[simcnt+1] = update_strstate!(appendageinfo.model, appendageinfo.internals, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
             end
         end
 
@@ -154,7 +148,7 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
     appendages = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
 
     # initialize orbit state data array
-    orbit = initorbitdata(datanum, orbitinfo.planeframe)
+    orbit = initorbitdata(datanum, orbitinfo)
 
     # initialize simulation data container
     tl = SimData(time, datanum, attitude, appendages, orbit)
@@ -163,16 +157,15 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
 end
 
 """
-    _calculate_orbit_state
+    _calculate_orbit!
 
 calculate the states of the orbital dynamics of spacecraft
 """
-function _calculate_orbit_state(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)
+function _calculate_orbit!(
+    orbitinfo::Union{OrbitInfo, Nothing},
+    currenttime::Real)
 
-    (orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, orbitinternals, currenttime)
-
-    # calculation of transformation matrix of the LVLH frame
-    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+    (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = OrbitBase.update_orbitstate!(orbitinfo, currenttime)
 
     return (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition)
 end
@@ -213,8 +206,7 @@ calculate the disturbance input torque for the attitude dynamics
 """
 function _calculate_attitude_disturbance(
     simconfig::SimulationConfig,
-    distconfig::DisturbanceConfig,
-    distinternals::DisturbanceInternals,
+    attidistinfo::AttitudeDisturbanceInfo,
     currenttime::Real,
     attitudemodel::AbstractAttitudeDynamicsModel,
     orbit_angularvelocity::Real,
@@ -223,7 +215,7 @@ function _calculate_attitude_disturbance(
     )::SVector{3, Float64}
 
     # disturbance input calculation
-    distinput = calc_attitudedisturbance(distconfig, distinternals, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, SMatrix{3,3}(zeros(3,3)), LVLHframe, simconfig.samplingtime)
+    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, SMatrix{3,3}(zeros(3,3)), LVLHframe, simconfig.samplingtime)
 
     # apply transformation matrix
     distinput = C_ECI2Body * distinput
@@ -256,25 +248,23 @@ calculate the state of the flexible appendages.
 This function is the interface to the flexible appendages simulation
 """
 function _calculate_flexible_appendages!(
-    strmodel::AbstractStructuresModel,
-    strinternals::Union{AppendageInternals, Nothing},
-    strdistconfig::AbstractStrDistConfig,
-    datacontainer::AppendageData,
+    appendageinfo::StructuresBase.AppendageInfo,
+    datacontainer::Union{AppendageData, Nothing},
     currenttime::Real,
     simcnt::Integer
     )::Tuple
 
     # check if the flexible appendages exist
-    if isnothing(strmodel)
+    if isnothing(appendageinfo.model)
         # return nothing if flexible appendages don't exist
         distinput = nothing
         ctrlinput = nothing
     else
         # obtain state of the flexible appendages
-        datacontainer.physicalstate[simcnt] = modalstate2physicalstate(strmodel, strinternals.currentstate)
+        datacontainer.physicalstate[simcnt] = modalstate2physicalstate(appendageinfo.model, appendageinfo.internals.currentstate)
 
         # disturbance input
-        distinput = calcstrdisturbance(strdistconfig, currenttime)
+        distinput = calcstrdisturbance(appendageinfo.disturbance, currenttime)
 
         # controller of the flexible appendages (for future development)
         ctrlinput = 0
@@ -293,7 +283,7 @@ end
 calculate the coupling term of the attitude dynamics and structural dynamics
 """
 function _calculate_coupling_input(
-    strmodel::AbstractStructuresModel,
+    strmodel::AbstractAppendageModel,
     strinternals::Union{AppendageInternals, Nothing},
     attitudedata::AttitudeData,
     simcnt::Integer

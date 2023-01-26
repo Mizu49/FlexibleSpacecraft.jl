@@ -22,7 +22,7 @@ orbit = OrbitBase.CircularOrbit(6370e+3, 3.986e+14)
 ```
 
 """
-struct CircularOrbit
+struct CircularOrbit<:AbstractOrbitalDynamics
 
     _radius::Real
     _gravityconstant::Real
@@ -101,9 +101,9 @@ function setorbit(elements::OrbitalElements)::CircularOrbit
     # set radius of the orbit from orbital elements
     radius = elements.semimajor_axis
 
-    orbitmodel = CircularOrbit(radius, OrbitBase.EarthGravityConstant)
+    dynamicsmodel = CircularOrbit(radius, OrbitBase.EarthGravityConstant)
 
-    return orbitmodel
+    return dynamicsmodel
 end
 
 end

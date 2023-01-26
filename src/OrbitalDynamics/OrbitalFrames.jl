@@ -1,8 +1,7 @@
 module OrbitalFrames
 
 using StaticArrays, LinearAlgebra
-using ..OrbitBase, ..Elements
-using ..Frames, ..DataContainers, ..UtilitiesBase
+using ..OrbitBase, ..Elements, ..Frames, ..DataContainers, ..UtilitiesBase
 
 export ECI2OrbitalPlane, ECI2ORF, OrbitalPlane2RadialAlongTrack, calc_orbitalframe, calc_inital_quaternion
 

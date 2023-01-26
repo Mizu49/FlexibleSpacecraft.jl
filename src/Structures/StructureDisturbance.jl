@@ -3,12 +3,14 @@ submodule for the disturbance input to the flexible appendages
 """
 module StructureDisturbance
 
-export VibrationConfig, NoStrDisturbance, calcstrdisturbance, setstrdistconfig, AbstractStrDistConfig
+abstract type AbstractAppendageDisturbance end
+
+export VibrationConfig, NoStrDisturbance, calcstrdisturbance, setstrdistconfig, AbstractAppendageDisturbance
 
 """
 struct of parameter configuration of the vibration disturbance input
 """
-struct VibrationConfig
+struct VibrationConfig<:AbstractAppendageDisturbance
 
     # dimension of the disturbance input
     dimdistinput::Int
@@ -22,13 +24,12 @@ struct VibrationConfig
 
 end
 
-struct NoStrDisturbance
+struct NoStrDisturbance<:AbstractAppendageDisturbance
     dimdistinput::Int
 end
 
-AbstractStrDistConfig = Union{VibrationConfig, NoStrDisturbance}
 
-function calcstrdisturbance(config::AbstractStrDistConfig, time::Real)
+function calcstrdisturbance(config::AbstractAppendageDisturbance, time::Real)
 
     distinput = _calcstrdisturbance(config, time)
 
@@ -60,7 +61,7 @@ function _calcstrdisturbance(config::NoStrDisturbance, time::Real)
     end
 end
 
-function setstrdistconfig(configdata::AbstractDict)::AbstractStrDistConfig
+function setstrdistconfig(configdata::AbstractDict)::AbstractAppendageDisturbance
 
     if configdata["type"] == "vibration"
         config = _setconfig_vibration(configdata)

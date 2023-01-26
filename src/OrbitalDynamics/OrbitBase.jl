@@ -7,21 +7,28 @@ const GravityConstant = 6.673e-11
 const EarthMass = 5.974e24
 const EarthGravityConstant = GravityConstant * EarthMass
 
+abstract type AbstractOrbitalDynamics end
+
+export AbstractOrbitalDynamics, OrbitInfo, OrbitData, OrbitInternals, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
+
 include("Elements.jl")
-@reexport using .Elements
+using .Elements
+
+include("Circular.jl")
+using .Circular
 
 include("OrbitalFrames.jl")
 @reexport using .OrbitalFrames
 
-include("NoOrbit.jl")
-@reexport using .NoOrbit
+"""
+    OrbitInternals
 
-include("Circular.jl")
-@reexport using .Circular
-
-export OrbitInfo, OrbitData, OrbitInternals, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
-
-const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
+struct that contains the information about the current state of the orbital dynamics
+"""
+mutable struct OrbitInternals
+    angularposition::Float64
+    angularvelocity::Float64
+end
 
 """
     OrbitInfo
@@ -29,47 +36,24 @@ const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 struct that contains the information about the orbital dynamics of the spacecraft
 """
 struct OrbitInfo
-    orbitmodel::AbstractOrbitModel
+    dynamicsmodel::AbstractOrbitalDynamics
     orbitalelement::OrbitalElements
+    internals::OrbitInternals
     planeframe::Frame
     info::String
 
-    OrbitInfo(orbitmodel::AbstractOrbitModel, orbitalelement::OrbitalElements, planeframe::Frame; info::String = "") = begin
-        new(orbitmodel, orbitalelement, planeframe, info)
+    # Constructor
+    OrbitInfo(
+        dynamicsmodel::AbstractOrbitalDynamics,
+        orbitalelement::OrbitalElements,
+        internals::OrbitInternals,
+        planeframe::Frame;
+        info::String = ""
+        )= begin
+            new(dynamicsmodel, orbitalelement, internals, planeframe, info)
     end
 end
 
-"""
-    setorbit
-
-Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
-"""
-function setorbit(orbitparamdict::AbstractDict, ECI::Frame)
-
-    orbitalmodel = orbitparamdict["Dynamics model"]
-
-    if orbitalmodel == "none"
-
-        elements = OrbitalElements(0, 0, 0, 0, 0, 0)
-        orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
-        orbitinternals = OrbitInternals(0, 0)
-
-    elseif orbitalmodel == "Circular"
-        # set the orbital parameter for the circular orbit
-
-        elements = setelements(orbitparamdict["Orbital elements"])
-        orbitmodel = Circular.setorbit(elements)
-        orbitalplaneframe = calc_orbitalframe(elements, ECI)
-
-        orbitinternals = OrbitInternals(0, 0)
-
-        orbitinfo = OrbitInfo(orbitmodel, elements, orbitalplaneframe)
-    else
-        error("orbital model \"$orbitalmodel\" not found")
-    end
-
-    return (orbitinfo, orbitinternals)
-end
 
 """
     OrbitData
@@ -89,18 +73,55 @@ struct OrbitData
     LVLH::Vector{<:Frame}
 end
 
-function initorbitdata(datanum::Integer, orbitalframe::Frame)::OrbitData
+"""
+    initorbitdata
+
+initialize data container for orbital dynamics
+"""
+function initorbitdata(datanum::Integer, orbitinfo::OrbitInfo)::OrbitData
 
     return OrbitData(
         zeros(datanum),
         zeros(datanum),
-        initframes(datanum, orbitalframe)
+        initframes(datanum, orbitinfo.planeframe)
     )
 end
 
-mutable struct OrbitInternals
-    angularposition::Real
-    angularvelocity::Real
+function initorbitdata(datanum::Integer, orbitinfo::Nothing)::OrbitData
+    return OrbitData(
+        zeros(datanum),
+        zeros(datanum),
+        initframes(datanum, Frames.UnitFrame)
+    )
+end
+
+
+"""
+    setorbit
+
+Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
+"""
+function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::Union{OrbitInfo, Nothing}
+
+    orbitalmodel = orbitparamdict["Dynamics model"]
+
+    if orbitalmodel == "none"
+
+        return nothing
+
+    elseif orbitalmodel == "Circular"
+        # set the orbital parameter for the circular orbit
+        elements = Elements.setelements(orbitparamdict["Orbital elements"])
+        dynamicsmodel = Circular.setorbit(elements)
+        orbitalplaneframe = OrbitalFrames.calc_orbitalframe(elements, ECI)
+        orbitinternals = OrbitInternals(0, 0)
+
+        orbitinfo = OrbitInfo(dynamicsmodel, elements, orbitinternals, orbitalplaneframe)
+
+        return orbitinfo
+    else
+        error("orbital model \"$orbitalmodel\" not found")
+    end
 end
 
 function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity::Real, angularposition::Real)::Nothing
@@ -111,14 +132,27 @@ function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity
     return
 end
 
-function update_orbitstate!(orbitinfo::OrbitInfo, orbitinternals::OrbitInternals, currenttime::Real)::Tuple
+function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
 
-    angularvelocity = _get_angularvelocity(orbitinfo.orbitmodel)
+    angularvelocity = _get_angularvelocity(orbitinfo.dynamicsmodel)
     angularposition = angularvelocity * currenttime
 
-    _update_orbitinternals!(orbitinternals, angularvelocity, angularposition)
+    _update_orbitinternals!(orbitinfo.internals, angularvelocity, angularposition)
 
-    return (angularvelocity, angularposition)
+    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+
+    return (C_ECI2LVLH, angularvelocity, angularposition)
+end
+
+function update_orbitstate!(orbitinfo::Nothing, currenttime::Real)::Tuple
+
+    angularvelocity = 0.0
+    angularposition = 0.0
+
+    # rotation matrix is identity
+    C_ECI2LVLH = SMatrix{3, 3}(I)
+
+    return (C_ECI2LVLH, angularvelocity, angularposition)
 end
 
 """
@@ -136,28 +170,29 @@ const LVLHUnitFrame = Frame([1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0])
 """
 T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
 
-function _get_angularvelocity(orbitmodel::CircularOrbit)::Real
-    Circular.get_angular_velocity(orbitmodel)
+function _get_angularvelocity(dynamicsmodel::CircularOrbit)::Float64
+    Circular.get_angular_velocity(dynamicsmodel)
 end
 
-function _get_angularvelocity(orbitmodel::NoOrbitModel)::Real
-    NoOrbit.get_angular_velocity(orbitmodel)
+function _get_angularvelocity(dynamicsmodel::Nothing)::Float64
+    return 0.0
 end
 
-function get_velocity(orbitmodel::CircularOrbit)::Real
-    CircularOrbit.get_velocity(orbitmodel)
+function get_velocity(dynamicsmodel::CircularOrbit)::Float64
+    CircularOrbit.get_velocity(dynamicsmodel)
 end
 
-function get_velocity(orbitmodel::NoOrbitModel)::Real
-    NoOrbit.get_velocity(orbitmodel)
+function get_velocity(dynamicsmodel::Nothing)::Float64
+    return 0.0
 end
 
-function get_timeperiod(orbitmodel::CircularOrbit; unit = "second")::Real
-    CircularOrbit.get_timeperiod(orbitmodel, unit)
+function get_timeperiod(dynamicsmodel::CircularOrbit; unit = "second")::Float64
+    timeperiod = CircularOrbit.get_timeperiod(dynamicsmodel, unit)
+    return timeperiod
 end
 
-function get_timeperiod(orbitmodel::NoOrbitModel; unit = "second")::Real
-    NoOrbit.get_timeperiod(orbitmodel, unit = unit)
+function get_timeperiod(dynamicsmodel::Nothing; unit = "second")::Float64
+    return 0.0
 end
 
 end

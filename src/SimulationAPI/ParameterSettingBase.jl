@@ -1,7 +1,8 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
+using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
+import ..OrbitBase
 
 export SimulationConfig, yamlread2matrix, readparamfile
 
@@ -54,7 +55,7 @@ function readparamfile(filepath::String)
 
     # Orbital dynamics
     if haskey(paramread, "Orbit")
-        (orbitinfo, orbitinternals) = setorbit(paramread["Orbit"], ECI_frame)
+        orbitinfo = OrbitBase.setorbit(paramread["Orbit"], ECI_frame)
     else
         throw(AssertionError("orbit configuration is not found on parameter setting file"))
     end
@@ -75,14 +76,14 @@ function readparamfile(filepath::String)
 
     # Disturbance for the attitude dynamics
     if haskey(paramread, "disturbance")
-        (distconfig, distinternals) = set_attitudedisturbance(paramread["disturbance"])
+        attidistinfo = set_attitudedisturbance(paramread["disturbance"])
     else
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
     end
 
     # Flexible appendage
     if haskey(paramread, "appendage")
-        (strparam, strmodel, strdistconfig, strinternals) = setstructure(paramread["appendage"])
+        appendageinfo = setstructure(paramread["appendage"])
     end
 
     # Attitude controller
@@ -92,7 +93,7 @@ function readparamfile(filepath::String)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, distconfig, distinternals, initvalue, orbitinfo, orbitinternals, strparam, strmodel, strdistconfig, strinternals, attitude_controller)
+    return (simconfig, attimodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitude_controller)
 end
 
 """
@@ -121,10 +122,10 @@ end
 
 Define the initial value for simulation
 """
-function _setkinematics(orbitinfo, initvaluedict::AbstractDict)::InitKinematicsData
+function _setkinematics(orbitinfo::OrbitBase.OrbitInfo, initvaluedict::AbstractDict)::InitKinematicsData
 
     # calculate the inital quaternion value based on the orbital reference frame
-    initquaternion = calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
+    initquaternion = OrbitBase.calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
 
     initvalue = InitKinematicsData(
         initquaternion,
@@ -135,5 +136,18 @@ function _setkinematics(orbitinfo, initvaluedict::AbstractDict)::InitKinematicsD
     return initvalue
 end
 
+function _setkinematics(orbitinfo::Nothing, initvaluedict::AbstractDict)::InitKinematicsData
+
+    # initialize quaternion
+    initquaternion = [0.0, 0.0, 0.0, 1.0]
+
+    initvalue = InitKinematicsData(
+        initquaternion,
+        initvaluedict["angular velocity"],
+        ECI_frame
+    )
+
+    return initvalue
+end
 
 end
