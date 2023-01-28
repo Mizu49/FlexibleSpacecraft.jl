@@ -1,14 +1,21 @@
 module AttitudeVisualization
 
-using Plots, LinearAlgebra
+using GLMakie, LinearAlgebra
 
 # Include module `DataContainers`
 using ...DataContainers, StaticArrays
 
 export plot_angularvelocity, plot_eulerangles, plot_quaternion, plot_angular_momentum
 
+# labels for the XYZ axis
+const XYZlabels = [
+    "x-axis",
+    "y-axis",
+    "z-axis"
+]
+
 """
-    function plot_angularvelocity(time::StepRangeLen, angularvelocity::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+    function plot_angularvelocity
 
 Plots angular velocity of each axis in one figure
 """
@@ -16,46 +23,67 @@ function plot_angularvelocity(
     time::StepRangeLen,
     angularvelocity::AbstractVector{SVector{3, <:Real}};
     timerange::Tuple{<:Real, <:Real} = (0, 0)
-    )::AbstractPlot
+    )
 
-    plotlyjs()
+    # get the index for data
+    dataindex = timerange2indexrange(timerange, time)
 
-    # using plot recipe for these plots
-    plt = plot();
-    plt = plot!(plt, time, angularvelocity, 1, timerange = timerange, ylabelname = "Angular velocity (rad/s)", datalabel = "x-axis");
-    plt = plot!(plt, time, angularvelocity, 2, timerange = timerange, ylabelname = "Angular velocity (rad/s)", datalabel = "y-axis");
-    plt = plot!(plt, time, angularvelocity, 3, timerange = timerange, ylabelname = "Angular velocity (rad/s)", datalabel = "z-axis");
+    fig = Figure();
+    ax = Axis(
+        fig[1, 1],
+        xlabel = "Time (s)",
+        ylabel = "Angular velocity (rad/s)"
+    )
 
-    return plt
+    for dim in 1:3
+        lines!(
+            ax, time[dataindex], angularvelocity[dataindex, dim],
+            label = XYZlabels[dim]
+        )
+    end
+
+    axislegend(ax)
+
+    return fig
 end
 
 """
-    plot_eulerangles(time::StepRangeLen, eulerangle::Vector{StaticArrays.SVector{3, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))::AbstractPlot
+    plot_eulerangles
 
 Plots time history of euler angles
-
 """
 function plot_eulerangles(
     time::StepRangeLen,
     eulerangle::AbstractVector{SVector{3, <:Real}};
     timerange::Tuple{<:Real, <:Real} = (0, 0)
-    )::AbstractPlot
+    )
 
-    plotlyjs()
+    # get the index for data
+    dataindex = timerange2indexrange(timerange, time)
 
-    # using type recipe
-    plt = plot();
-    plt = plot!(plt, time, eulerangle, 1, timerange = timerange, ylabelname = "Euler angle (rad)", datalabel = "roll");
-    plt = plot!(plt, time, eulerangle, 2, timerange = timerange, ylabelname = "Euler angle (rad)", datalabel = "pitch");
-    plt = plot!(plt, time, eulerangle, 3, timerange = timerange, ylabelname = "Euler angle (rad)", datalabel = "yaw");
+    fig = Figure();
+    ax = Axis(
+        fig[1, 1],
+        xlabel = "Time (s)",
+        ylabel = "Euler angle (rad)"
+    )
 
-    return plt
+    for dim in 1:3
+        lines!(
+            ax, time[dataindex], eulerangle[dataindex, dim],
+            label = XYZlabels[dim]
+        )
+    end
+
+    axislegend(ax)
+
+    return fig
 end
 
 """
-function plot_quaternion(time::StepRangeLen, quaternion::Vector{StaticArrays.SVector{4, <:Real}}; timerange::Tuple{<:Real, <:Real} = (0, 0))
+    plot_quaternion
 
-    Plot plot_quaternion in single plot
+Plot plot_quaternion in single plot
 """
 function plot_quaternion(
     time::StepRangeLen,
@@ -63,18 +91,33 @@ function plot_quaternion(
     timerange::Tuple{<:Real, <:Real} = (0, 0)
     )
 
-    plotlyjs()
+    # get the index for data
+    dataindex = timerange2indexrange(timerange, time)
 
-    # using type recipe
-    plt = plot();
-    plt = plot!(plt, time, quaternion, 1, timerange = timerange, ylabelname = "Quaternion", datalabel = "q1");
-    plt = plot!(plt, time, quaternion, 2, timerange = timerange, ylabelname = "Quaternion", datalabel = "q2");
-    plt = plot!(plt, time, quaternion, 3, timerange = timerange, ylabelname = "Quaternion", datalabel = "q3");
-    plt = plot!(plt, time, quaternion, 4, timerange = timerange, ylabelname = "Quaternion", datalabel = "q4");
+    fig = Figure()
+    ax = Axis(
+        fig[1, 1],
+        xlabel = "Time (s)",
+        ylabel = "Quaternion (-)"
+    )
 
-    return plt
+    for dim in 1:4
+        lines!(
+            ax, time[dataindex], quaternion[dataindex, dim],
+            label = "Quaternion $dim"
+        )
+    end
+
+    axislegend(ax)
+
+    return fig
 end
 
+"""
+    plot_angular_momentum
+
+plot time history of angular momentum
+"""
 function plot_angular_momentum(
     time::StepRangeLen,
     angular_momentum::AbstractVector{SVector{3, <:Real}};
@@ -84,79 +127,30 @@ function plot_angular_momentum(
     # calculate norm of the angular momentum
     momentum_norm = norm.(angular_momentum)
 
-    plotlyjs()
+    # get the index for data
+    dataindex = timerange2indexrange(timerange, time)
 
-    # using type recipe
-    plt = plot();
-    plt = plot!(plt, time, angular_momentum, 1, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "1-axis");
-    plt = plot!(plt, time, angular_momentum, 2, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "2-axis");
-    plt = plot!(plt, time, angular_momentum, 3, timerange = timerange, ylabelname = "Angular momentum (kg m^2 / s )", datalabel = "3-axis");
+    fig = Figure()
+    ax = Axis(
+        fig[1, 1],
+        xlabel = "Time (s)",
+        ylabel = "Angular momentum (kg⋅m^2⋅s^−1)"
+    )
+
+    # plot each dimension
+    for dim in 1:3
+        lines!(
+            ax, time[dataindex], angular_momentum[dataindex, dim],
+            label = XYZlabels[dim]
+        )
+    end
 
     # plot norm
-    plt = plot!(plt, time, momentum_norm, linewidth = 2, label = "Norm");
+    lines!(ax, time, momentum_norm, label = "Norm");
 
-    return plt
-end
+    axislegend(ax)
 
-# type recipe for data container of quaternion
-@recipe function f(
-    time::StepRangeLen,
-    quaternion::AbstractVector{SVector{4, <:Real}},
-    axisindex::Integer;
-    timerange = (0, 0),
-    ylabelname = "no y-label",
-    datalabel = "no data label")
-
-
-    # check the bounds for indexing
-    if !(1 <= axisindex <= 4)
-        throw(BoundsError(quaternion[1], index))
-    end
-
-    xguide --> "Time (s)"
-    yguide --> ylabelname
-    label --> datalabel
-    linewidth --> 2
-    fontfamily --> "Times"
-    guidefontsize --> 15
-    tickfontsize --> 15
-    legendfontsize --> 15
-    titlefontsize --> 15
-
-    # get the index for data
-    dataindex = timerange2indexrange(timerange, time)
-
-    return time[dataindex], quaternion[dataindex, axisindex]
-end
-
-# type recipe for data container of vector of 3D vectors, mainly for the angles
-@recipe function f(
-    time::StepRangeLen,
-    anglevectors::AbstractVector{SVector{3, <:Real}},
-    axisindex::Integer;
-    timerange = (0, 0),
-    ylabelname = "no y-label",
-    datalabel = "no data label")
-
-    # check the bounds for indexing
-    if !(1 <= axisindex <= 3)
-        throw(BoundsError(anglevectors[1], index))
-    end
-
-    xguide --> "Time (s)"
-    yguide --> ylabelname
-    label --> datalabel
-    linewidth --> 2
-    fontfamily --> "Times"
-    guidefontsize --> 15
-    tickfontsize --> 15
-    legendfontsize --> 15
-    titlefontsize --> 15
-
-    # get the index for data
-    dataindex = timerange2indexrange(timerange, time)
-
-    return time[dataindex], anglevectors[dataindex, axisindex]
+    return fig
 end
 
 end
