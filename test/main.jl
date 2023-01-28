@@ -31,13 +31,7 @@ end
 fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
 display(fig5)
 
-Makie.inline!(false)
-framefig = Figure()
-frametime = simdata.time[10000]
-frame = getframe(frametime, 1e-3, simdata.attitude.RPYframe)
-LVLHframe = T_UnitFrame2LVLHFrame * UnitFrame
-dispframe!(framefig, frametime, LVLHframe, frame)
 
-display(framefig)
+animate_attitude(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe)
 
 println("Simulation time : $(simtime.time) (s)")

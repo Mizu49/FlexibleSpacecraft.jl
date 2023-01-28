@@ -26,10 +26,10 @@ attitude dynamics:
     ]
 
 disturbance:
-    constant torque: [0.0, 0.0, 0.0]
+    constant torque: [5.0, 0.0, 0.0]
     gravitational torque: false
     step trajectory:
-        value: [[5, 0, 0], [0, 0, 0]]
+        value: [[0, 0, 0], [0, 0, 0]]
         endurance: [1, 300]
 
 Orbit:
@@ -87,7 +87,7 @@ appendage:
         phase: [0, 0]
 
 attitude controller:
-    strategy: PID
+    strategy: none
     config:
         Pgain: [
             100, 0, 0,

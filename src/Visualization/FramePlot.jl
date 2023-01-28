@@ -3,7 +3,7 @@ module FramePlot
 using GLMakie, ProgressMeter, StaticArrays, ColorTypes
 using ...DataContainers, ...Frames
 
-export dispframe!, framegif
+export animate_attitude
 
 # RGB color setting for frame plots
 const axiscolors = [
@@ -22,7 +22,7 @@ const refaxiscolors = [
 """
     _Frame2Arrows
 """
-function _Frame2Arrows(frame::Frame)
+function _Frame2Arrows(frame)
 
     dir_x = [
         frame.x[1]
@@ -45,46 +45,18 @@ function _Frame2Arrows(frame::Frame)
     return (dir_x, dir_y, dir_z)
 end
 
-
 """
-    function dispframe
-
-Generates the 3D figure of body fixed frame
+    _plot_frame!
 """
-function dispframe!(fig, time::Real, refCoordinate::Frame, coordinate::Frame)
-
-    ax = Axis3(
-        fig[1, 1],
-        title  = "Time: $time (s)",
-        xlabel = "x label",
-        ylabel = "y label",
-        zlabel = "z label",
-        # elevation = pi/4,
-        # azimuth   = pi/4,
-        aspect = :data,
-        viewmode = :fit,
-        limits = (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
-    )
-
-    (ref_x, ref_y, ref_z) = _Frame2Arrows(refCoordinate)
-    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(coordinate)
+function _plot_frame!(ax, ref_x, ref_y, ref_z, color_config)
 
     arrows!(
         ax,
         zeros(3), zeros(3), zeros(3),
         ref_x, ref_y, ref_z,
-        color = refaxiscolors
+        linewidth = 0.05,
+        color = color_config
     )
-
-    arrows!(
-        ax,
-        zeros(3), zeros(3), zeros(3),
-        BRF_x, BRF_y, BRF_z,
-        color = axiscolors
-    )
-
-    hidespines!(ax)
-    hidedecorations!(ax)
 
     return
 end
@@ -94,7 +66,68 @@ end
 
 Generates animation of frame rotation as GIF figure
 """
-function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; Tgif = 60, FPS = 3, timerange = (0, 0))
+function animate_attitude(
+    time::StepRangeLen,
+    refframe::Frame,
+    frames::Vector{<:Frame};
+    Tgif = 1e-1,
+    FPS = 20,
+    timerange = (0, 0)
+    )
+
+    # extract indeces of data to be plotted
+    Tsampling = convert(Float64, time.step)
+    steps = round(Int, Tgif/Tsampling)
+    dataindex = timerange2indexrange(timerange, time)
+    if dataindex == Colon()
+        animindex = 1:steps:size(time[dataindex], 1)
+    else
+        animindex = dataindex[1]:steps:dataindex[end]
+    end
+
+    # vectors for the corrdinate frame
+    (ref_x, ref_y, ref_z) = _Frame2Arrows(refframe)
+    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[animindex[1]])
+
+    # set observables
+    obs_x = Observable(BRF_x)
+    obs_y = Observable(BRF_y)
+    obs_z = Observable(BRF_z)
+
+    # create instance
+    fig = Figure(; resolution = (600, 600))
+    ax = Axis3(
+        fig[1, 1],
+        xlabel = "x label",
+        ylabel = "y label",
+        zlabel = "z label",
+        elevation = pi/6,
+        azimuth   = pi/4,
+        aspect = :data,
+        viewmode = :fit,
+        limits = (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+    )
+    hidespines!(ax)
+    hidedecorations!(ax)
+
+    # plot frame vectors
+    _plot_frame!(ax, ref_x, ref_y, ref_z, refaxiscolors)
+    _plot_frame!(ax, obs_x, obs_y, obs_z, axiscolors)
+
+    # create animation
+    record(fig, "attitude.mp4", animindex; framerate = FPS) do idx
+
+        # update values
+        (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[idx])
+
+        # update observables
+        obs_x[] = BRF_x
+        obs_y[] = BRF_y
+        obs_z[] = BRF_z
+
+        ax.title = "Time: $(time[idx]) (s)"
+
+    end
 
 end
 
