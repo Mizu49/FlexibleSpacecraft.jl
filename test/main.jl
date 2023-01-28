@@ -26,10 +26,10 @@ display(fig2)
 display(fig3)
 # display(anim)
 
-# if !isnothing(appendageinfo.model)
-#     fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
-#     display(fig4)
-# end
+if !isnothing(appendageinfo.model)
+    fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
+    display(fig4)
+end
 
 fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
 display(fig5)
