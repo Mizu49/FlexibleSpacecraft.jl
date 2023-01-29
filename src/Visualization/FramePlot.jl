@@ -72,7 +72,8 @@ function animate_attitude(
     frames::Vector{<:Frame};
     Tgif = 1e-1,
     FPS = 20,
-    timerange = (0, 0)
+    timerange = (0, 0),
+    filename = "attitude.gif"
     )
 
     # extract indeces of data to be plotted
@@ -116,7 +117,7 @@ function animate_attitude(
 
     # create animation
     prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
-    record(fig, "attitude.mp4", animindex; framerate = FPS) do idx
+    record(fig, filename, animindex; framerate = FPS) do idx
 
         # update values
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[idx])
