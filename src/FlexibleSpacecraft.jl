@@ -2,7 +2,7 @@ module FlexibleSpacecraft
 
 using Reexport
 
-@reexport using LinearAlgebra, Plots, StaticArrays
+@reexport using LinearAlgebra, GLMakie, StaticArrays
 
 include("Core/UtilitiesBase.jl")
 @reexport using .UtilitiesBase

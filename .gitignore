@@ -36,3 +36,5 @@ Manifest.toml
 !docs/src/**/*.png
 !docs/src/**/*.gif
 
+# Exclude the movie
+*mp4

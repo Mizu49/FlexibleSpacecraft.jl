@@ -2,7 +2,7 @@ using Test
 
 include("../../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
-using Plots, StaticArrays
+using StaticArrays
 
 # parameter setting
 paramfile = "./test/module-tests/param-springmass.yml"

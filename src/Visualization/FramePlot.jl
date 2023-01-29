@@ -1,97 +1,138 @@
 module FramePlot
 
-using Plots, ProgressMeter, StaticArrays
+using GLMakie, ProgressMeter, StaticArrays, ColorTypes
 using ...DataContainers, ...Frames
 
-export dispframe, framegif
+export animate_attitude
 
 # RGB color setting for frame plots
-axiscolor_x = RGB(colorant"#FF0000")
-axiscolor_y = RGB(colorant"#008000")
-axiscolor_z = RGB(colorant"#0000FF")
-axiscolor_ref_x = RGB(colorant"#FFA5A5")
-axiscolor_ref_y = RGB(colorant"#CCFECC")
-axiscolor_ref_z = RGB(colorant"#A5A5FF")
+const axiscolors = [
+    RGBA(1.0, 0.0, 0.0, 1),
+    RGBA(0.0, 1.0, 0.0, 1),
+    RGBA(0.0, 0.0, 1.0, 1)
+]
+
+const refaxiscolors = [
+    RGBA(1.0, 0.0, 0.0, 0.5),
+    RGBA(0.0, 1.0, 0.0, 0.5),
+    RGBA(0.0, 0.0, 1.0, 0.5)
+]
+
 
 """
-    function dispframe(time, refCoordinate, coordinate)
-
-Generates the 3D figure of body fixed frame
+    _Frame2Arrows
 """
-function dispframe(time::Real, refCoordinate::Frame, coordinate::Frame)
+function _Frame2Arrows(frame)
 
-    # Use `GR` backend
-    gr()
+    dir_x = [
+        frame.x[1]
+        frame.y[1]
+        frame.z[1]
+    ]
 
-    # Plot of reference frame
-    coordFig = plot()
-    coordFig = _frame_vector!(refCoordinate.x, axiscolor_ref_x)
-    coordFig = _frame_vector!(refCoordinate.y, axiscolor_ref_y)
-    coordFig = _frame_vector!(refCoordinate.z, axiscolor_ref_z)
+    dir_y = [
+        frame.x[2]
+        frame.y[2]
+        frame.z[2]
+    ]
 
-    # Plot of spacecraft fixed frame
-    coordFig = _frame_vector!(coordinate.x, axiscolor_x)
-    coordFig = _frame_vector!(coordinate.y, axiscolor_y)
-    coordFig = _frame_vector!(coordinate.z, axiscolor_z)
+    dir_z = [
+        frame.x[3]
+        frame.y[3]
+        frame.z[3]
+    ]
 
-
-    title!("Time: $time [s]")
-
-    return coordFig
+    return (dir_x, dir_y, dir_z)
 end
 
 """
-    function frame_gif(time, Tsampling, refCoordinate, bodyCoordinateArray, Tgif = 0.4, FPS = 15)
+    _plot_frame!
+"""
+function _plot_frame!(ax, ref_x, ref_y, ref_z, color_config)
+
+    arrows!(
+        ax,
+        zeros(3), zeros(3), zeros(3),
+        ref_x, ref_y, ref_z,
+        linewidth = 0.05,
+        color = color_config
+    )
+
+    return
+end
+
+"""
+    frame_gif
 
 Generates animation of frame rotation as GIF figure
 """
-function framegif(time::StepRangeLen, refframe::Frame, frames::Vector{<:Frame}; Tgif = 60, FPS = 3, timerange = (0, 0))
+function animate_attitude(
+    time::StepRangeLen,
+    refframe::Frame,
+    frames::Vector{<:Frame};
+    Tgif = 1e-1,
+    FPS = 20,
+    timerange = (0, 0),
+    filename = "attitude.gif"
+    )
 
-    # get the index for data
-    dataindex = timerange2indexrange(timerange, time)
-
+    # extract indeces of data to be plotted
     Tsampling = convert(Float64, time.step)
-
     steps = round(Int, Tgif/Tsampling)
-
-    # determine the index for animation for-loop
+    dataindex = timerange2indexrange(timerange, time)
     if dataindex == Colon()
         animindex = 1:steps:size(time[dataindex], 1)
     else
         animindex = dataindex[1]:steps:dataindex[end]
     end
 
-    # create animation
-    prog = Progress(length(animindex), 1, "Generating animation...", 50)   # progress meter
-    anim = @animate for idx = animindex
-        frame = getframe(time[idx], Tsampling, frames)
-        dispframe(time[idx], refframe, frame)
+    # vectors for the corrdinate frame
+    (ref_x, ref_y, ref_z) = _Frame2Arrows(refframe)
+    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[animindex[1]])
 
-        next!(prog) # update the progress meter
+    # set observables
+    obs_x = Observable(BRF_x)
+    obs_y = Observable(BRF_y)
+    obs_z = Observable(BRF_z)
+
+    # create instance
+    fig = Figure(; resolution = (600, 600))
+    ax = Axis3(
+        fig[1, 1],
+        xlabel = "x label",
+        ylabel = "y label",
+        zlabel = "z label",
+        elevation = pi/6,
+        azimuth   = pi/4,
+        aspect = :data,
+        viewmode = :fit,
+        limits = (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+    )
+    hidespines!(ax)
+    hidedecorations!(ax)
+
+    # plot frame vectors
+    _plot_frame!(ax, ref_x, ref_y, ref_z, refaxiscolors)
+    _plot_frame!(ax, obs_x, obs_y, obs_z, axiscolors)
+
+    # create animation
+    prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
+    record(fig, filename, animindex; framerate = FPS) do idx
+
+        # update values
+        (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[idx])
+
+        # update observables
+        obs_x[] = BRF_x
+        obs_y[] = BRF_y
+        obs_z[] = BRF_z
+
+        ax.title = "Time: $(time[idx]) (s)"
+
+        # update progress meter
+        next!(prog)
     end
 
-    # make gif image
-    gifanime = gif(anim, "attitude.gif", fps = FPS)
-
-    return gifanime
-end
-
-function _frame_vector!(vec::SVector{3, <:Real}, argcolor; arglinewidth = 4)
-    fig = quiver!(
-        [0], [0], [0],
-        quiver = (
-            [vec[1]],
-            [vec[2]],
-            [vec[3]]),
-        color = argcolor,
-        linewidth = arglinewidth,
-        framestyle = :origin)
-
-    xlims!(-1.0, 1.0)
-    ylims!(-1.0, 1.0)
-    zlims!(-1.0, 1.0)
-
-    return fig
 end
 
 end
