@@ -115,6 +115,7 @@ function animate_attitude(
     _plot_frame!(ax, obs_x, obs_y, obs_z, axiscolors)
 
     # create animation
+    prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
     record(fig, "attitude.mp4", animindex; framerate = FPS) do idx
 
         # update values
@@ -127,6 +128,8 @@ function animate_attitude(
 
         ax.title = "Time: $(time[idx]) (s)"
 
+        # update progress meter
+        next!(prog)
     end
 
 end
