@@ -1,7 +1,7 @@
 module FramePlot
 
 using GLMakie, ProgressMeter, StaticArrays, ColorTypes
-using ...UtilitiesBase, ...DataContainers, ...Frames
+using ...UtilitiesBase, ...DataContainers, ...Frames, ...KinematicsBase, ...OrbitBase
 
 export animate_attitude
 
@@ -70,8 +70,7 @@ Generates animation of frame rotation as GIF figure
 """
 function animate_attitude(
     time::StepRangeLen,
-    refframe::Frame,
-    frames::Vector{<:Frame};
+    RPYangles::Vector{<:SVector{3}};
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
@@ -88,9 +87,12 @@ function animate_attitude(
         animindex = dataindex[1]:steps:dataindex[end]
     end
 
+    # get initial body reference frame
+    C_LVLH2BRF = euler2dcm(RPYangles[1])
+    BRF = C_LVLH2BRF * LVLHUnitFrame
+
     # vectors for the corrdinate frame
-    (ref_x, ref_y, ref_z) = _Frame2Arrows(refframe)
-    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[animindex[1]])
+    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
     # spacecraft body polygon
     spacecraft = get_spacecraft_polygon()
@@ -99,7 +101,6 @@ function animate_attitude(
     obs_x = Observable(BRF_x)
     obs_y = Observable(BRF_y)
     obs_z = Observable(BRF_z)
-
     obs_spacecraft_points = Observable(spacecraft.points)
 
     # create instance
@@ -119,7 +120,6 @@ function animate_attitude(
     hidedecorations!(ax)
 
     # plot frame vectors
-    _plot_frame!(ax, ref_x, ref_y, ref_z, refaxiscolors)
     _plot_frame!(ax, obs_x, obs_y, obs_z, axiscolors)
 
     # plot spacecraft body
@@ -130,10 +130,11 @@ function animate_attitude(
     record(fig, filename, animindex; framerate = FPS) do idx
 
         # update values
-        (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[idx])
+        C_LVLH2BRF = euler2dcm(RPYangles[idx])
+        BRF = C_LVLH2BRF * LVLHUnitFrame
+        (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
-        C = euler2dcm([0, 0, 0])
-        spacecraft_points = C * spacecraft.points
+        spacecraft_points = C_LVLH2BRF * spacecraft.points
 
         # update observables
         obs_x[] = BRF_x
