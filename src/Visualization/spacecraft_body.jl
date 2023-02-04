@@ -6,6 +6,24 @@ end
 
 Base.:*(C::SMatrix{3, 3, <:Real}, points::AbstractVector{Point{Dim, T}}) where {Dim, T} = map(point -> Point{Dim, T}(C * point) , points)
 
+const label_positions = [
+    Point3{Float64}(1.5, 0.0, 0.0),
+    Point3{Float64}(-1.5, 0.0, 0.0),
+    Point3{Float64}(0.0, 1.5, 0.0),
+    Point3{Float64}(0.0, -1.5, 0.0),
+    Point3{Float64}(0.0, 0.0, 1.5),
+    Point3{Float64}(0.0, 0.0, -1.5),
+]
+
+const label_texts = [
+    "FWD",
+    "AFT",
+    "PRT",
+    "STB",
+    "ZNT",
+    "NDR"
+]
+
 function get_spacecraft_polygon()
 
     faces = [

@@ -114,7 +114,7 @@ function animate_attitude(
         azimuth   = pi/4,
         aspect = :data,
         viewmode = :fit,
-        limits = (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+        limits = (-1.5, 1.5, -1.5, 1.5, -1.5, 1.5)
     )
     hidespines!(ax)
     hidedecorations!(ax)
@@ -124,6 +124,16 @@ function animate_attitude(
 
     # plot spacecraft body
     mesh!(ax, obs_spacecraft_points, spacecraft.faces, color = :yellow ,shading = true)
+
+    # directions
+    text!(
+        label_positions,
+        text = label_texts,
+        align = (:center, :center),
+    )
+    lines!(ax, [-1.5, 1.5], [0.0, 0.0], [0.0, 0.0], linestyle = :dash, color = :black, linewidth = 3)
+    lines!(ax, [0.0, 0.0], [-1.5, 1.5], [0.0, 0.0], linestyle = :dash, color = :black, linewidth = 3)
+    lines!(ax, [0.0, 0.0], [0.0, 0.0], [-1.5, 1.5], linestyle = :dash, color = :black, linewidth = 3)
 
     # create animation
     prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
