@@ -1,9 +1,11 @@
 module FramePlot
 
 using GLMakie, ProgressMeter, StaticArrays, ColorTypes
-using ...DataContainers, ...Frames
+using ...UtilitiesBase, ...DataContainers, ...Frames
 
 export animate_attitude
+
+include("spacecraft_body.jl")
 
 # RGB color setting for frame plots
 const axiscolors = [
@@ -90,10 +92,15 @@ function animate_attitude(
     (ref_x, ref_y, ref_z) = _Frame2Arrows(refframe)
     (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[animindex[1]])
 
+    # spacecraft body polygon
+    spacecraft = get_spacecraft_polygon()
+
     # set observables
     obs_x = Observable(BRF_x)
     obs_y = Observable(BRF_y)
     obs_z = Observable(BRF_z)
+
+    obs_spacecraft_points = Observable(spacecraft.points)
 
     # create instance
     fig = Figure(; resolution = (600, 600))
@@ -115,6 +122,9 @@ function animate_attitude(
     _plot_frame!(ax, ref_x, ref_y, ref_z, refaxiscolors)
     _plot_frame!(ax, obs_x, obs_y, obs_z, axiscolors)
 
+    # plot spacecraft body
+    mesh!(ax, obs_spacecraft_points, spacecraft.faces, color = :yellow ,shading = true)
+
     # create animation
     prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
     record(fig, filename, animindex; framerate = FPS) do idx
@@ -122,10 +132,14 @@ function animate_attitude(
         # update values
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[idx])
 
+        C = euler2dcm([0, 0, 0])
+        spacecraft_points = C * spacecraft.points
+
         # update observables
         obs_x[] = BRF_x
         obs_y[] = BRF_y
         obs_z[] = BRF_z
+        obs_spacecraft_points[] = spacecraft_points
 
         ax.title = "Time: $(time[idx]) (s)"
 
