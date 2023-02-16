@@ -32,6 +32,6 @@ fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
 display(fig5)
 
 
-animate_attitude(simdata.time, T_UnitFrame2LVLHFrame * UnitFrame, simdata.attitude.RPYframe)
+animate_attitude(simdata.time, simdata.attitude.eulerangle)
 
 println("Simulation time : $(simtime.time) (s)")

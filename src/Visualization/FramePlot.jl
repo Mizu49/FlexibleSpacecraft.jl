@@ -1,9 +1,11 @@
 module FramePlot
 
 using GLMakie, ProgressMeter, StaticArrays, ColorTypes
-using ...DataContainers, ...Frames
+using ...UtilitiesBase, ...DataContainers, ...Frames, ...KinematicsBase, ...OrbitBase
 
 export animate_attitude
+
+include("spacecraft_body.jl")
 
 # RGB color setting for frame plots
 const axiscolors = [
@@ -68,8 +70,7 @@ Generates animation of frame rotation as GIF figure
 """
 function animate_attitude(
     time::StepRangeLen,
-    refframe::Frame,
-    frames::Vector{<:Frame};
+    RPYangles::Vector{<:SVector{3}};
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
@@ -86,14 +87,21 @@ function animate_attitude(
         animindex = dataindex[1]:steps:dataindex[end]
     end
 
+    # get initial body reference frame
+    C_LVLH2BRF = euler2dcm(RPYangles[1])
+    BRF = C_LVLH2BRF * LVLHUnitFrame
+
     # vectors for the corrdinate frame
-    (ref_x, ref_y, ref_z) = _Frame2Arrows(refframe)
-    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[animindex[1]])
+    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
+
+    # spacecraft body polygon
+    spacecraft = get_spacecraft_polygon()
 
     # set observables
     obs_x = Observable(BRF_x)
     obs_y = Observable(BRF_y)
     obs_z = Observable(BRF_z)
+    obs_spacecraft_points = Observable(spacecraft.points)
 
     # create instance
     fig = Figure(; resolution = (600, 600))
@@ -106,26 +114,43 @@ function animate_attitude(
         azimuth   = pi/4,
         aspect = :data,
         viewmode = :fit,
-        limits = (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+        limits = (-1.5, 1.5, -1.5, 1.5, -1.5, 1.5)
     )
     hidespines!(ax)
     hidedecorations!(ax)
 
     # plot frame vectors
-    _plot_frame!(ax, ref_x, ref_y, ref_z, refaxiscolors)
     _plot_frame!(ax, obs_x, obs_y, obs_z, axiscolors)
+
+    # plot spacecraft body
+    mesh!(ax, obs_spacecraft_points, spacecraft.faces, color = :yellow ,shading = true)
+
+    # directions
+    text!(
+        label_positions,
+        text = label_texts,
+        align = (:center, :center),
+    )
+    lines!(ax, [-1.5, 1.5], [0.0, 0.0], [0.0, 0.0], linestyle = :dash, color = :black, linewidth = 3)
+    lines!(ax, [0.0, 0.0], [-1.5, 1.5], [0.0, 0.0], linestyle = :dash, color = :black, linewidth = 3)
+    lines!(ax, [0.0, 0.0], [0.0, 0.0], [-1.5, 1.5], linestyle = :dash, color = :black, linewidth = 3)
 
     # create animation
     prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
     record(fig, filename, animindex; framerate = FPS) do idx
 
         # update values
-        (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(frames[idx])
+        C_LVLH2BRF = euler2dcm(RPYangles[idx])
+        BRF = C_LVLH2BRF * LVLHUnitFrame
+        (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
+
+        spacecraft_points = C_LVLH2BRF * spacecraft.points
 
         # update observables
         obs_x[] = BRF_x
         obs_y[] = BRF_y
         obs_z[] = BRF_z
+        obs_spacecraft_points[] = spacecraft_points
 
         ax.title = "Time: $(time[idx]) (s)"
 
