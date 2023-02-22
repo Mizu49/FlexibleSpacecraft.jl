@@ -136,7 +136,7 @@ function animate_attitude(
     lines!(ax, [0.0, 0.0], [0.0, 0.0], [-1.5, 1.5], linestyle = :dash, color = :black, linewidth = 3)
 
     # create animation
-    prog = Progress(length(animindex), 1, "Generating animation...", 20) # progress meter
+    prog = Progress(length(animindex), 1, "Animating...", 20) # progress meter
     record(fig, filename, animindex; framerate = FPS) do idx
 
         # update values

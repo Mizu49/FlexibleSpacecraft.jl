@@ -80,7 +80,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     tl = _init_datacontainers(simconfig, initvalue, appendageinfo.model, orbitinfo)
 
     ### main loop of the simulation
-    progress = Progress(tl.datanum, 1, "Simulation running...", 50)   # progress meter
+    progress = Progress(tl.datanum, 1, "Running...", 20)   # progress meter
     for simcnt = 1:tl.datanum
 
         # variables
