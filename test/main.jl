@@ -31,7 +31,7 @@ end
 fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
 display(fig5)
 
-
-animate_attitude(simdata.time, simdata.attitude.eulerangle)
+# spacecraft attitude animation
+# animate_attitude(simdata.time, simdata.attitude.eulerangle)
 
 println("Simulation time : $(simtime.time) (s)")
