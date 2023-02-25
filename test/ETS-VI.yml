@@ -13,17 +13,14 @@ initial value:
 
 attitude dynamics:
     model: Linear coupling
-    inertia: [
-        15762.6, -183.0, -89.0,
-        -183.0, 5354.0, 217.0,
-        -89.0, 217.0, 14832.6
-    ]
-
-    coupling: [
-        1, 0,
-        0, 1,
+    inertia:
+        15762.6,  -183.0,   -89.0
+         -183.0,  5354.0,   217.0
+          -89.0,   217.0, 14832.6
+    coupling:
+        1, 0
+        0, 1
         0, 0
-    ]
 
 disturbance:
     constant torque: [0.0, 0.0, 0.0]
@@ -51,34 +48,29 @@ appendage:
     system:
         coord: physical
         DOF: 2
-        mass: [
-            100, 0,
-            0, 50
-        ]
-        stiffness: [
-            6e4, -1e4,
-            -1e4, 1e4
-        ]
+        mass:
+            100,  0
+            0  , 50
+        stiffness:
+            6e4 , -1e4
+            -1e4,  1e4
         damping:
             config: Rayleigh
             alpha: 0
             beta: 0.005
-        coupling: [
-                1, 0, 0,
+        coupling:
+                1, 0, 0
                 0, 1, 0
-            ]
         control input:
             dimension: 1
-            coefficient: [
-                    5,
-                    0
-                ]
+            coefficient:
+                5
+                0
         disturbance input:
             dimension: 1
-            coefficient: [
-                    3,
-                    0
-                ]
+            coefficient:
+                3
+                0
     disturbance:
         type: vibration
         dimension: 1
@@ -89,18 +81,15 @@ appendage:
 attitude controller:
     strategy: PID
     config:
-        Pgain: [
-            100, 0, 0,
-            0, 100, 0,
-            0, 0, 100
-        ]
-        Igain: [
-            0, 0, 0,
-            0, 0, 0,
+        Pgain:
+            100,   0,   0
+            0  , 100,   0
+            0  ,   0, 100
+        Igain:
             0, 0, 0
-        ]
-        Dgain: [
-            0, 0, 0,
-            0, 0, 0,
             0, 0, 0
-        ]
+            0, 0, 0
+        Dgain:
+            0, 0, 0
+            0, 0, 0
+            0, 0, 0

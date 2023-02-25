@@ -104,10 +104,10 @@ end
 information of the flexible appendages
 """
 struct AppendageInfo
-    params::AbstractAppendageParameters
-    model::AbstractAppendageModel
-    internals::AbstractAppendageInternals
-    disturbance::StructureDisturbance.AbstractAppendageDisturbance
+    params::Union{AbstractAppendageParameters, Nothing}
+    model::Union{AbstractAppendageModel, Nothing}
+    internals::Union{AbstractAppendageInternals, Nothing}
+    disturbance::Union{StructureDisturbance.AbstractAppendageDisturbance, Nothing}
 end
 
 """

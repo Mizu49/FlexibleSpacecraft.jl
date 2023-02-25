@@ -139,7 +139,7 @@ function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
 
     _update_orbitinternals!(orbitinfo.internals, angularvelocity, angularposition)
 
-    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
+    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, angularposition)
 
     return (C_ECI2LVLH, angularvelocity, angularposition)
 end
