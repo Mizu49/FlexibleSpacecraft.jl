@@ -14,9 +14,9 @@ initial value:
 attitude dynamics:
     model: Linear coupling
     inertia: [
-        1000, 0, 0,
-        0, 1000, 0,
-        0, 0, 1000
+        15762.6, -183.0, -89.0,
+        -183.0, 5354.0, 217.0,
+        -89.0, 217.0, 14832.6
     ]
 
     coupling: [

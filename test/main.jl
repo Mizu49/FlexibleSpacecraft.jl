@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft.yml"
+paramfilepath = "./test/ETS-VI.yml"
 (simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
@@ -31,7 +31,7 @@ end
 fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
 display(fig5)
 
-
-animate_attitude(simdata.time, simdata.attitude.eulerangle)
+# spacecraft attitude animation
+# animate_attitude(simdata.time, simdata.attitude.eulerangle)
 
 println("Simulation time : $(simtime.time) (s)")
