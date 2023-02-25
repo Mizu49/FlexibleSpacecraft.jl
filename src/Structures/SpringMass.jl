@@ -518,8 +518,8 @@ function defmodel(paramdict::AbstractDict)
     DOF = paramdict["system"]["DOF"]
 
     # read the parameters from the dictionary
-    M = yamlread2matrix(paramdict["system"]["mass"], (DOF, DOF))
-    K = yamlread2matrix(paramdict["system"]["stiffness"], (DOF, DOF))
+    M = yamlread2matrix(paramdict["system"]["mass"])
+    K = yamlread2matrix(paramdict["system"]["stiffness"])
 
     if paramdict["system"]["damping"]["config"] == "Rayleigh"
         alpha = paramdict["system"]["damping"]["alpha"]
@@ -530,12 +530,12 @@ function defmodel(paramdict::AbstractDict)
     end
 
     dimcontrolinput = paramdict["system"]["control input"]["dimension"]
-    Ectrl = yamlread2matrix(paramdict["system"]["control input"]["coefficient"], (DOF, dimcontrolinput))
+    Ectrl = yamlread2matrix(paramdict["system"]["control input"]["coefficient"])
 
     dimdistinput = paramdict["system"]["control input"]["dimension"]
-    Edist = yamlread2matrix(paramdict["system"]["disturbance input"]["coefficient"], (DOF, dimdistinput))
+    Edist = yamlread2matrix(paramdict["system"]["disturbance input"]["coefficient"])
 
-    Ecoupling = yamlread2matrix(paramdict["system"]["coupling"], (DOF, 3))
+    Ecoupling = yamlread2matrix(paramdict["system"]["coupling"])
 
     # define the parameters struct
     params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)
