@@ -1,8 +1,12 @@
 module UtilitiesBase
 
-using StaticArrays
+using StaticArrays, DelimitedFiles
 
 export check_size, C1, C2, C3, yamlread2matrix, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
+
+
+# delimiter is comma
+const delimiter = ','
 
 """
     check_size
@@ -95,11 +99,31 @@ function that converts the direct read data from YAML file into the Matrix
 
 # Argument
 
-* `x::AbstractVector`: direct read data from YAML
-* `size::Tuple{<:Int, <:Int}`: size of the desired matrix
+* `yamldata::String`: direct read data from YAML
+
+# YAML format for matrix A
+
+```yaml
+A :
+    1 2 3
+    4 5 6
+    7 8 9
+```
+
+This can be read as follows:
+
+```julia
+data = YAML.load_file(YAMLfilename)
+
+matrixA = yamlread2matrix(data["A"])
+```
+
 """
-@inline function yamlread2matrix(x::AbstractVector, size::Tuple{<:Int, <:Int})
-    return Matrix(transpose(reshape(x, reverse(size))))
+@inline function yamlread2matrix(yamldata::String)
+
+    matrix = readdlm(IOBuffer(yamldata), delimiter)
+
+    return matrix
 end
 
 """
