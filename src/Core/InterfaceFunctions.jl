@@ -32,13 +32,23 @@ end
 
 calculate the states of the orbital dynamics of spacecraft
 """
-function _calculate_orbit!(
-    orbitinfo::Union{OrbitInfo, Nothing},
-    currenttime::Real)
+function _calculate_orbit!(orbitinfo::OrbitInfo, currenttime::Real)
 
-    (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = OrbitBase.update_orbitstate!(orbitinfo, currenttime)
+    # call the function in module `OrbitBase`
+    (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, currenttime)
 
     return (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition)
+end
+
+function _calculate_orbit!(orbitinfo::Nothing, currentime::Real)
+    # orbital dynamics is not considered
+    angularvelocity = 0.0
+    angularposition = 0.0
+
+    # rotation matrix is identity
+    C_ECI2LVLH = SMatrix{3, 3}(I)
+
+    return (C_ECI2LVLH, angularvelocity, angularposition)
 end
 
 """

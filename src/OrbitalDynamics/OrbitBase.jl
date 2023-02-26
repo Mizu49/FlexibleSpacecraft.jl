@@ -139,18 +139,7 @@ function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
 
     _update_orbitinternals!(orbitinfo.internals, angularvelocity, angularposition)
 
-    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, orbit_angularposition)
-
-    return (C_ECI2LVLH, angularvelocity, angularposition)
-end
-
-function update_orbitstate!(orbitinfo::Nothing, currenttime::Real)::Tuple
-
-    angularvelocity = 0.0
-    angularposition = 0.0
-
-    # rotation matrix is identity
-    C_ECI2LVLH = SMatrix{3, 3}(I)
+    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, angularposition)
 
     return (C_ECI2LVLH, angularvelocity, angularposition)
 end
