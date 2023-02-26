@@ -5,7 +5,12 @@
 
 initialize data container
 """
-function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
+function _init_datacontainers(
+    simconfig::SimulationConfig,
+    initvalue::InitKinematicsData,
+    appendageinfo::Union{AppendageInfo, Nothing},
+    orbitinfo::Union{OrbitInfo, Nothing}
+    )::SimData
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
 
@@ -16,7 +21,11 @@ function _init_datacontainers(simconfig, initvalue, strmodel, orbitinfo)
     attitude = initattitudedata(datanum, initvalue)
 
     # initialize data container for the structural motion of the flexible appendages
-    appendages = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
+    if isnothing(appendageinfo)
+        appendages = nothing
+    else
+        appendages = initappendagedata(appendageinfo, [0, 0, 0, 0], datanum)
+    end
 
     # initialize orbit state data array
     orbit = initorbitdata(datanum, orbitinfo)
@@ -129,31 +138,37 @@ calculate the state of the flexible appendages.
 This function is the interface to the flexible appendages simulation
 """
 function _calculate_flexible_appendages!(
-    appendageinfo::StructuresBase.AppendageInfo,
-    datacontainer::Union{AppendageData, Nothing},
+    appendageinfo::AppendageInfo,
+    datacontainer::AppendageData,
     currenttime::Real,
     simcnt::Integer
     )::Tuple
 
-    # check if the flexible appendages exist
-    if isnothing(appendageinfo.model)
-        # return nothing if flexible appendages don't exist
-        distinput = nothing
-        ctrlinput = nothing
-    else
-        # obtain state of the flexible appendages
-        datacontainer.physicalstate[simcnt] = modalstate2physicalstate(appendageinfo.model, appendageinfo.internals.currentstate)
+    # obtain state of the flexible appendages
+    datacontainer.physicalstate[simcnt] = modalstate2physicalstate(appendageinfo.model, appendageinfo.internals.currentstate)
 
-        # disturbance input
-        distinput = calcstrdisturbance(appendageinfo.disturbance, currenttime)
+    # disturbance input
+    distinput = calcstrdisturbance(appendageinfo.disturbance, currenttime)
 
-        # controller of the flexible appendages (for future development)
-        ctrlinput = 0
+    # controller of the flexible appendages (for future development)
+    ctrlinput = 0
 
-        # data log
-        datacontainer.controlinput[simcnt] = ctrlinput
-        datacontainer.disturbance[simcnt] = distinput
-    end
+    # data log
+    datacontainer.controlinput[simcnt] = ctrlinput
+    datacontainer.disturbance[simcnt] = distinput
+
+    return (distinput, ctrlinput)
+end
+
+function _calculate_flexible_appendages!(
+    appendageinfo::Nothing,
+    datacontainer::Nothing,
+    currenttime::Real,
+    simcnt::Integer
+    )::Tuple
+
+    distinput = nothing
+    ctrlinput = nothing
 
     return (distinput, ctrlinput)
 end
@@ -164,21 +179,34 @@ end
 calculate the coupling term of the attitude dynamics and structural dynamics
 """
 function _calculate_coupling_input(
-    strmodel::Union{AbstractAppendageModel, Nothing},
-    strinternals::Union{AppendageInternals, Nothing},
+    appendageinfo::AppendageInfo,
     attitudedata::AttitudeData,
     simcnt::Integer
     )::Tuple
 
     # calculation of the structural response input for the attitude dynamics
-    if isnothing(strinternals)
-        # no simulation for flexible appendages
-        str_accel = nothing
-        str_velocity = nothing
-    else
-        str_accel    = SVector{2}(strinternals.currentaccel)
-        str_velocity = SVector{2}(strinternals.currentstate[(strmodel.DOF+1):end])
-    end
+    str_accel    = SVector{2}(appendageinfo.internals.currentaccel)
+    str_velocity = SVector{2}(appendageinfo.internals.currentstate[(appendageinfo.model.DOF+1):end])
+
+    # attitude dynamics
+    attitude_angular_velocity = attitudedata.angularvelocity[simcnt]
+
+    # create named tuple
+    structure2attitude = (accel = str_accel, velocity = str_velocity)
+    attitude2structure = (angularvelocity = attitude_angular_velocity,)
+
+    return (structure2attitude, attitude2structure)
+end
+
+function _calculate_coupling_input(
+    appendageinfo::Nothing,
+    attitudedata::AttitudeData,
+    simcnt::Integer
+)::Tuple
+
+    # no data available when flexible appendages are not considered
+    str_accel    = nothing
+    str_velocity = nothing
 
     # attitude dynamics
     attitude_angular_velocity = attitudedata.angularvelocity[simcnt]

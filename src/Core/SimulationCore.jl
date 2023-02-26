@@ -69,7 +69,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     initvalue::InitKinematicsData,
     orbitinfo::Union{OrbitInfo, Nothing},
     attidistinfo::AttitudeDisturbanceInfo,
-    appendageinfo::StructuresBase.AppendageInfo,
+    appendageinfo::Union{AppendageInfo, Nothing},
     simconfig::SimulationConfig,
     attitude_controller::AbstractAttitudeController
     )::SimData
@@ -79,7 +79,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     Ts = simconfig.samplingtime
 
     # Data containers
-    tl = _init_datacontainers(simconfig, initvalue, appendageinfo.model, orbitinfo)
+    tl = _init_datacontainers(simconfig, initvalue, appendageinfo, orbitinfo)
 
     ### main loop of the simulation
     progress = Progress(tl.datanum, 1, "Running...", 20)   # progress meter
@@ -105,7 +105,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(appendageinfo, tl.appendages, currenttime, simcnt)
 
         ### attitude-structure coupling dynamics
-        (structure2attitude, attitude2structure) = _calculate_coupling_input(appendageinfo.model, appendageinfo.internals, tl.attitude, simcnt)
+        (structure2attitude, attitude2structure) = _calculate_coupling_input(appendageinfo, tl.attitude, simcnt)
 
         ### Time evolution of the system
         if simcnt != tl.datanum
@@ -117,8 +117,8 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
             tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
             # Update the state of the flexible appendages
-            if !isnothing(appendageinfo.model)
-                tl.appendages.state[simcnt+1] = update_strstate!(appendageinfo.model, appendageinfo.internals, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
+            if !isnothing(appendageinfo)
+                tl.appendages.state[simcnt+1] = update_appendages!(appendageinfo, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
             end
         end
 
