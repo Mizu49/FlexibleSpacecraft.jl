@@ -87,15 +87,6 @@ function initorbitdata(datanum::Integer, orbitinfo::OrbitInfo)::OrbitData
     )
 end
 
-function initorbitdata(datanum::Integer, orbitinfo::Nothing)::OrbitData
-    return OrbitData(
-        zeros(datanum),
-        zeros(datanum),
-        initframes(datanum, Frames.UnitFrame)
-    )
-end
-
-
 """
     setorbit
 
@@ -132,7 +123,7 @@ function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity
     return
 end
 
-function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
+function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)
 
     angularvelocity = _get_angularvelocity(orbitinfo.dynamicsmodel)
     angularposition = angularvelocity * currenttime
@@ -141,7 +132,7 @@ function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)::Tuple
 
     C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, angularposition)
 
-    return (C_ECI2LVLH, angularvelocity, angularposition)
+    return C_ECI2LVLH
 end
 
 """

@@ -89,14 +89,14 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         currenttime = tl.time[simcnt]
 
         ### orbit state
-        (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = _calculate_orbit!(orbitinfo, currenttime)
+        C_ECI2LVLH = _calculate_orbit!(orbitinfo, tl.orbit, simcnt, currenttime)
 
         ### attitude state
         (C_ECI2Body, C_LVLH2BRF, RPYangle) = _calculate_attitude_state!(attitudemodel, tl.attitude, simcnt, C_ECI2LVLH)
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, currenttime, attitudemodel, tl.orbit.angularvelocity[simcnt], tl.orbit.LVLH[simcnt], C_ECI2Body)
+        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, currenttime, attitudemodel, orbitinfo, C_ECI2LVLH, C_ECI2Body)
 
         # control input
         attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)

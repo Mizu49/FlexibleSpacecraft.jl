@@ -28,7 +28,11 @@ function _init_datacontainers(
     end
 
     # initialize orbit state data array
-    orbit = initorbitdata(datanum, orbitinfo)
+    if isnothing(orbitinfo)
+        orbit = nothing
+    else
+        orbit = initorbitdata(datanum, orbitinfo)
+    end
 
     # initialize simulation data container
     tl = SimData(time, datanum, attitude, appendages, orbit)
@@ -41,23 +45,35 @@ end
 
 calculate the states of the orbital dynamics of spacecraft
 """
-function _calculate_orbit!(orbitinfo::OrbitInfo, currenttime::Real)
+function _calculate_orbit!(
+    orbitinfo::OrbitInfo,
+    orbitdata::OrbitData,
+    simcnt::Integer,
+    currenttime::Real
+    )::SMatrix{3, 3}
 
     # call the function in module `OrbitBase`
-    (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition) = update_orbitstate!(orbitinfo, currenttime)
+    C_ECI2LVLH = update_orbitstate!(orbitinfo, currenttime)
 
-    return (C_ECI2LVLH, orbit_angularvelocity, orbit_angularposition)
+    orbitdata.angularposition[simcnt] = orbitinfo.internals.angularposition
+    orbitdata.angularvelocity[simcnt] = orbitinfo.internals.angularvelocity
+    orbitdata.LVLH[simcnt] = C_ECI2LVLH * UnitFrame
+
+    return C_ECI2LVLH
 end
 
-function _calculate_orbit!(orbitinfo::Nothing, currentime::Real)
+function _calculate_orbit!(
+    orbitinfo::Nothing,
+    orbitdata::Nothing,
+    simcnt::Integer,
+    currenttime::Real
+    )::SMatrix{3, 3}
     # orbital dynamics is not considered
-    angularvelocity = 0.0
-    angularposition = 0.0
 
     # rotation matrix is identity
     C_ECI2LVLH = SMatrix{3, 3}(I)
 
-    return (C_ECI2LVLH, angularvelocity, angularposition)
+    return C_ECI2LVLH
 end
 
 """
@@ -99,13 +115,21 @@ function _calculate_attitude_disturbance(
     attidistinfo::AttitudeDisturbanceInfo,
     currenttime::Real,
     attitudemodel::AbstractAttitudeDynamicsModel,
-    orbit_angularvelocity::Real,
-    LVLHframe::Frame,
+    orbitinfo::Union{OrbitInfo, Nothing},
+    C_ECI2LVLH::SMatrix{3, 3},
     C_ECI2Body::SMatrix{3, 3}
     )::SVector{3, Float64}
 
+    if isnothing(orbitinfo)
+        orbit_angularvelocity = 0.0
+    else
+        orbit_angularvelocity = orbitinfo.internals.angularvelocity
+    end
+
+    LVLHframe = C_ECI2LVLH * UnitFrame
+
     # disturbance input calculation
-    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, SMatrix{3,3}(zeros(3,3)), LVLHframe, simconfig.samplingtime)
+    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, C_ECI2LVLH, LVLHframe, simconfig.samplingtime)
 
     # apply transformation matrix
     distinput = C_ECI2Body * distinput
