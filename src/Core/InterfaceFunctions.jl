@@ -154,7 +154,7 @@ end
 calculate the coupling term of the attitude dynamics and structural dynamics
 """
 function _calculate_coupling_input(
-    strmodel::AbstractAppendageModel,
+    strmodel::Union{AbstractAppendageModel, Nothing},
     strinternals::Union{AppendageInternals, Nothing},
     attitudedata::AttitudeData,
     simcnt::Integer
