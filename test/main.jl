@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/ETS-VI.yml"
+paramfilepath = "./test/spacecraft2.yml"
 (simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation

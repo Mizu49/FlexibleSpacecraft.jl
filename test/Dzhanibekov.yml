@@ -13,11 +13,10 @@ initial value:
 
 attitude dynamics:
     model: Rigid body
-    inertia: [
-        300, 0, 0,
-        0, 200, 0,
+    inertia:
+        300, 0, 0
+        0, 200, 0
         0, 0, 100
-    ]
 
 disturbance:
     constant torque: [0.0, 0.0, 0.0]
