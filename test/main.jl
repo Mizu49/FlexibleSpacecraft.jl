@@ -23,7 +23,7 @@ display(fig1)
 display(fig2)
 display(fig3)
 
-if !isnothing(appendageinfo.model)
+if !isnothing(appendageinfo)
     fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
     display(fig4)
 end
