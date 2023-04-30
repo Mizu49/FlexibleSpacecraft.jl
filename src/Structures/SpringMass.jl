@@ -6,9 +6,9 @@ submodule that contains all features for spring-mass modeling of flexible append
 module SpringMass
 
 using LinearAlgebra, StaticArrays
-using ..Utilities
+using ..UtilitiesBase, ..StructuresBase
 
-export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams, defmodel
+export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams
 
 """
     PhysicalSystem
@@ -244,7 +244,7 @@ StateSpace(model::SpringMassModel)
 ```
 
 """
-struct StateSpace
+struct StateSpace<:StructuresBase.AbstractAppendageModel
 
     # dimension of the state and input vectors
     DOF::Int
@@ -468,7 +468,7 @@ struct for accomodating the parameters for the spring mass structural model
 * `Edisturbance::AbstractVecOrMat`: coefficient matrix for the disturbance input
 
 """
-struct SpringMassParams
+struct SpringMassParams<:StructuresBase.AbstractAppendageParameters
     # mass matrix
     M::AbstractMatrix
     # damping matrix
@@ -518,8 +518,8 @@ function defmodel(paramdict::AbstractDict)
     DOF = paramdict["system"]["DOF"]
 
     # read the parameters from the dictionary
-    M = yamlread2matrix(paramdict["system"]["mass"], (DOF, DOF))
-    K = yamlread2matrix(paramdict["system"]["stiffness"], (DOF, DOF))
+    M = yamlread2matrix(paramdict["system"]["mass"])
+    K = yamlread2matrix(paramdict["system"]["stiffness"])
 
     if paramdict["system"]["damping"]["config"] == "Rayleigh"
         alpha = paramdict["system"]["damping"]["alpha"]
@@ -530,12 +530,12 @@ function defmodel(paramdict::AbstractDict)
     end
 
     dimcontrolinput = paramdict["system"]["control input"]["dimension"]
-    Ectrl = yamlread2matrix(paramdict["system"]["control input"]["coefficient"], (DOF, dimcontrolinput))
+    Ectrl = yamlread2matrix(paramdict["system"]["control input"]["coefficient"])
 
     dimdistinput = paramdict["system"]["control input"]["dimension"]
-    Edist = yamlread2matrix(paramdict["system"]["disturbance input"]["coefficient"], (DOF, dimdistinput))
+    Edist = yamlread2matrix(paramdict["system"]["disturbance input"]["coefficient"])
 
-    Ecoupling = yamlread2matrix(paramdict["system"]["coupling"], (DOF, 3))
+    Ecoupling = yamlread2matrix(paramdict["system"]["coupling"])
 
     # define the parameters struct
     params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)

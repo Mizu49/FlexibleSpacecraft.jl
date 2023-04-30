@@ -1,24 +1,34 @@
 module OrbitBase
 
-using ..Frames, ..DataContainers
-using StaticArrays, Reexport
+using ..Frames, ..DataContainers, ..UtilitiesBase
+using StaticArrays, Reexport, LinearAlgebra
 
 const GravityConstant = 6.673e-11
 const EarthMass = 5.974e24
 const EarthGravityConstant = GravityConstant * EarthMass
 
-include("Elements.jl")
-@reexport using .Elements
+abstract type AbstractOrbitalDynamics end
 
-include("NoOrbit.jl")
-@reexport using .NoOrbit
+export AbstractOrbitalDynamics, OrbitInfo, OrbitData, OrbitInternals, initorbitdata, T_UnitFrame2LVLHFrame, LVLHUnitFrame, T_RAT2LVLH, T_LVLH2RPY, setorbit, update_orbitstate!
+
+include("Elements.jl")
+using .Elements
 
 include("Circular.jl")
-@reexport using .Circular
+using .Circular
 
-export OrbitInfo, OrbitData, T_RAT2LVLH, T_LVLHref2rollpitchyaw, LVLHref, setorbit, get_angular_velocity
+include("OrbitalFrames.jl")
+@reexport using .OrbitalFrames
 
-const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
+"""
+    OrbitInternals
+
+struct that contains the information about the current state of the orbital dynamics
+"""
+mutable struct OrbitInternals
+    angularposition::Float64
+    angularvelocity::Float64
+end
 
 """
     OrbitInfo
@@ -26,40 +36,24 @@ const AbstractOrbitModel = Union{NoOrbitModel, CircularOrbit}
 struct that contains the information about the orbital dynamics of the spacecraft
 """
 struct OrbitInfo
-    orbitmodel::AbstractOrbitModel
+    dynamicsmodel::AbstractOrbitalDynamics
     orbitalelement::OrbitalElements
+    internals::OrbitInternals
     planeframe::Frame
     info::String
 
-    OrbitInfo(orbitmodel::AbstractOrbitModel, orbitalelement::OrbitalElements, planeframe::Frame; info::String = "") = begin
-        new(orbitmodel, orbitalelement, planeframe, info)
+    # Constructor
+    OrbitInfo(
+        dynamicsmodel::AbstractOrbitalDynamics,
+        orbitalelement::OrbitalElements,
+        internals::OrbitInternals,
+        planeframe::Frame;
+        info::String = ""
+        )= begin
+            new(dynamicsmodel, orbitalelement, internals, planeframe, info)
     end
 end
 
-"""
-    setorbit
-
-Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
-"""
-function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::OrbitInfo
-
-    if orbitparamdict["Dynamics model"] == "none"
-
-        elements = OrbitalElements(0, 0, 0, 0, 0, 0)
-        orbitinfo = OrbitInfo(NoOrbitModel(), elements, ECI, info = "no orbit simulation");
-
-    elseif orbitparamdict["Dynamics model"] == "Circular"
-        # set the orbital parameter for the circular orbit
-
-        elements = setelements(orbitparamdict["Orbital elements"])
-        orbitmodel = Circular.setorbit(elements)
-        orbitalplaneframe = calc_orbitalframe(elements, ECI)
-
-        orbitinfo = OrbitInfo(orbitmodel, elements, orbitalplaneframe)
-    end
-
-    return orbitinfo
-end
 
 """
     OrbitData
@@ -79,59 +73,106 @@ struct OrbitData
     LVLH::Vector{<:Frame}
 end
 
-function initorbitdata(datanum::Integer, orbitalframe::Frame)
+"""
+    initorbitdata
+
+initialize data container for orbital dynamics
+"""
+function initorbitdata(datanum::Integer, orbitinfo::OrbitInfo)::OrbitData
 
     return OrbitData(
         zeros(datanum),
         zeros(datanum),
-        initframes(datanum, orbitalframe)
+        initframes(datanum, orbitinfo.planeframe)
     )
 end
 
 """
-    T_RAT2LVLH
+    setorbit
 
-Transformation matrix from radial along track frame to LVLH frame. LVLH frame is defined with the replacement of the coordinate of the radial-along-track frame.
+Load the configuration from YAML file and construct the appropriate model for the simulation. Works with the `ParameterSettingBase.jl`.
 """
-const T_RAT2LVLH = SMatrix{3, 3}([0 1 0; 0 0 -1; 1 0 0])
+function setorbit(orbitparamdict::AbstractDict, ECI::Frame)::Union{OrbitInfo, Nothing}
 
-"""
-    T_LVLHref2rollpitchyaw
+    orbitalmodel = orbitparamdict["Dynamics model"]
 
-Transformation matrix from LVLH reference frame to roll-pitch-yaw frame. This transformation matrix converts the reference frame from `UnitFrame` to `LVLHref`.
-"""
-const T_LVLHref2rollpitchyaw = SMatrix{3, 3}([0 1 0; 0 0 1; -1 0 0])
+    if orbitalmodel == "none"
 
-"""
-    LVLHref
+        return nothing
 
-    Reference unit frame for the LVLH frame
-"""
-const LVLHref = Frame([1, 0, 0], [0, -1, 0], [0, 0, -1])
+    elseif orbitalmodel == "Circular"
+        # set the orbital parameter for the circular orbit
+        elements = Elements.setelements(orbitparamdict["Orbital elements"])
+        dynamicsmodel = Circular.setorbit(elements)
+        orbitalplaneframe = OrbitalFrames.calc_orbitalframe(elements, ECI)
+        orbitinternals = OrbitInternals(0, 0)
 
+        orbitinfo = OrbitInfo(dynamicsmodel, elements, orbitinternals, orbitalplaneframe)
 
-function get_angular_velocity(orbitmodel::CircularOrbit)
-    Circular.get_angular_velocity(orbitmodel)
+        return orbitinfo
+    else
+        error("orbital model \"$orbitalmodel\" not found")
+    end
 end
 
-function get_angular_velocity(orbitmodel::NoOrbitModel)
-    NoOrbit.get_angular_velocity(orbitmodel)
+function _update_orbitinternals!(orbitinternals::OrbitInternals, angularvelocity::Real, angularposition::Real)::Nothing
+
+    orbitinternals.angularvelocity = angularvelocity
+    orbitinternals.angularposition = angularposition
+
+    return
 end
 
-function get_velocity(orbitmodel::CircularOrbit)
-    CircularOrbit.get_velocity(orbitmodel)
+function update_orbitstate!(orbitinfo::OrbitInfo, currenttime::Real)
+
+    angularvelocity = _get_angularvelocity(orbitinfo.dynamicsmodel)
+    angularposition = angularvelocity * currenttime
+
+    _update_orbitinternals!(orbitinfo.internals, angularvelocity, angularposition)
+
+    C_ECI2LVLH = ECI2ORF(orbitinfo.orbitalelement, angularposition)
+
+    return C_ECI2LVLH
 end
 
-function get_velocity(orbitmodel::NoOrbitModel)
-    NoOrbit.get_velocity(orbitmodel)
+"""
+    transformation matrix from unit frame to LVLH referential frame
+"""
+const T_UnitFrame2LVLHFrame = diagm([1.0, -1.0, -1.0])
+
+"""
+    LVLH referential frame
+"""
+const LVLHUnitFrame = Frame([1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0])
+
+"""
+    rotational matrix that transfers from radial-along-track (RAT) to local-vertical local-horizontal (LVLH) attitude representation
+"""
+T_RAT2LVLH = C1(-pi/2) * C3(pi/2)
+
+function _get_angularvelocity(dynamicsmodel::CircularOrbit)::Float64
+    Circular.get_angular_velocity(dynamicsmodel)
 end
 
-function get_timeperiod(orbitmodel::CircularOrbit; unit = "second")
-    CircularOrbit.get_timeperiod(orbitmodel, unit)
+function _get_angularvelocity(dynamicsmodel::Nothing)::Float64
+    return 0.0
 end
 
-function get_timeperiod(orbitmodel::NoOrbitModel; unit = "second")
-    NoOrbit.get_timeperiod(orbitmodel, unit = unit)
+function get_velocity(dynamicsmodel::CircularOrbit)::Float64
+    CircularOrbit.get_velocity(dynamicsmodel)
+end
+
+function get_velocity(dynamicsmodel::Nothing)::Float64
+    return 0.0
+end
+
+function get_timeperiod(dynamicsmodel::CircularOrbit; unit = "second")::Float64
+    timeperiod = CircularOrbit.get_timeperiod(dynamicsmodel, unit)
+    return timeperiod
+end
+
+function get_timeperiod(dynamicsmodel::Nothing; unit = "second")::Float64
+    return 0.0
 end
 
 end

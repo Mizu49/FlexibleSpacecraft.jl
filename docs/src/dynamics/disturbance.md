@@ -1,10 +1,11 @@
 # Disturbance input to attitude dynamics
 
-Disturbance input for attitude motion is crucial to model how the spacecraft attitude changes from the effect of the outer environment. `FlexibleSpacecraft.jl` offers a disturbance input generation feature.
+Disturbance input for attitude motion is crucial to model how the spacecraft attitude changes from the effect of the outer environment. A submodule `AttitudeDisturbance.jl` offers a disturbance input generation feature for `FlexibleSpacecraft.jl`.
 
 ## Disturbance input models
 
 * Constant torque input
+* Step disturbance input trajectory
 * Gravitational torque input
 
 ## Parameter settings for disturbance input
@@ -12,19 +13,18 @@ Disturbance input for attitude motion is crucial to model how the spacecraft att
 You need an parameter setting YAML file to configure the disturbance input to the spacecraft. The file is presented as follows:
 
 ```yaml
-# set `property` distconfig to indicate that this file configures the disturbance input
-property: distconfig
-
-# set constant torque input with 3-d vector, define it to be [0, 0, 0] if no constant torque is applied
-constant torque: [0.05, 0, 0]
-# Boolean to select if the gravitational torque is considered or not.
-gravitational torque: false
+disturbance:
+    constant torque: [0.0, 0.0, 0.0]
+    gravitational torque: false
+    step trajectory:
+        value: [[10, 0, 0], [0, 0, 0]]
+        endurance: [1, 100]
 ```
 
-## Libraries
+## Libraries for `AttitudeDisturbance.jl`
 
 ```@autodocs
-Modules = [Disturbance]
+Modules = [AttitudeDisturbance]
 Order   = [:type, :function]
-Pages   = ["Disturbance.jl"]
+Pages   = ["AttitudeDisturbance.jl"]
 ```

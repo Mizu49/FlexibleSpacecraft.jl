@@ -1,32 +1,37 @@
-using Test, Profile
+using Test, Profile, GLMakie
 
 include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft.yml"
-(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig) = readparamfile(paramfilepath)
+paramfilepath = "./test/spacecraft2.yml"
+(simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
-simtime = @timed (time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, strdistconfig, simconfig)
+simtime = @timed simdata = runsimulation(attitudemodel, initvalue, orbitinfo, attidistinfo, appendageinfo, simconfig, attitudecontroller)
 
-@test quaternion_constraint(attitudedata.quaternion)
+# test the quaternion value to check the stability of the simulation
+@test quaternion_constraint(simdata.attitude.quaternion)
 
-plottime = @timed begin # measure time for post process
+fig1 = plot_angularvelocity(simdata.time, simdata.attitude.angularvelocity)
+fig2 = plot_quaternion(simdata.time, simdata.attitude.quaternion)
+fig3 = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
 
-    fig1 = PlotRecipe.angularvelocities(time, attitudedata.angularvelocity)
-    fig2 = PlotRecipe.eulerangles(time, attitudedata.eulerangle)
-    fig3 = plot(time, strdata.physicalstate[:, 1])
-    fig3 = plot!(time, strdata.physicalstate[:, 2])
+Makie.inline!(true)
 
-    # file output
-    # location = "output" # specify where to save your data
-    # outputdata = SimData(time, attitudedata, orbitdata)
-    # write(location, outputdata)
+display(fig1)
+display(fig2)
+display(fig3)
 
-    display(fig1)
-    display(fig2)
-    display(fig3)
+if !isnothing(appendageinfo)
+    fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
+    display(fig4)
 end
+
+fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
+display(fig5)
+
+# spacecraft attitude animation
+# animate_attitude(simdata.time, simdata.attitude.eulerangle)
 
 println("Simulation time : $(simtime.time) (s)")

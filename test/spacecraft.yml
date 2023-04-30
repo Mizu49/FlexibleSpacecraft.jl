@@ -1,75 +1,95 @@
 # parameter configuration file for `FlexibleSpacecraft.jl`
 
 config:
-    name: example spacecraft No. 2
+    name: example spacecraft
     note: This model is for test purpose
     sampling time: 1e-3 # Sampling period of simulation (second)
-    time length: 600 # Time length of simulation (second)
+    time length: 100 # Time length of simulation (second)
 
 initial value:
-    quaternion: [0, 0, 0, 1]
+    roll-pitch-yaw: [0, 0, 0]
     angular velocity: [0, 0, 0]
 
 
 attitude dynamics:
     model: Linear coupling
-    inertia: [
-        1000, 0, 0,
-        0, 1000, 0,
+    inertia:
+        1000, 0, 0
+        0, 1000, 0
         0, 0, 1000
-    ]
-
-    coupling: [
-        0, 0,
-        1, 0,
+    coupling:
+        1, 0
         0, 1
-    ]
+        0, 0
 
 disturbance:
     constant torque: [0.0, 0.0, 0.0]
     gravitational torque: false
+    step trajectory:
+        value: [[1, 0, 0], [0, 0, 0]]
+        endurance: [1, 300]
 
 Orbit:
+    # Specify the model used in the simulation of orbital motion
     Dynamics model: none
-
-modeling: spring-mass
+    # Orbital elements
+    Orbital elements:
+        right ascension: 0
+        inclination: 0
+        semimajor axis: 6371e3
+        eccentricity: 0
+        argument of perigee: 0
+        true anomaly at epoch: 0
+    # Note for this parameter setting
+    OrbitInfo: Test orbit parameters
 
 appendage:
     modeling: spring-mass
     system:
         coord: physical
         DOF: 2
-        mass: [
-            100, 0,
+        mass:
+            100, 0
             0, 50
-        ]
-        stiffness: [
-            6e4, -1e4,
+        stiffness:
+            6e4, -1e4
             -1e4, 1e4
-        ]
         damping:
             config: Rayleigh
             alpha: 0
             beta: 0.005
-        coupling: [
-                0, 1, 0,
-                0, 0, 1,
-            ]
+        coupling:
+                1, 0, 0
+                0, 1, 0
         control input:
             dimension: 1
-            coefficient: [
-                    5,
+            coefficient:
+                    5
                     0
-                ]
         disturbance input:
             dimension: 1
-            coefficient: [
-                    3,
+            coefficient:
+                    3
                     0
-                ]
     disturbance:
-        type: no disturbance
+        type: vibration
         dimension: 1
         angular velocity: [1, 0]
-        amplitude: [5000, 0]
+        amplitude: [0, 0]
         phase: [0, 0]
+
+attitude controller:
+    strategy: PID
+    config:
+        Pgain:
+            100, 0, 0
+            0, 100, 0
+            0, 0, 100
+        Igain:
+            0, 0, 0
+            0, 0, 0
+            0, 0, 0
+        Dgain:
+            0, 0, 0
+            0, 0, 0
+            0, 0, 0

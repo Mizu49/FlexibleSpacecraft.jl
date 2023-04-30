@@ -6,140 +6,128 @@ submodule contains the high-level interface functions and core implementation of
 module SimulationCore
 
 using LinearAlgebra, StaticArrays, ProgressMeter
-using ..Frames, ..OrbitBase, ..Disturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase
+using ..UtilitiesBase, ..Frames, ..OrbitBase, ..AttitudeDisturbance, ..DynamicsBase, ..KinematicsBase, ..StructuresBase, ..StructureDisturbance, ..ParameterSettingBase, ..AttitudeControlBase
 
-export runsimulation
+export SimData, runsimulation
 
-############# runsimulation function ##################################
+# function for providing the interface for the simulation feature
+include("InterfaceFunctions.jl")
+
 """
-    runsimulation(attitudemodel, initvalue::KinematicsBase.InitData, orbitinfo::OrbitBase.OrbitInfo, distconfig::DisturbanceConfig, simconfig::SimulationConfig)::Tuple
+    SimData
+
+data container for one simulation result.
+
+# Fields
+
+* `time::StepRangeLen`: time information
+* `datanum::Unsigned`: numbers of simulation data
+* `attitude::AttitudeData`: data container for attitude dynamics
+* `appendages::AppendageData`: data container for the appendages
+* `orbit::OrbitData`: data contaier for orbit data
+
+"""
+struct SimData
+    time::StepRangeLen
+    datanum::Unsigned
+    attitude::AttitudeData
+    appendages::Union{AppendageData, Nothing}
+    orbit::Union{OrbitData, Nothing}
+end
+
+# main functions for simulation
+"""
+    runsimulation
 
 Function that runs simulation of the spacecraft attitude-structure coupling problem
 
 # Arguments
 
-* `attitudemodel`: KinematicsBase dynamics model of the system
-* `strmodel`: Structural model of the flexible appendages
-* `initvalue::InitData`: Inital value of the simulation physical states
-* `orbitinfo::OrbitBase.OrbitInfo`: information and model definition of the orbital dynamics
-* `distconfig::DisturbanceConfig`: Disturbanve torque input configuration
-* `simconfig::SimulationConfig`: Simulation configuration ParameterSettingBase
+* `attitudemodel::AbstractAttitudeDynamicsModel`: dynamics model for the attitude motion
+* `initvalue::InitKinematicsData`: struct of initial values for the simulation
+* `orbitinfo::OrbitInfo`: model and configuration for the orbital motion
+* `orbitinternals::OrbitInternals`: internals of the orbital model
+* `distconfig::DisturbanceConfig`: disturbance configuration for the attitude dynamics
+* `distinternals::Union{DisturbanceInternals, Nothing}`: internals of the disturbance calculation
+*
+* `simconfig::SimulationConfig`: configuration for the overall simulation
+* `attitude_controller::AbstractAttitudeController: configuration of the attitude controller
 
 # Return value
 
-Return is tuple of `(time, attidata, orbitdata, strdata``)`
-
-* `time`: 1-D array of the time
-* `attidata`: Struct of time trajectory of the physical amount states of the spacecraft system
-* `orbitdata`: Struct of the orbit state trajectory
-* `strdata`: Struct of the trajectory of the state of the flexible appendage
+return value is the instance of `SimData`
 
 # Usage
 
 ```julia
-(time, attitudedata, orbitdata, strdata) = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, distconfig, simconfig)
+simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinternals, distconfig, distinternals, strdistconfig, strinternals, simconfig, attitudecontroller)
 ```
 
 """
 @inline function runsimulation(
-    attitudemodel,
-    strmodel,
-    initvalue::KinematicsBase.InitData,
-    orbitinfo::OrbitBase.OrbitInfo,
-    distconfig::DisturbanceConfig,
-    strdistconfig::AbstractStrDistConfig,
-    simconfig::SimulationConfig
-    )::Tuple
+    attitudemodel::AbstractAttitudeDynamicsModel,
+    initvalue::InitKinematicsData,
+    orbitinfo::Union{OrbitInfo, Nothing},
+    attidistinfo::AttitudeDisturbanceInfo,
+    appendageinfo::Union{AppendageInfo, Nothing},
+    simconfig::SimulationConfig,
+    attitude_controller::AbstractAttitudeController
+    )::SimData
 
-    # misc of the simulation implementation
+    ##### Constants
+    # Sampling tl.time
     Ts = simconfig.samplingtime
 
-    # array of the time
-    time = 0:Ts:simconfig.simulationtime
+    # Data containers
+    tl = _init_datacontainers(simconfig, initvalue, appendageinfo, orbitinfo)
 
-    # Numbers of simulation data
-    datanum = floor(Int, simconfig.simulationtime/Ts) + 1;
+    ### main loop of the simulation
+    progress = Progress(tl.datanum, 1, "Running...", 20)   # progress meter
+    for simcnt = 1:tl.datanum
 
-    # Initialize data containers for the attitude dynamics
-    attidata = initattitudedata(datanum, initvalue)
+        # variables
+        currenttime = tl.time[simcnt]
 
-    # initialize data container for the structural motion of the flexible appendages
-    strdata = initappendagedata(strmodel, [0, 0, 0, 0], datanum)
+        ### orbit state
+        C_ECI2LVLH = _calculate_orbit!(orbitinfo, tl.orbit, simcnt, currenttime)
 
-    # transformation matrix from ECI frame to orbital plane frame
-    C_ECI2OrbitPlane = OrbitBase.ECI2OrbitalPlaneFrame(orbitinfo.orbitalelement)
+        ### attitude state
+        (C_ECI2Body, C_LVLH2BRF, RPYangle) = _calculate_attitude_state!(attitudemodel, tl.attitude, simcnt, C_ECI2LVLH)
 
-    # initialize orbit state data array
-    orbitdata = OrbitBase.initorbitdata(datanum, orbitinfo.planeframe)
+        ### input to the attitude dynamics
+        # disturbance input
+        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, currenttime, attitudemodel, orbitinfo, C_ECI2LVLH, C_ECI2Body)
 
-    # main loop of the simulation
-    prog = Progress(datanum, 1, "Simulation running...", 50)   # progress meter
-    for iter = 1:datanum
+        # control input
+        attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)
 
-        ############### orbit state ##################################################
-        orbitdata.angularvelocity[iter] = get_angular_velocity(orbitinfo.orbitmodel)
-        orbitdata.angularposition[iter] = orbitdata.angularvelocity[iter] * time[iter]
+        ### flexible appendages state
+        (structure_disturbance_input, structure_control_input) = _calculate_flexible_appendages!(appendageinfo, tl.appendages, currenttime, simcnt)
 
-        # calculation of the LVLH frame and its transformation matrix
-        C_OrbitPlane2RAT = OrbitalPlaneFrame2RadialAlongTrack(orbitinfo.orbitalelement, orbitdata.angularvelocity[iter], time[iter])
-        C_ECI2LVLH = T_RAT2LVLH * C_OrbitPlane2RAT * C_ECI2OrbitPlane
-        orbitdata.LVLH[iter] = C_ECI2LVLH * RefFrame
+        ### attitude-structure coupling dynamics
+        (structure2attitude, attitude2structure) = _calculate_coupling_input(appendageinfo, tl.attitude, simcnt)
 
-        ############### attitude #####################################################
-        # Update current attitude
-        C_ECI2Body = ECI2BodyFrame(attidata.quaternion[iter])
-        attidata.bodyframe[iter] = C_ECI2Body * RefFrame
-        # update the euler angle representations
-        C_LVLH2Body = T_LVLHref2rollpitchyaw * C_ECI2Body * transpose(C_ECI2LVLH)
-        attidata.RPYframe[iter] = C_LVLH2Body * RefFrame
-        attidata.eulerangle[iter] = dcm2euler(C_LVLH2Body)
-
-        ############### flexible appendages state ####################################
-        strdata.physicalstate[iter] = modalstate2physicalstate(strmodel, strdata.state[iter])
-
-        ############### disturbance torque input to the attitude dynamics ############
-        attidistinput = disturbanceinput(distconfig, attitudemodel.inertia, orbitdata.angularvelocity[iter], C_ECI2Body, C_ECI2LVLH, orbitdata.LVLH[iter].z)
-
-        ############### control and disturbance input to the flexible appendages
-        strdistinput = calcstrdisturbance(strdistconfig, time[iter])
-        strctrlinput = 0
-
-        strdata.controlinput[iter] = strctrlinput
-        strdata.disturbance[iter] = strdistinput
-
-        ############### coupling dynamics of the flexible spacecraft ###############
-
-        # calculation of the structural response input for the attitude dynamics
-        currentstrstate = strdata.state[iter]
-        if iter == 1
-            straccel = currentstrstate[(strmodel.DOF+1):end] / Ts
-        else
-            previousstrstate = strdata.state[iter-1]
-            straccel = (currentstrstate[(strmodel.DOF+1):end] - previousstrstate[(strmodel.DOF+1):end]) / Ts
-        end
-        strvelocity = currentstrstate[(strmodel.DOF+1):end]
-
-        # angular velocity of the attitude dynamics for the structural coupling input
-        attiinput = attidata.angularvelocity[iter]
-
-        ################## Time evolution of the system ##############################
-        if iter != datanum
+        ### Time evolution of the system
+        if simcnt != tl.datanum
 
             # Update angular velocity
-            attidata.angularvelocity[iter+1] = update_angularvelocity(attitudemodel, time[iter], attidata.angularvelocity[iter], Ts, attidata.bodyframe[iter], attidistinput, straccel, strvelocity)
+            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input, structure2attitude.accel, structure2attitude.velocity)
 
             # Update quaternion
-            attidata.quaternion[iter+1] = update_quaternion(attidata.angularvelocity[iter], attidata.quaternion[iter], Ts)
+            tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
             # Update the state of the flexible appendages
-            strdata.state[iter+1] = updatestate(strmodel, Ts, time[iter], strdata.state[iter], attiinput, strctrlinput, strdistinput)
-
+            if !isnothing(appendageinfo)
+                tl.appendages.state[simcnt+1] = update_appendages!(appendageinfo, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
+            end
         end
 
-        next!(prog) # update the progress meter
+        # update the progress meter
+        next!(progress)
     end
 
-    return (time, attidata, orbitdata, strdata)
+    # return simulation data
+    return tl
 end
 
 end

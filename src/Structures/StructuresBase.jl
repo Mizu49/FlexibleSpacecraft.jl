@@ -6,15 +6,20 @@ module for wrapping all the submodules for the structual dynamics for flexible s
 module StructuresBase
 
 using Reexport, YAML, StaticArrays
-using ..Utilities, ..StructureDisturbance
+using ..UtilitiesBase, ..StructureDisturbance
+
+export AppendageInfo, AppendageData, initappendagedata, setstructure, update_appendages!
+
+# abstract types for the flexible appendages
+abstract type AbstractAppendageParameters end
+abstract type AbstractAppendageModel end
+abstract type AbstractAppendageInternals end
 
 include("SpringMass.jl")
 @reexport using .SpringMass
 
-export StructureSimData, initappendagedata, setstructure
-
 """
-    StructureSimData
+    AppendageData
 
 struct of the data container for the states and inputs of the structural response of the flexible appendages
 
@@ -25,76 +30,42 @@ struct of the data container for the states and inputs of the structural respons
 * `controlinput::AbstractVector{<:AbstractVector}`: data container for the control input trajectory
 * `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
-struct StructureSimData
-
-    state::AbstractVector{<:AbstractVector}
-    physicalstate::AbstractVector{<:AbstractVector}
+struct AppendageData
+    state::AbstractVector{<:Union{AbstractVector, Real}}
+    physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
     controlinput::AbstractVector{<:Union{AbstractVector, Real}}
     disturbance::AbstractVector{<:Union{AbstractVector, Real}}
-
 end
 
 """
-    initappendagedata
+    AppendageInternals
 
-initializer for the data container for structural simulation
-
-# Arguments
-
-* `model::StateSpace`: simulation model for the flexible appendage
-* `initphysicalstate::Vector`: initial physical state value of the flexible appendage
-* `datanum::Int`: numbers of the simulation data
+internals of the appendage data
 """
-function initappendagedata(model::StateSpace, initphysicalstate::Vector, datanum::Int)::StructureSimData
+mutable struct AppendageInternals<:AbstractAppendageInternals
+    previousstate::AbstractVector{<:Real}
+    currentstate::AbstractVector{<:Real}
+    currentaccel::AbstractVector{<:Real}
 
-    # physical state vector (physical coordinate)
-    physicalstate = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
-    physicalstate[1] = SVector{model.dimstate}(initphysicalstate)
+    AppendageInternals(DOF::Integer) = begin
 
-    # state vector (modal coordinate)
-    state = [zeros(SVector{model.dimstate}) for _ in 1:datanum]
-    state[1] = physicalstate2modalstate(model, initphysicalstate)
+        initstate = SVector{2*DOF, Real}(zeros(2*DOF))
+        initaccel = SVector{DOF, Real}(zeros(DOF))
 
-    # switch based on the dimension of the input
-    if model.dimctrlinput == 1
-        controlinput = [0.0 for _ in 1:datanum]
-    else
-        controlinput = [zeros(SVector{model.dimctrlinput}) for _ in 1:datanum]
+        new(initstate, initstate, initaccel)
     end
-
-    if model.dimdistinput == 1
-        disturbance = [0.0 for _ in 1:datanum]
-    else
-        disturbance = [zeros(SVector{model.dimdistinput}) for _ in 1:datanum]
-    end
-
-    return StructureSimData(state, physicalstate, controlinput, disturbance)
 end
 
 """
-    setstructure
+    AppendageInfo
 
-API function to define the model of the flexible appendages. Argument is a file path for the configuration file. This function is expected to be used directly with the configuration file
-
-# Arguments
-
-* `configfilepath::String`: path for the configuration file for the structural appendages
+information of the flexible appendages
 """
-function setstructure(configfilepath::String)
-
-    lawread = YAML.load_file(configfilepath)
-
-    if haskey(lawread, "modeling") == false
-        throw(ErrorException("`model` is undefined in configuration file `$configfilepath`"))
-    end
-
-    if lawread["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = defmodel(lawread)
-    else
-        throw(ErrorException("no matching modeling method for \"$(lawread["modeling"])\""))
-    end
-
-    return (structureparams, structuresimmodel)
+struct AppendageInfo
+    params::Union{AbstractAppendageParameters, Nothing}
+    model::Union{AbstractAppendageModel, Nothing}
+    internals::Union{AbstractAppendageInternals, Nothing}
+    disturbance::Union{StructureDisturbance.AbstractAppendageDisturbance, Nothing}
 end
 
 """
@@ -106,25 +77,80 @@ API function to define the model of the flexible appendages. Argument is the dic
 
 * `configdata::AbstractDict`: path for the configuration file for the structural appendages
 """
-function setstructure(configdata::AbstractDict)
+function setstructure(configdata::AbstractDict)::Union{AppendageInfo, Nothing}
 
     if haskey(configdata, "modeling") == false
         throw(ErrorException("`modeling` is undefined in configuration"))
     end
 
-    if configdata["modeling"] == "spring-mass"
-        (structureparams, structuresimmodel) = defmodel(configdata)
+    if configdata["modeling"] == "none"
+        # flexible appendage does not exist
+        return nothing
+
+    elseif configdata["modeling"] == "spring-mass"
+        # formulate spring-mass model of the flexible appendages
+
+        (params, model) = SpringMass.defmodel(configdata)
+        internals = AppendageInternals(2)
+
+        # configure disturbance input to the flexible appendage
+        if haskey(configdata, "disturbance")
+            disturbance = setstrdistconfig(configdata["disturbance"])
+        else
+            throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
+        end
+
+        return AppendageInfo(params, model, internals, disturbance)
+
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
+end
 
-    if haskey(configdata, "disturbance")
-        strdistconfig = setstrdistconfig(configdata["disturbance"])
+
+"""
+    initappendagedata
+
+initializer for the data container for structural simulation
+"""
+function initappendagedata(info::AppendageInfo, initphysicalstate::Vector, datanum::Int)
+
+    # physical state vector (physical coordinate)
+    physicalstate = [zeros(SVector{info.model.dimstate}) for _ in 1:datanum]
+    physicalstate[1] = SVector{info.model.dimstate}(initphysicalstate)
+
+    # state vector (modal coordinate)
+    state = [zeros(SVector{info.model.dimstate}) for _ in 1:datanum]
+    state[1] = physicalstate2modalstate(info.model, initphysicalstate)
+
+    # switch based on the dimension of the input
+    if info.model.dimctrlinput == 1
+        controlinput = [0.0 for _ in 1:datanum]
     else
-        throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
+        controlinput = [zeros(SVector{info.model.dimctrlinput}) for _ in 1:datanum]
     end
 
-    return (structureparams, structuresimmodel, strdistconfig)
+    if info.model.dimdistinput == 1
+        disturbance = [0.0 for _ in 1:datanum]
+    else
+        disturbance = [zeros(SVector{info.model.dimdistinput}) for _ in 1:datanum]
+    end
+
+    return AppendageData(state, physicalstate, controlinput, disturbance)
 end
+
+
+function update_appendages!(info::AppendageInfo, Ts::Real, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+
+    # time evolution
+    nextstate = SpringMass.updatestate(info.model, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+
+    info.internals.previousstate = currentstate
+    info.internals.currentstate = nextstate
+    info.internals.currentaccel = (nextstate[(info.model.DOF+1):end] - currentstate[(info.model.DOF+1):end]) / Ts
+
+    return nextstate
+end
+
 
 end

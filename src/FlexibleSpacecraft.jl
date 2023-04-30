@@ -2,10 +2,10 @@ module FlexibleSpacecraft
 
 using Reexport
 
-@reexport using LinearAlgebra, Plots, StaticArrays
+@reexport using LinearAlgebra, GLMakie, StaticArrays, GeometryBasics
 
-include("Core/Utilities.jl")
-@reexport using.Utilities
+include("Core/UtilitiesBase.jl")
+@reexport using .UtilitiesBase
 
 include("DataContainers/DataContainers.jl")
 @reexport using .DataContainers
@@ -17,9 +17,9 @@ include("DataContainers/Frames.jl")
 include("OrbitalDynamics/OrbitBase.jl")
 @reexport using .OrbitBase
 
-# Inculde module `Disturbance`
-include("Disturbances/Disturbance.jl")
-@reexport using .Disturbance
+# Inculde module `AttitudeDisturbance`
+include("AttitudeDynamics/AttitudeDisturbance.jl")
+@reexport using .AttitudeDisturbance
 
 include("AttitudeDynamics/DynamicsBase.jl")
 @reexport using .DynamicsBase
@@ -30,15 +30,18 @@ include("AttitudeDynamics/KinematicsBase.jl")
 include("AttitudeDynamics/Evaluation.jl")
 @reexport using .Evaluation
 
-# Include module `PlotRecipe`
-include("PlotRecipes/PlotRecipe.jl")
-@reexport using .PlotRecipe
+# Include module `VisualizationBase`
+include("Visualization/VisualizationBase.jl")
+@reexport using .VisualizationBase
 
 include("Structures/StructureDisturbance.jl")
 @reexport using .StructureDisturbance
 
 include("Structures/StructuresBase.jl")
 @reexport using .StructuresBase
+
+include("AttitudeControl/AttitudeControlBase.jl")
+@reexport using .AttitudeControlBase
 
 include("SimulationAPI/DataAPI.jl")
 @reexport using .DataAPI

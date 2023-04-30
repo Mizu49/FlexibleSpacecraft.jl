@@ -1,9 +1,9 @@
 module DynamicsBase
 
 using Reexport, StaticArrays
-using ..Frames, ..Utilities
+using ..Frames, ..UtilitiesBase
 
-export update_angularvelocity, setdynamicsmodel
+export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel, calc_angular_momentum
 
 include("RigidBody.jl")
 @reexport using .RigidBody
@@ -11,7 +11,7 @@ include("RigidBody.jl")
 include("LinearCoupling.jl")
 @reexport using .LinearCoupling
 
-TypeModels = Union{RigidBodyModel, LinearCouplingModel}
+AbstractAttitudeDynamicsModel = Union{RigidBodyModel, LinearCouplingModel}
 
 """
     setdynamicsmodel
@@ -22,17 +22,17 @@ function setdynamicsmodel(paramsetting::AbstractDict)
 
     if paramsetting["model"] == "Linear coupling"
 
-        inertia = yamlread2matrix(paramsetting["inertia"], (3,3))
+        inertia = yamlread2matrix(paramsetting["inertia"])
 
         # get dimension of the structural motion of the flexible appendages
-        dimstructurestate = Int(length(paramsetting["coupling"]) / 3)
-        Dcplg = yamlread2matrix(paramsetting["coupling"], (3, dimstructurestate))
+        Dcplg = yamlread2matrix(paramsetting["coupling"])
 
+        dimstructurestate = size(Dcplg, 2)
         model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
 
     elseif paramsetting["model"] == "Rigid body"
 
-        inertia = yamlread2matrix(paramsetting["inertia"], (3,3))
+        inertia = yamlread2matrix(paramsetting["inertia"])
 
         model = RigidBodyModel(inertia)
     else
@@ -61,21 +61,26 @@ update the angular velocity of the angular velocity of the attitude dynamics. In
 
 """
 function update_angularvelocity(
-    model::TypeModels,
+    model::AbstractAttitudeDynamicsModel,
     currentTime::Real,
-    angularvelocity::AbstractVector{<:Real},
+    angularvelocity::SVector{3, Float64},
     Tsampling::Real,
-    currentbodyframe::Frame,
-    distinput::AbstractVector{<:Real},
-    straccel::AbstractVector{<:Real},
-    strvelocity::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    distinput::SVector{3, Float64},
+    ctrlinput::SVector{3, Float64},
+    straccel::Union{SVector, Nothing},
+    strvelocity::Union{SVector, Nothing}
+    )::SVector{3, Float64}
+
+    # check size of vectors
+    check_size(angularvelocity, 3)
+    check_size(distinput, 3)
+    check_size(ctrlinput, 3)
 
     # switch based on the type of `model`
     if typeof(model) == RigidBodyModel
-        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput)
+        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
     elseif typeof(model) == LinearCouplingModel
-        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, currentbodyframe, distinput, straccel, strvelocity)
+        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, straccel, strvelocity)
     else
         error("given model is invalid")
     end
@@ -83,22 +88,24 @@ function update_angularvelocity(
     return angularvelocity
 end
 
-"""
-    Base.:~(x::AbstractVector)
+function calc_angular_momentum(
+    model::AbstractAttitudeDynamicsModel,
+    angular_velocity::SVector{3, Float64}
+    )::SVector{3, Float64}
 
-operator for calculating the skew-symmetric matrix. It will be used for internal calculation of the calculation of the attitude dynamics of `FlexibleSpacecraft.jl`.
-"""
-@inline function Base.:~(x::AbstractVector)
+    # check size of the vector
+    check_size(angular_velocity, 3)
 
-    if size(x, 1) != 3
-        throw(DimensionMismatch("dimension of vector `x` should be 3"))
+    # switch based on the type of model
+    if typeof(model) == RigidBodyModel
+        L = RigidBody.calc_angular_momentum(model, angular_velocity)
+    elseif typeof(model) == LinearCouplingModel
+        L = LinearCoupling.calc_angular_momentum(model, angular_velocity)
+    else
+        error("given model is invalid")
     end
 
-    return SMatrix{3, 3, <:Real}([
-        0 -x[3] x[2]
-        x[3] 0 -x[1]
-        -x[2] x[1] 0
-    ])
+    return L
 end
 
 end

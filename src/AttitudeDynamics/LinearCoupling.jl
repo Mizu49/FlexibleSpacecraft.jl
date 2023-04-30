@@ -17,13 +17,13 @@ Data container of spacecraft model attitude dynamics model with the linear attit
 
 # Fields of struct `LinearCouplingModel`
 
-* `inertia::SMatrix{3, 3, <:Real}`: Inertia matrix of spacecraft platform
-* `Dcplt::SMatrix{<:Real}`: coefficient matric for the coupling dynamics with the structural motion. The size of this matrix is 3 x (dimstructure)
+* `inertia::SMatrix{3, 3, Float64}`: Inertia matrix of spacecraft platform
+* `Dcplt::SMatrix{Float64}`: coefficient matric for the coupling dynamics with the structural motion. The size of this matrix is 3 x (dimstructure)
 
 """
 struct LinearCouplingModel
     # Inertia Matrix
-    inertia::SMatrix{3, 3, <:Real}
+    inertia::SMatrix{3, 3, Float64}
 
     # coefficient matrix for the coupling dynamics
     Dcplg::SMatrix
@@ -51,29 +51,30 @@ Get the differential of equation of dynamics. Internal function for module `Line
 
 * `model::LinearCouplingModel`: attitude dynamics model
 * `currentTime::Real`: current time
-* `angularvelocity::AbstractVector{<:Real}`: angular velocity vector
-* `current_body_frame::SMatrix{3, 3, <:Real, 9}`: current body frame matrix
-* `distinput::AbstractVector{<:Real}`: disturbance torque input vector
-* `straccel::AbstractVector{<:Real}`: acceleration of the structural response of the flexible appendages
+* `angularvelocity::SVector{3, Float64}`: angular velocity vector
+* `distinput::SVector{3, Float64}`: disturbance torque input vector
+* `ctrlinput::SVector{3, Float64}`: control torque input vector
+* `straccel::SVector{Float64}`: acceleration of the structural response of the flexible appendages
 * `strvelocity::AbstractVector{<:Real}`: velocity of the structural response of the flexible appendages
 
 """
 function _calc_differential_dynamics(
     model::LinearCouplingModel,
     currentTime::Real,
-    angularvelocity::AbstractVector{<:Real},
-    current_body_frame::SMatrix{3, 3, <:Real, 9},
-    distinput::AbstractVector{<:Real},
-    straccel::AbstractVector{<:Real},
-    strvelocity::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    angularvelocity::SVector{3, Float64},
+    distinput::SVector{3, Float64},
+    ctrlinput::SVector{3, Float64},
+    straccel::SVector,
+    strvelocity::SVector
+    )::SVector{3, Float64}
 
     # calculate differential of equation of motion
-    differential = SVector{3}(inv(model.inertia) * (
-        distinput # disturbance torque
-        - current_body_frame' * model.inertia * ~(angularvelocity) * current_body_frame * current_body_frame' * angularvelocity # attitude dynamics
+    differential = inv(model.inertia) * (
+        + ctrlinput # control input torque
+        + distinput # disturbance torque
+        - ~(angularvelocity) * model.inertia * angularvelocity # attitude dynamics
         - model.Dcplg * straccel - ~(angularvelocity) * model.Dcplg * strvelocity # structural coupling
-    ))
+    )
 
     return differential
 end
@@ -87,35 +88,49 @@ calculate angular velocity at next time step using 4th order Runge-Kutta method
 
 * `model::LinearCouplingModel`: attitude dynamics model
 * `currentTime::Real`: current time
-* `angularvelocity::AbstractVector{<:Real}`: angular velocity vector
-* `current_body_frame::SMatrix{3, 3, <:Real, 9}`: current body frame matrix
-* `distinput::AbstractVector{<:Real}`: disturbance torque input vector
-* `straccel::AbstractVector{<:Real}`: acceleration of the structural response of the flexible appendages
-* `strvelocity::AbstractVector{<:Real}`: velocity of the structural response of the flexible appendages
+* `angularvelocity::SVector{3, Float64}`: angular velocity vector
+* `distinput::SVector{3, Float64}`: disturbance torque input vector
+* `straccel::SVector`: acceleration of the structural response of the flexible appendages
+* `strvelocity::SVector`: velocity of the structural response of the flexible appendages
 
 """
 function update_angularvelocity(
     model::LinearCouplingModel,
     currentTime::Real,
-    angularvelocity::AbstractVector{<:Real},
+    angularvelocity::SVector{3, Float64},
     Tsampling::Real,
-    currentbodyframe::Frame,
-    distinput::AbstractVector{<:Real},
-    straccel::AbstractVector{<:Real},
-    strvelocity::AbstractVector{<:Real}
-    )::SVector{3, <:Real}
+    distinput::SVector{3, Float64},
+    ctrlinput::SVector{3, Float64},
+    straccel::SVector,
+    strvelocity::SVector
+    )::SVector{3, Float64}
 
-    # define body frame matrix from struct `Frame`
-    bodyframematrix = SMatrix{3, 3}(hcat(currentbodyframe.x, currentbodyframe.y, currentbodyframe.z))
+    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , distinput, ctrlinput, straccel, strvelocity)
+    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, distinput, ctrlinput, straccel, strvelocity)
+    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, distinput, ctrlinput, straccel, strvelocity)
+    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, distinput, ctrlinput, straccel, strvelocity)
 
-    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , bodyframematrix, distinput, straccel, strvelocity)
-    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, bodyframematrix, distinput, straccel, strvelocity)
-    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, bodyframematrix, distinput, straccel, strvelocity)
-    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, bodyframematrix, distinput, straccel, strvelocity)
+    updated_angularvelocity = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 
-    nextOmega = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return nextOmega
+    return updated_angularvelocity
 end
+
+"""
+    calc_angular_momentum
+
+calculate the angular momentum of the attitude motion
+
+# Arguments
+
+* `model::LinearCouplingModel`: dynamics model of the attitude motion
+* `angularvelocity::SVector{3, Float64}`: angular velocity of the attitude motion
+"""
+function calc_angular_momentum(model::LinearCouplingModel, angular_velocity::SVector{3, Float64})::SVector{3, Float64}
+
+    momentum = model.inertia * angular_velocity
+
+    return momentum
+end
+
 
 end

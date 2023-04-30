@@ -2,7 +2,7 @@ module Frames
 
 using StaticArrays
 
-export Frame, RefFrame, ECI_frame, initframes, getframe, ECI2BodyFrame
+export Frame, UnitFrame, ECI_frame, initframes, getframe, ECI2BodyFrame
 
 """
     struct Frame(x::Vector{Real}, y::Vector{Real}, z::Vector{Real})
@@ -15,7 +15,7 @@ struct Frame
     z::SVector{3, Real}
 end
 
-const RefFrame = Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
+const UnitFrame = Frame([1, 0, 0], [0, 1, 0], [0, 0, 1])
 
 """
     ECI_frame
@@ -56,38 +56,25 @@ function getframe(time, sampling_period, frames)
 end
 
 """
-    ECI2BodyFrame(q)
+    ECI2BodyFrame
 
 Calculate the transformation matrix from ECI frame to spacecraft body-fixed frame.
 
 # Arguments
-- `q`: quaternion
+- `q::SVector{4, Float64}`: vector of the quaternion
 
 # Return
-- `transformation_matrix`: transformation matrix
+- `C_ECI2BRF::SMatrix{3, 3, Float64}`: transformation matrix
 """
-function ECI2BodyFrame(q)
+function ECI2BodyFrame(q::SVector{4, Float64})::SMatrix{3, 3, Float64}
 
-    # Check if the quaterion satisfies its constraint
-    try
-        constraint = q[1]^2 + q[2]^2 + q[3]^2 + q[4]^2
-
-    catch constraint
-
-        if constraint < 0.995
-            error("Quaternion does not satisfy constraint")
-        elseif constraint > 1.005
-            error("Quaternion does not satisfy constraint")
-        end
-    end
-
-    transformation_matrix = [
+    C_ECI2BRF = SMatrix{3, 3, Float64}([
         q[1]^2 - q[2]^2 - q[3]^2 + q[4]^2  2*(q[1]*q[2] + q[3]*q[4])          2*(q[1]*q[3] - q[2]*q[4])
         2*(q[2]*q[1] - q[3]*q[4])          q[2]^2 - q[3]^2 - q[1]^2 + q[4]^2  2*(q[2]*q[3] + q[1]*q[4])
         2*(q[3]*q[1] + q[2]*q[4])          2*(q[3]*q[2] - q[1]*q[4])          q[3]^2 - q[1]^2 - q[2]^2 + q[4]^2
-    ]
+    ])
 
-    return transformation_matrix
+    return C_ECI2BRF
 end
 
 """

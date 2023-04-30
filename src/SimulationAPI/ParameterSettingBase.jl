@@ -1,7 +1,8 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..OrbitBase, ..DynamicsBase, ..KinematicsBase, ..Disturbance, ..StructuresBase
+using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
+import ..OrbitBase
 
 export SimulationConfig, yamlread2matrix, readparamfile
 
@@ -52,9 +53,16 @@ function readparamfile(filepath::String)
         throw(AssertionError("simulation configuration is not found on parameter setting file"))
     end
 
+    # Orbital dynamics
+    if haskey(paramread, "Orbit")
+        orbitinfo = OrbitBase.setorbit(paramread["Orbit"], ECI_frame)
+    else
+        throw(AssertionError("orbit configuration is not found on parameter setting file"))
+    end
+
     # initial value
     if haskey(paramread, "initial value")
-        initvalue = _setinitvalue(paramread["initial value"])
+        initvalue = _setkinematics(orbitinfo, paramread["initial value"])
     else
         throw(AssertionError("initial value configuration is not found on parameter setting file"))
     end
@@ -68,24 +76,24 @@ function readparamfile(filepath::String)
 
     # Disturbance for the attitude dynamics
     if haskey(paramread, "disturbance")
-        distconfig = setdisturbance(paramread["disturbance"])
+        attidistinfo = set_attitudedisturbance(paramread["disturbance"])
     else
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
     end
 
-    # Orbital dynamics
-    if haskey(paramread, "Orbit")
-        orbitinfo = setorbit(paramread["Orbit"], ECI_frame)
-    else
-        throw(AssertionError("orbit configuration is not found on parameter setting file"))
-    end
-
     # Flexible appendage
     if haskey(paramread, "appendage")
-        (strparam, strmodel, strdistconfig) = setstructure(paramread["appendage"])
+        appendageinfo = setstructure(paramread["appendage"])
     end
 
-    return (simconfig, attimodel, distconfig, initvalue, orbitinfo, strparam, strmodel, strdistconfig)
+    # Attitude controller
+    if haskey(paramread, "attitude controller")
+        attitude_controller = set_attitudecontroller(paramread["attitude controller"])
+    else
+        throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
+    end
+
+    return (simconfig, attimodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitude_controller)
 end
 
 """
@@ -110,14 +118,17 @@ function _setsimconfig(simconfigdict::AbstractDict)::SimulationConfig
 end
 
 """
-    _setinitvalue(filepath::String)::InitData
+    _setkinematics(filepath::String)::InitKinematicsData
 
 Define the initial value for simulation
 """
-function _setinitvalue(initvaluedict::AbstractDict)::InitData
+function _setkinematics(orbitinfo::OrbitBase.OrbitInfo, initvaluedict::AbstractDict)::InitKinematicsData
 
-    initvalue = InitData(
-        initvaluedict["quaternion"],
+    # calculate the inital quaternion value based on the orbital reference frame
+    initquaternion = OrbitBase.calc_inital_quaternion(orbitinfo.orbitalelement, initvaluedict["roll-pitch-yaw"])
+
+    initvalue = InitKinematicsData(
+        initquaternion,
         initvaluedict["angular velocity"],
         ECI_frame
     )
@@ -125,5 +136,18 @@ function _setinitvalue(initvaluedict::AbstractDict)::InitData
     return initvalue
 end
 
+function _setkinematics(orbitinfo::Nothing, initvaluedict::AbstractDict)::InitKinematicsData
+
+    # initialize quaternion
+    initquaternion = [0.0, 0.0, 0.0, 1.0]
+
+    initvalue = InitKinematicsData(
+        initquaternion,
+        initvaluedict["angular velocity"],
+        ECI_frame
+    )
+
+    return initvalue
+end
 
 end
