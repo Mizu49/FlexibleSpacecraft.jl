@@ -162,14 +162,16 @@ calculate disturbance torque input for the attitude dynamics
 """
 function calc_attitudedisturbance(
     info::AttitudeDisturbanceInfo,
-    inertia::SMatrix{3, 3, <:Real},
+    attitudemodel,
     currenttime::Real,
-    orbit_angularvelocity::Real,
     C_ECI2Body::SMatrix{3, 3, <:Real},
     C_ECI2LVLH::SMatrix{3, 3, <:Real},
-    LVLHframe::Frame,
+    altitude::Real,
     Tsampling::Real
     )::SVector{3, Float64}
+
+    # earth direction
+    nadir_earth = C_ECI2Body * transpose(C_ECI2LVLH) * SVector{3}([0.0, 0.0, -1.0])
 
     # initialize disturbance torque vector
     disturbance = SVector{3, Float64}(zeros(3))
@@ -184,7 +186,7 @@ function calc_attitudedisturbance(
 
     # apply gravitational torque
     if info.config.gravitationaltorque == true
-        disturbance = disturbance + _gravity_gradient(inertia, orbit_angularvelocity, C_ECI2Body, C_ECI2LVLH, LVLHframe.z)
+        disturbance = disturbance + _gravity_gradient(attitudemodel, C_ECI2Body, nadir_earth, altitude)
     end
 
     return disturbance

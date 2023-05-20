@@ -126,10 +126,11 @@ function _calculate_attitude_disturbance(
         orbit_angularvelocity = orbitinfo.internals.angularvelocity
     end
 
-    LVLHframe = C_ECI2LVLH * UnitFrame
+    # altitude of the spacecraft
+    orbital_altitude = 400e3
 
     # disturbance input calculation
-    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, C_ECI2LVLH, LVLHframe, simconfig.samplingtime)
+    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel, currenttime, C_ECI2Body, C_ECI2LVLH, orbital_altitude ,simconfig.samplingtime)
 
     # apply transformation matrix
     distinput = C_ECI2Body * distinput
