@@ -19,10 +19,10 @@ function _gravity_gradient(
     )::SVector{3}
 
     # inertia of the spacecraft considering the attitude
-    I = transpose(C_ECI3BRF) * attitudemodel.inertia * C_ECI3BRF
+    I = attitudemodel.inertia
 
     # direction of the Earth with respect to the body reference frame
-    n = C_ECI3BRF * nadir_earth
+    n = nadir_earth
 
     # distance from center of the Earth
     R = R_earth + altitude

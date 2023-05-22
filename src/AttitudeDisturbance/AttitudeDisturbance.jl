@@ -170,7 +170,7 @@ function calc_attitudedisturbance(
     Tsampling::Real
     )::SVector{3, Float64}
 
-    # earth direction
+    # earth direction in ECI frame
     nadir_earth = C_ECI2Body * transpose(C_ECI2LVLH) * SVector{3}([0.0, 0.0, -1.0])
 
     # initialize disturbance torque vector
