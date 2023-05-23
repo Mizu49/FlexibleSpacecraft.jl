@@ -11,7 +11,7 @@ using ..Frames
 
 # include supporting program files
 include("DisturbanceTrajectory.jl")
-include("GravityDisturbance.jl")
+include("GravityGradient.jl")
 
 export AttitudeDisturbanceInfo, calc_attitudedisturbance, set_attitudedisturbance
 
