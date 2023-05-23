@@ -13,7 +13,6 @@ const R_earth = 6371e3
 """
 function _gravity_gradient(
     attitudemodel,
-    C_ECI3BRF::SMatrix{3, 3},
     nadir_earth::SVector{3},
     altitude::Real
     )::SVector{3}

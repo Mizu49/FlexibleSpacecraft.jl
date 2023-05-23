@@ -186,7 +186,7 @@ function calc_attitudedisturbance(
 
     # apply gravitational torque
     if info.config.gravitationaltorque == true
-        disturbance = disturbance + _gravity_gradient(attitudemodel, C_ECI2Body, nadir_earth, altitude)
+        disturbance = disturbance + _gravity_gradient(attitudemodel, nadir_earth, altitude)
     end
 
     return disturbance
