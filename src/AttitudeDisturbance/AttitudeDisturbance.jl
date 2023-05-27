@@ -13,7 +13,7 @@ using ..Frames
 include("DisturbanceTrajectory.jl")
 include("GravityGradient.jl")
 
-export AttitudeDisturbanceInfo, calc_attitudedisturbance, set_attitudedisturbance
+export AttitudeDisturbanceInfo, AttitudeDisturbanceData, calc_attitudedisturbance!, set_attitudedisturbance, init_attitude_disturbance_data
 
 
 """
@@ -85,6 +85,46 @@ struct AttitudeDisturbanceInfo
 end
 
 """
+    AttitudeDisturbanceData
+
+data container for the attitude disturbance
+"""
+struct AttitudeDisturbanceData
+    all::Vector{SVector{3, <:Real}} # sum of the all disturbance component
+    constant::SVector{3, Float64} # constant disturbance
+    trajectory::Union{Vector{SVector{3, Float64}}, Nothing} # time-series of the predefined disturbance trajectory
+    gravity_gradient::Union{Vector{SVector{3, Float64}}, Nothing} # time-series of the gravity gradient disturbance torque
+end
+
+"""
+    init_attitude_disturbance_data
+
+initialize data container for the attitude disturbance
+"""
+function init_attitude_disturbance_data(datanum::Int, info::AttitudeDisturbanceInfo)
+
+    # copy the constant torque info
+    constant = info.config.consttorque
+
+    # initialize time-series trajectory
+    trajectory = [SVector{3}(zeros(3)) for _ in 1:datanum]
+
+    # gravity gradient torque
+    if info.config.gravitationaltorque
+        gravity = [SVector{3}(zeros(3)) for _ in 1:datanum]
+    else
+        gravity = nothing
+    end
+
+    # disturbance applied to the spacecraft
+    all = [SVector{3}(zeros(3)) for _ in 1:datanum]
+
+    return AttitudeDisturbanceData(all, constant, trajectory, gravity)
+
+end
+
+
+"""
     set_attitudedisturbance
 
 set disturbance configuration from YAML setting file
@@ -137,6 +177,7 @@ function set_attitudedisturbance(distconfigdict::AbstractDict)
         gravitygradient = distconfigdict["gravitational torque"],
         step_trajectory = step_trajectory_config
     )
+
     # initialize internals
     distinternals = DisturbanceInternals()
 
@@ -149,23 +190,13 @@ end
 """
     calc_attitudedisturbance
 
-calculate disturbance torque input for the attitude dynamics
-
-# Arguments
-
-* `attidistinfo::AttitudeDisturbanceInfo`: disturbance information
-* `inertia::AbstractMatrix`: inertia of the spacecraft body
-* `currenttime::Real`: current time
-* `orbit_angular_velocity::Real`: angular velocity of the orbital motion
-* `C_ECI2Body::AbstractMatrix`: rotation matrix from ECI to body
-* `C_ECI2LVLH::AbstractMatrix`: rotation matrix from ECI to LVLH
-* `LVLHframe_z::AbstractVector`: vector of the LVLH z-axix
-* `Tsampling::Real`: sampling time in simulation
-
+calculate disturbance torque for the attitude dynamics
 """
-function calc_attitudedisturbance(
+function calc_attitudedisturbance!(
     info::AttitudeDisturbanceInfo,
     attitudemodel,
+    attidistdata::AttitudeDisturbanceData,
+    simcnt::Unsigned,
     currenttime::Real,
     C_ECI2Body::SMatrix{3, 3, <:Real},
     C_ECI2LVLH::SMatrix{3, 3, <:Real},
@@ -176,23 +207,27 @@ function calc_attitudedisturbance(
     # earth direction in ECI frame
     nadir_earth = C_ECI2Body * transpose(C_ECI2LVLH) * SVector{3}([0.0, 0.0, -1.0])
 
-    # initialize disturbance torque vector
-    disturbance = SVector{3, Float64}(zeros(3))
-
-    # apply constant torque
-    disturbance = disturbance + _constant_torque(info.config.consttorque)
-
     # apply step trajectory torque
     if !isnothing(info.config.steptraj)
-        disturbance = disturbance + _step_trajectory!(info.config.steptraj, info.internals.steptraj, currenttime, Tsampling)
+        trajectory = _step_trajectory!(info.config.steptraj, info.internals.steptraj, currenttime, Tsampling)
+        attidistdata.trajectory[simcnt] = trajectory
+    else
+        trajectory = SVector{3}(zeros(3))
     end
 
     # apply gravitational torque
     if info.config.gravitationaltorque == true
-        disturbance = disturbance + _gravity_gradient(attitudemodel, nadir_earth, altitude)
+        gravity_torque = _gravity_gradient(attitudemodel, nadir_earth, altitude)
+        attidistdata.gravity_gradient[simcnt] = gravity_torque
+    else
+        gravity_torque = SVector{3}(zeros(3))
     end
 
-    return disturbance
+    # sum up all disturbance component
+    disturbance_torque = _constant_torque(info.config.consttorque) + trajectory + gravity_torque
+    attidistdata.all[simcnt] = disturbance_torque
+
+    return disturbance_torque
 end
 
 end
