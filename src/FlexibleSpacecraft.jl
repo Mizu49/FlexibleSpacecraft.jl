@@ -18,7 +18,7 @@ include("OrbitalDynamics/OrbitBase.jl")
 @reexport using .OrbitBase
 
 # Inculde module `AttitudeDisturbance`
-include("AttitudeDynamics/AttitudeDisturbance.jl")
+include("AttitudeDisturbance/AttitudeDisturbance.jl")
 @reexport using .AttitudeDisturbance
 
 include("AttitudeDynamics/DynamicsBase.jl")

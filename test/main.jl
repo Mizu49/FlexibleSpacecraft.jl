@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-paramfilepath = "./test/spacecraft2.yml"
+paramfilepath = "./test/spacecraft3.yml"
 (simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = readparamfile(paramfilepath)
 
 # run simulation
