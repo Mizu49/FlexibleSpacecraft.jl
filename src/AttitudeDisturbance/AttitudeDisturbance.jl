@@ -61,10 +61,13 @@ internals of the disturbance torque for the attitude dynamics
 * `steptraj::_InternalsStepTrajectory`: internals of the step disturbance trajectory
 """
 mutable struct DisturbanceInternals
+
+    # configuration of the disturbance input
     steptraj::_InternalsStepTrajectory
 
+    # constructor of the `DisturbanceInternals`
     DisturbanceInternals() = begin
-        # initialize `steptraj`
+        # initialize `steptraj` internal data container
         steptraj = _InternalsStepTrajectory(1, 0)
 
         new(steptraj)
