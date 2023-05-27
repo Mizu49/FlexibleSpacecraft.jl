@@ -85,11 +85,11 @@ appendage:
 
 ## Parameter setting API for the configuration file
 
-Simply call the function `readparamfile`, giving the path of the configuration file.
+Simply call the function `set_simulation_parameters`, giving the path of the configuration file.
 
 ```julia
 paramfilepath = "./test/spacecraft2.yml"
-(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(paramfilepath)
+(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = set_simulation_parameters(paramfilepath)
 ```
 
 Detailed docs for the parameter setting API is found on the [Parameter setting API](@ref)

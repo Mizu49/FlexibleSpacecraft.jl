@@ -4,7 +4,7 @@ using YAML
 using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
 import ..OrbitBase
 
-export SimulationConfig, yamlread2matrix, readparamfile
+export SimulationConfig, yamlread2matrix, set_simulation_parameters
 
 """
     struct SimulationConfig
@@ -26,7 +26,7 @@ struct SimulationConfig
 end
 
 """
-    readparamfile
+    set_simulation_parameters
 
 read the configuration of the spacecraft from the configuration file in YAML format.
 
@@ -38,10 +38,10 @@ read the configuration of the spacecraft from the configuration file in YAML for
 
 ```julia
 paramfilepath = "./test/spacecraft2.yml"
-(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(paramfilepath)
+(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = set_simulation_parameters(paramfilepath)
 ```
 """
-function readparamfile(filepath::String)
+function set_simulation_parameters(filepath::String)
 
     # Read YAML file
     paramread = YAML.load_file(filepath)
