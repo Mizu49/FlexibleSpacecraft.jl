@@ -2,7 +2,7 @@ module UtilitiesBase
 
 using StaticArrays, DelimitedFiles
 
-export check_size, C1, C2, C3, yamlread2matrix, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
+export check_size, C1, C2, C3, load_matrix, dcm2quaternion, euler2dcm, quaternion2dcm, dcm2euler, quaternion2euler, euler2quaternion
 
 
 # delimiter is comma
@@ -93,7 +93,7 @@ end
 
 
 """
-    yamlread2matrix
+    _yaml2matrix
 
 function that converts the direct read data from YAML file into the Matrix
 
@@ -115,15 +115,28 @@ This can be read as follows:
 ```julia
 data = YAML.load_file(YAMLfilename)
 
-matrixA = yamlread2matrix(data["A"])
+matrixA = _yaml2matrix(data["A"])
 ```
 
 """
-@inline function yamlread2matrix(yamldata::String)
+@inline function _yaml2matrix(yamldata::String)
+    return readdlm(IOBuffer(yamldata), delimiter)
+end
 
-    matrix = readdlm(IOBuffer(yamldata), delimiter)
+"""
+    load_matrix
+"""
+@inline function load_matrix(config::Any)::AbstractVecOrMat
 
-    return matrix
+    # branch based on the type of the data
+    if typeof(config) == String
+        # read from YAML configuration file
+        return _yaml2matrix(config)
+    else
+        # read numeric matrix data directly
+        return config
+    end
+
 end
 
 """

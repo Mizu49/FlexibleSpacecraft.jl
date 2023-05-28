@@ -22,17 +22,17 @@ function setdynamicsmodel(paramsetting::AbstractDict)
 
     if paramsetting["model"] == "Linear coupling"
 
-        inertia = yamlread2matrix(paramsetting["inertia"])
+        inertia = load_matrix(paramsetting["inertia"])
 
         # get dimension of the structural motion of the flexible appendages
-        Dcplg = yamlread2matrix(paramsetting["coupling"])
+        Dcplg = load_matrix(paramsetting["coupling"])
 
         dimstructurestate = size(Dcplg, 2)
         model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
 
     elseif paramsetting["model"] == "Rigid body"
 
-        inertia = yamlread2matrix(paramsetting["inertia"])
+        inertia = load_matrix(paramsetting["inertia"])
 
         model = RigidBodyModel(inertia)
     else

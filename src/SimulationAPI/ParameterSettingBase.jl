@@ -4,7 +4,7 @@ using YAML
 using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
 import ..OrbitBase
 
-export SimulationConfig, yamlread2matrix, set_simulation_parameters
+export SimulationConfig, load_matrix, set_simulation_parameters
 
 """
     struct SimulationConfig
@@ -89,6 +89,58 @@ function set_simulation_parameters(filepath::String)
     # Attitude controller
     if haskey(paramread, "attitude controller")
         attitude_controller = set_attitudecontroller(paramread["attitude controller"])
+    else
+        throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
+    end
+
+    return (simconfig, attimodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitude_controller)
+end
+
+function set_simulation_parameters(spacecraft::AbstractDict)
+
+    # simulation configuration
+    if haskey(spacecraft, "config")
+        simconfig = _setsimconfig(spacecraft["config"])
+    else
+        throw(AssertionError("simulation configuration is not found on parameter setting file"))
+    end
+
+    # Orbital dynamics
+    if haskey(spacecraft, "Orbit")
+        orbitinfo = OrbitBase.setorbit(spacecraft["Orbit"], ECI_frame)
+    else
+        throw(AssertionError("orbit configuration is not found on parameter setting file"))
+    end
+
+    # initial value
+    if haskey(spacecraft, "initial value")
+        initvalue = _setkinematics(orbitinfo, spacecraft["initial value"])
+    else
+        throw(AssertionError("initial value configuration is not found on parameter setting file"))
+    end
+
+    # Dynamics model
+    if haskey(spacecraft, "attitude dynamics")
+        attimodel = setdynamicsmodel(spacecraft["attitude dynamics"])
+    else
+        throw(AssertionError("attitude dynamics configuration is not found on parameter setting file"))
+    end
+
+    # Disturbance for the attitude dynamics
+    if haskey(spacecraft, "disturbance")
+        attidistinfo = set_attitudedisturbance(spacecraft["disturbance"])
+    else
+        throw(AssertionError("disturbance configuration is not found on parameter setting file"))
+    end
+
+    # Flexible appendage
+    if haskey(spacecraft, "appendage")
+        appendageinfo = setstructure(spacecraft["appendage"])
+    end
+
+    # Attitude controller
+    if haskey(spacecraft, "attitude controller")
+        attitude_controller = set_attitudecontroller(spacecraft["attitude controller"])
     else
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
