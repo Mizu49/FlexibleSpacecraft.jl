@@ -68,12 +68,21 @@ function _calc_differential_dynamics(
     strvelocity::SVector
     )::SVector{3, Float64}
 
+    # time-variant inertia
+    I = model.inertia
+
+    # time-variant coupling term
+    D = model.coupling
+
     # calculate differential of equation of motion
-    differential = inv(model.inertia) * (
+    differential = inv(I) * (
+        - ~(angularvelocity) * I * angularvelocity
+        # structual coupling term
+        - D * straccel
+        - ~(angularvelocity) * D * strvelocity
+        # input terms
         + ctrlinput # control input torque
         + distinput # disturbance torque
-        - ~(angularvelocity) * model.inertia * angularvelocity # attitude dynamics
-        - model.coupling * straccel - ~(angularvelocity) * model.coupling * strvelocity # structural coupling
     )
 
     return differential
