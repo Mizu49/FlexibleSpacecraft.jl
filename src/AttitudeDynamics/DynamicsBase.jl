@@ -25,10 +25,10 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         inertia = load_matrix(paramsetting["inertia"])
 
         # get dimension of the structural motion of the flexible appendages
-        Dcplg = load_matrix(paramsetting["coupling"])
+        coupling = load_matrix(paramsetting["coupling"])
 
-        dimstructurestate = size(Dcplg, 2)
-        model = ConstrainedModel(inertia, Dcplg, dimstructurestate)
+        dimstructurestate = size(coupling, 2)
+        model = ConstrainedModel(inertia, coupling, dimstructurestate)
 
     elseif paramsetting["model"] == "Rigid body"
 
