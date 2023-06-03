@@ -50,9 +50,9 @@ function _set_controller_config(config::AbstractDict)
     if !haskey(config, "Dgain") throw(KeyError("key \"Dgain\" is not configured")) end
 
     controller_config = _Config(
-        yamlread2matrix(config["Pgain"]),
-        yamlread2matrix(config["Igain"]),
-        yamlread2matrix(config["Dgain"])
+        load_matrix(config["Pgain"]),
+        load_matrix(config["Igain"]),
+        load_matrix(config["Dgain"])
     )
 
     return controller_config

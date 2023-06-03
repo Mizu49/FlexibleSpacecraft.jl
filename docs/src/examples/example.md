@@ -22,7 +22,7 @@ You need to input the simulation parameters and configuration settings. Our API 
 
 ```julia
 paramfilepath = "./test/spacecraft2.yml"
-(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(paramfilepath)
+(simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = set_simulation_parameters(paramfilepath)
 ```
 
 Then you are all set! Just run `runsimulation()`. This function is the high-level user interface for simulation. You can find more detailed information at [Simulation interface](@ref)
