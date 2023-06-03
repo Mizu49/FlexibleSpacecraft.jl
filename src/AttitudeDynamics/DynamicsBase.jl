@@ -67,8 +67,7 @@ function update_angularvelocity(
     Tsampling::Real,
     distinput::SVector{3, Float64},
     ctrlinput::SVector{3, Float64},
-    straccel::Union{SVector, Nothing},
-    strvelocity::Union{SVector, Nothing}
+    structure2attitude::NamedTuple
     )::SVector{3, Float64}
 
     # check size of vectors
@@ -80,7 +79,7 @@ function update_angularvelocity(
     if typeof(model) == RigidBodyModel
         angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
     elseif typeof(model) == ConstrainedModel
-        angularvelocity = ConstrainedModeling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, straccel, strvelocity)
+        angularvelocity = ConstrainedModeling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, structure2attitude)
     else
         error("given model is invalid")
     end

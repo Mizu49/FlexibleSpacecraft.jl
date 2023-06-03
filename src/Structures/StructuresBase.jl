@@ -140,7 +140,9 @@ function initappendagedata(info::AppendageInfo, initphysicalstate::Vector, datan
 end
 
 
-function update_appendages!(info::AppendageInfo, Ts::Real, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+function update_appendages!(info::AppendageInfo, Ts::Real, currenttime, currentstate, attitude2structure, strctrlinput, strdistinput)
+
+    attiinput = attitude2structure.angularvelocity
 
     # time evolution
     nextstate = SpringMass.updatestate(info.model, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
