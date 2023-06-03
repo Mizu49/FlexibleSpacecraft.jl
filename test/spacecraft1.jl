@@ -18,7 +18,7 @@ spacecraft["initial value"] = Dict(
 
 ## spacecraft attitdue dynamics model configuration
 spacecraft["attitude dynamics"] = Dict(
-    "model" => "Linear coupling",
+    "model" => "constrained modeling",
     "inertia" => [
         1000.0    0.0    0.0
         0.0    1000.0    0.0

@@ -1,35 +1,35 @@
 """
-    LinearCoupling
+    ConstrainedModeling
 
 submodule that accommodate the implementation of the linear model for the attitude structure coupling
 """
-module LinearCoupling
+module ConstrainedModeling
 
 using StaticArrays
 using ..Frames, ..DynamicsBase
 
-export LinearCouplingModel
+export ConstrainedModel
 
 """
-    struct LinearCouplingModel
+    struct ConstrainedModel
 
 Data container of spacecraft model attitude dynamics model with the linear attitude-structure coupling. Used to specify and configure the parameter settings for simulation and control model in `FlexibleSpacecraft.jl`
 
-# Fields of struct `LinearCouplingModel`
+# Fields of struct `ConstrainedModel`
 
 * `inertia::SMatrix{3, 3, Float64}`: Inertia matrix of spacecraft platform
 * `Dcplt::SMatrix{Float64}`: coefficient matric for the coupling dynamics with the structural motion. The size of this matrix is 3 x (dimstructure)
 
 """
-struct LinearCouplingModel
+struct ConstrainedModel
     # Inertia Matrix
     inertia::SMatrix{3, 3, Float64}
 
     # coefficient matrix for the coupling dynamics
     Dcplg::SMatrix
 
-    # counstructor for `LinearCouplingModel`
-    LinearCouplingModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}, dimstructurestate::Int) = begin
+    # counstructor for `ConstrainedModel`
+    ConstrainedModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}, dimstructurestate::Int) = begin
 
         if size(inertia) != (3, 3)
             throw(DimensionMismatch("dimension of `inertia` is invalid, it should be 3x3."))
@@ -45,11 +45,11 @@ end
 """
     function _calc_differential_dynamics
 
-Get the differential of equation of dynamics. Internal function for module `LinearCoupling.jl`
+Get the differential of equation of dynamics. Internal function for module `ConstrainedModeling.jl`
 
 # Arguments
 
-* `model::LinearCouplingModel`: attitude dynamics model
+* `model::ConstrainedModel`: attitude dynamics model
 * `currentTime::Real`: current time
 * `angularvelocity::SVector{3, Float64}`: angular velocity vector
 * `distinput::SVector{3, Float64}`: disturbance torque input vector
@@ -59,7 +59,7 @@ Get the differential of equation of dynamics. Internal function for module `Line
 
 """
 function _calc_differential_dynamics(
-    model::LinearCouplingModel,
+    model::ConstrainedModel,
     currentTime::Real,
     angularvelocity::SVector{3, Float64},
     distinput::SVector{3, Float64},
@@ -86,7 +86,7 @@ calculate angular velocity at next time step using 4th order Runge-Kutta method
 
 # Arguments
 
-* `model::LinearCouplingModel`: attitude dynamics model
+* `model::ConstrainedModel`: attitude dynamics model
 * `currentTime::Real`: current time
 * `angularvelocity::SVector{3, Float64}`: angular velocity vector
 * `distinput::SVector{3, Float64}`: disturbance torque input vector
@@ -95,7 +95,7 @@ calculate angular velocity at next time step using 4th order Runge-Kutta method
 
 """
 function update_angularvelocity(
-    model::LinearCouplingModel,
+    model::ConstrainedModel,
     currentTime::Real,
     angularvelocity::SVector{3, Float64},
     Tsampling::Real,
@@ -122,10 +122,10 @@ calculate the angular momentum of the attitude motion
 
 # Arguments
 
-* `model::LinearCouplingModel`: dynamics model of the attitude motion
+* `model::ConstrainedModel`: dynamics model of the attitude motion
 * `angularvelocity::SVector{3, Float64}`: angular velocity of the attitude motion
 """
-function calc_angular_momentum(model::LinearCouplingModel, angular_velocity::SVector{3, Float64})::SVector{3, Float64}
+function calc_angular_momentum(model::ConstrainedModel, angular_velocity::SVector{3, Float64})::SVector{3, Float64}
 
     momentum = model.inertia * angular_velocity
 
