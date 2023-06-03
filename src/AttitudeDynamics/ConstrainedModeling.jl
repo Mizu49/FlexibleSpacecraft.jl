@@ -110,9 +110,12 @@ function update_angularvelocity(
     Tsampling::Real,
     distinput::SVector{3, Float64},
     ctrlinput::SVector{3, Float64},
-    straccel::SVector,
-    strvelocity::SVector
+    structure2atttiude::NamedTuple
     )::SVector{3, Float64}
+
+    # map info on flexible appendages
+    straccel = structure2atttiude.accel
+    strvelocity = structure2atttiude.velocity
 
     k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , distinput, ctrlinput, straccel, strvelocity)
     k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, distinput, ctrlinput, straccel, strvelocity)

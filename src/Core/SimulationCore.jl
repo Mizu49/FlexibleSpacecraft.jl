@@ -120,14 +120,14 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         if simcnt != tl.datanum
 
             # Update angular velocity
-            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input, structure2attitude.accel, structure2attitude.velocity)
+            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input, structure2attitude)
 
             # Update quaternion
             tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
             # Update the state of the flexible appendages
             if !isnothing(appendageinfo)
-                tl.appendages.state[simcnt+1] = update_appendages!(appendageinfo, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure.angularvelocity, structure_control_input, structure_disturbance_input)
+                tl.appendages.state[simcnt+1] = update_appendages!(appendageinfo, Ts, currenttime, tl.appendages.state[simcnt], attitude2structure, structure_control_input, structure_disturbance_input)
             end
         end
 
