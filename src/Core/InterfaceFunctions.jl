@@ -162,21 +162,36 @@ function _calculate_attitude_control(
 end
 
 """
-    _calculate_flexible_appendages!
+    _calculate_appendages_state!
 
 calculate the state of the flexible appendages.
 
 This function is the interface to the flexible appendages simulation
 """
-function _calculate_flexible_appendages!(
+function _calculate_appendages_state!(
     appendageinfo::AppendageInfo,
     datacontainer::AppendageData,
     currenttime::Real,
     simcnt::Integer
-    )::Tuple
+    )
 
     # obtain state of the flexible appendages
     datacontainer.physicalstate[simcnt] = modalstate2physicalstate(appendageinfo.model, appendageinfo.internals.currentstate)
+
+    return
+end
+
+"""
+    _calculate_appendages_input!
+
+calculate the input for the flexible appendages
+"""
+function _calculate_appendages_input!(
+    appendageinfo::AppendageInfo,
+    datacontainer::AppendageData,
+    currenttime::Real,
+    simcnt::Integer
+    )
 
     # disturbance input
     distinput = calcstrdisturbance(appendageinfo.disturbance, currenttime)
@@ -189,23 +204,11 @@ function _calculate_flexible_appendages!(
     datacontainer.disturbance[simcnt] = distinput
 
     return (distinput, ctrlinput)
-end
 
-function _calculate_flexible_appendages!(
-    appendageinfo::Nothing,
-    datacontainer::Nothing,
-    currenttime::Real,
-    simcnt::Integer
-    )::Tuple
-
-    distinput = nothing
-    ctrlinput = nothing
-
-    return (distinput, ctrlinput)
 end
 
 """
-    _calculate_coupling_input
+_calculate_coupling_input
 
 calculate the coupling term of the attitude dynamics and structural dynamics
 """
