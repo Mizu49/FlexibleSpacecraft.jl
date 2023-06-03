@@ -8,10 +8,10 @@ export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel, 
 include("RigidBody.jl")
 @reexport using .RigidBody
 
-include("LinearCoupling.jl")
-@reexport using .LinearCoupling
+include("ConstrainedModeling.jl")
+@reexport using .ConstrainedModeling
 
-AbstractAttitudeDynamicsModel = Union{RigidBodyModel, LinearCouplingModel}
+AbstractAttitudeDynamicsModel = Union{RigidBodyModel, ConstrainedModel}
 
 """
     setdynamicsmodel
@@ -20,7 +20,7 @@ Load a dictionaly data of configuration and construct the appropriate model for 
 """
 function setdynamicsmodel(paramsetting::AbstractDict)
 
-    if paramsetting["model"] == "Linear coupling"
+    if paramsetting["model"] == "constrained modeling"
 
         inertia = load_matrix(paramsetting["inertia"])
 
@@ -28,7 +28,7 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         Dcplg = load_matrix(paramsetting["coupling"])
 
         dimstructurestate = size(Dcplg, 2)
-        model = LinearCouplingModel(inertia, Dcplg, dimstructurestate)
+        model = ConstrainedModel(inertia, Dcplg, dimstructurestate)
 
     elseif paramsetting["model"] == "Rigid body"
 
@@ -79,8 +79,8 @@ function update_angularvelocity(
     # switch based on the type of `model`
     if typeof(model) == RigidBodyModel
         angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
-    elseif typeof(model) == LinearCouplingModel
-        angularvelocity = LinearCoupling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, straccel, strvelocity)
+    elseif typeof(model) == ConstrainedModel
+        angularvelocity = ConstrainedModeling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, straccel, strvelocity)
     else
         error("given model is invalid")
     end
@@ -99,8 +99,8 @@ function calc_angular_momentum(
     # switch based on the type of model
     if typeof(model) == RigidBodyModel
         L = RigidBody.calc_angular_momentum(model, angular_velocity)
-    elseif typeof(model) == LinearCouplingModel
-        L = LinearCoupling.calc_angular_momentum(model, angular_velocity)
+    elseif typeof(model) == ConstrainedModel
+        L = ConstrainedModeling.calc_angular_momentum(model, angular_velocity)
     else
         error("given model is invalid")
     end

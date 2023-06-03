@@ -12,7 +12,7 @@ initial value:
 
 
 attitude dynamics:
-    model: Linear coupling
+    model: constrained modeling
     inertia:
         15762.6,  -183.0,   -89.0
          -183.0,  5354.0,   217.0
