@@ -13,25 +13,23 @@ simtime = @timed simdata = runsimulation(attitudemodel, initvalue, orbitinfo, at
 # test the quaternion value to check the stability of the simulation
 @test quaternion_constraint(simdata.attitude.quaternion)
 
-fig1 = plot_angularvelocity(simdata.time, simdata.attitude.angularvelocity)
-fig2 = plot_quaternion(simdata.time, simdata.attitude.quaternion)
-fig3 = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
+fig_angularvelocity = plot_angularvelocity(simdata.time, simdata.attitude.angularvelocity)
+fig_quaternion = plot_quaternion(simdata.time, simdata.attitude.quaternion)
+fig_rollpitchyaw = plot_eulerangles(simdata.time, simdata.attitude.eulerangle)
 
 Makie.inline!(true)
 
-display(fig1)
-display(fig2)
-display(fig3)
+display(fig_angularvelocity)
+display(fig_quaternion)
+display(fig_rollpitchyaw)
 
 if !isnothing(appendageinfo)
-    fig4 = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
-    display(fig4)
+    fig_appendage_displacement = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
+    display(fig_appendage_displacement)
 end
 
-fig5 = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
-display(fig5)
+fig_angularmomentum = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
+display(fig_angularmomentum)
 
 # spacecraft attitude animation
 # animate_attitude(simdata.time, simdata.attitude.eulerangle)
-
-println("Simulation time : $(simtime.time) (s)")
