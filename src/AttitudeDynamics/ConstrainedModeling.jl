@@ -26,7 +26,7 @@ struct ConstrainedModel
     inertia::SMatrix{3, 3, Float64}
 
     # coefficient matrix for the coupling dynamics
-    Dcplg::SMatrix
+    coupling::SMatrix
 
     # counstructor for `ConstrainedModel`
     ConstrainedModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}, dimstructurestate::Int) = begin
@@ -36,9 +36,9 @@ struct ConstrainedModel
         end
 
         inertiamat = SMatrix{3, 3}(inertia)
-        Dcplg = SMatrix{3, dimstructurestate}(couplingmat)
+        coupling = SMatrix{3, dimstructurestate}(couplingmat)
 
-        return new(inertiamat, Dcplg)
+        return new(inertiamat, coupling)
     end
 end
 
@@ -73,7 +73,7 @@ function _calc_differential_dynamics(
         + ctrlinput # control input torque
         + distinput # disturbance torque
         - ~(angularvelocity) * model.inertia * angularvelocity # attitude dynamics
-        - model.Dcplg * straccel - ~(angularvelocity) * model.Dcplg * strvelocity # structural coupling
+        - model.coupling * straccel - ~(angularvelocity) * model.coupling * strvelocity # structural coupling
     )
 
     return differential
