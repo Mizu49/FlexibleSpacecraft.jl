@@ -65,12 +65,12 @@ function _calc_differential_appendages()
 end
 
 """
-    update_angularvelocity
+    update_attitude_dynamics
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 
 """
-function update_angularvelocity(
+function update_attitude_dynamics(
     model::ConstrainedModel,
     # attitude variables at current time
     currentTime::Real,
