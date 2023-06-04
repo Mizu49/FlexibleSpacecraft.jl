@@ -3,7 +3,7 @@ module DynamicsBase
 using Reexport, StaticArrays
 using ..Frames, ..UtilitiesBase
 
-export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel, calc_angular_momentum
+export AbstractAttitudeDynamicsModel, update_attitude_dynamics, setdynamicsmodel, calc_angular_momentum
 
 abstract type AbstractAttitudeDynamicsModel end
 
@@ -50,7 +50,7 @@ end
 
 
 """
-    update_angularvelocity
+    update_attitude_dynamics
 
 update the angular velocity of the angular velocity of the attitude dynamics. Interface to the individual functions implemented in each submodules
 
@@ -66,7 +66,7 @@ update the angular velocity of the angular velocity of the attitude dynamics. In
 * `strvelocity::AbstractVector{<:Real}`: velocity of the structural response of the flexible appendages
 
 """
-function update_angularvelocity(
+function update_attitude_dynamics(
     model::AbstractAttitudeDynamicsModel,
     currentTime::Real,
     angularvelocity::SVector{3, Float64},
@@ -82,9 +82,9 @@ function update_angularvelocity(
 
     # switch based on the type of `model`
     if typeof(model) <: RigidBodyModel
-        angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
+        angularvelocity = RigidBody.update_attitude_dynamics(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
     elseif typeof(model) <: ConstrainedModel
-        angularvelocity = ConstrainedModeling.update_angularvelocity(model, currentTime, Tsampling, angularvelocity, distinput, ctrlinput)
+        angularvelocity = ConstrainedModeling.update_attitude_dynamics(model, currentTime, Tsampling, angularvelocity, distinput, ctrlinput)
     else
         error("given model is invalid")
     end

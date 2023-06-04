@@ -71,11 +71,11 @@ function _calc_differential_dynamics(
 end
 
 """
-    update_angularvelocity
+    update_attitude_dynamics
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 """
-function update_angularvelocity(
+function update_attitude_dynamics(
     model::RigidBodyModel,
     currentTime::Real,
     angularvelocity::SVector{3, Float64},

@@ -31,5 +31,5 @@ platform:
 
 ```@docs
 RigidBodyModel
-update_angularvelocity
+update_attitude_dynamics
 ```

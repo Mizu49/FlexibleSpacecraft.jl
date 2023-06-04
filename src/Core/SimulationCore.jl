@@ -106,10 +106,10 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
         if simcnt != tl.datanum
 
             # Update angular velocity
-            tl.attitude.angularvelocity[simcnt+1] = update_angularvelocity(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input)
+            tl.attitude.angularvelocity[simcnt+1] = update_attitude_dynamics(attitudemodel, currenttime, tl.attitude.angularvelocity[simcnt], Ts, attitude_disturbance_input, attitude_control_input)
 
             # Update quaternion
-            tl.attitude.quaternion[simcnt+1] = update_quaternion(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
+            tl.attitude.quaternion[simcnt+1] = update_attitude_kinematics(tl.attitude.angularvelocity[simcnt], tl.attitude.quaternion[simcnt], Ts)
 
         end
 

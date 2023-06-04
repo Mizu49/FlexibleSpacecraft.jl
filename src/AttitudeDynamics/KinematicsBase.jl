@@ -8,7 +8,7 @@ module KinematicsBase
 using StaticArrays
 using ..Frames
 
-export InitKinematicsData, AttitudeData, initattitudedata, update_quaternion
+export InitKinematicsData, AttitudeData, initattitudedata, update_attitude_kinematics
 
 """
     function _initangularvelocity(simdata_num, initital_value::Vector)
@@ -79,11 +79,11 @@ function initattitudedata(datanum::Int, initialdata::InitKinematicsData)
 end
 
 """
-    function update_quaternion(angularvelocity, quaternion, Tsampling)::SVector{4, <:Real}
+    function update_attitude_kinematics(angularvelocity, quaternion, Tsampling)::SVector{4, <:Real}
 
 calculate quaternion at next time step using 4th order Runge-Kutta method.
 """
-function update_quaternion(angularvelocity, quaternion, Tsampling)::SVector{4, <:Real}
+function update_attitude_kinematics(angularvelocity, quaternion, Tsampling)::SVector{4, <:Real}
     # Update the quaterion vector using 4th order runge kutta method
 
     k1 = _calcdifferential_kinematics(angularvelocity, quaternion                   );
