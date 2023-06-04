@@ -25,7 +25,7 @@ Data container of rigid body spacecraft model. Used to specify and configure the
 
 * `inertia::SMatrix{3, 3, Float64}`: Inertia matrix of spacecraft platform
 """
-struct RigidBodyModel
+struct RigidBodyModel <: AbstractAttitudeDynamicsModel
     # Inertia Matrix
     inertia::SMatrix{3, 3, Float64}
 

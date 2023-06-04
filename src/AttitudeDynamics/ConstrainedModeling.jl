@@ -13,79 +13,55 @@ export ConstrainedModel
 """
     struct ConstrainedModel
 
-Data container of spacecraft model attitude dynamics model with the linear attitude-structure coupling. Used to specify and configure the parameter settings for simulation and control model in `FlexibleSpacecraft.jl`
-
-# Fields of struct `ConstrainedModel`
-
-* `inertia::SMatrix{3, 3, Float64}`: Inertia matrix of spacecraft platform
-* `Dcplt::SMatrix{Float64}`: coefficient matric for the coupling dynamics with the structural motion. The size of this matrix is 3 x (dimstructure)
-
 """
-struct ConstrainedModel
+struct ConstrainedModel{T <: Union{AbstractMatrix, Function}} <: AbstractAttitudeDynamicsModel
+
+    ## Attitude dynamics
     # Inertia Matrix
-    inertia::SMatrix{3, 3, Float64}
+    inertia::T
 
-    # coefficient matrix for the coupling dynamics
-    coupling::SMatrix
+    ## Coupling coefficient
+    coupling_coefficient::Function
 
-    # counstructor for `ConstrainedModel`
-    ConstrainedModel(inertia::AbstractMatrix{<:Real}, couplingmat::AbstractMatrix{<:Real}, dimstructurestate::Int) = begin
+    ## Flexible appendage dynamics
+    appendage_model
 
-        if size(inertia) != (3, 3)
-            throw(DimensionMismatch("dimension of `inertia` is invalid, it should be 3x3."))
-        end
-
-        inertiamat = SMatrix{3, 3}(inertia)
-        coupling = SMatrix{3, dimstructurestate}(couplingmat)
-
-        return new(inertiamat, coupling)
-    end
 end
 
 """
-    function _calc_differential_dynamics
-
-Get the differential of equation of dynamics. Internal function for module `ConstrainedModeling.jl`
-
-# Arguments
-
-* `model::ConstrainedModel`: attitude dynamics model
-* `currentTime::Real`: current time
-* `angularvelocity::SVector{3, Float64}`: angular velocity vector
-* `distinput::SVector{3, Float64}`: disturbance torque input vector
-* `ctrlinput::SVector{3, Float64}`: control torque input vector
-* `straccel::SVector{Float64}`: acceleration of the structural response of the flexible appendages
-* `strvelocity::AbstractVector{<:Real}`: velocity of the structural response of the flexible appendages
-
+    function _calc_differential_attitude_dynamics
 """
-function _calc_differential_dynamics(
+function _calc_differential_attitude_dynamics(
     model::ConstrainedModel,
     currentTime::Real,
-    angularvelocity::SVector{3, Float64},
-    distinput::SVector{3, Float64},
-    ctrlinput::SVector{3, Float64},
-    straccel::SVector,
-    strvelocity::SVector
+    angular_velocity::SVector{3, Float64},
+    attitude_disturbance::SVector{3, Float64},
+    attitude_control_torque::SVector{3, Float64},
+    appendage_acceleration::SVector,
+    current_coupling_coefficient::SMatrix
     )::SVector{3, Float64}
 
     # time-variant inertia
     I = model.inertia
 
-    # time-variant coupling term
-    D = model.coupling
-
     # calculate differential of equation of motion
-    differential = inv(I) * (
-        - ~(angularvelocity) * I * angularvelocity
+    diff_angular_velocity = inv(I) * (
+        - ~(angular_velocity) * I * angular_velocity
         # structual coupling term
-        - D * straccel
-        - ~(angularvelocity) * D * strvelocity
+        - current_coupling_coefficient * appendage_acceleration
         # input terms
-        + ctrlinput # control input torque
-        + distinput # disturbance torque
+        + attitude_control_torque
+        + attitude_disturbance
     )
 
-    return differential
+    return diff_angular_velocity
+end
+
+"""
+    _calc_differential_appendages
+"""
+function _calc_differential_appendages()
+
 end
 
 """
@@ -93,38 +69,29 @@ end
 
 calculate angular velocity at next time step using 4th order Runge-Kutta method
 
-# Arguments
-
-* `model::ConstrainedModel`: attitude dynamics model
-* `currentTime::Real`: current time
-* `angularvelocity::SVector{3, Float64}`: angular velocity vector
-* `distinput::SVector{3, Float64}`: disturbance torque input vector
-* `straccel::SVector`: acceleration of the structural response of the flexible appendages
-* `strvelocity::SVector`: velocity of the structural response of the flexible appendages
-
 """
 function update_angularvelocity(
     model::ConstrainedModel,
+    # attitude variables at current time
     currentTime::Real,
-    angularvelocity::SVector{3, Float64},
     Tsampling::Real,
-    distinput::SVector{3, Float64},
-    ctrlinput::SVector{3, Float64},
-    structure2atttiude::NamedTuple
+    angular_velocity::SVector{3, Float64},
+    attitude_disturbance::SVector{3, Float64},
+    attitude_control_torque::SVector{3, Float64},
     )::SVector{3, Float64}
 
-    # map info on flexible appendages
-    straccel = structure2atttiude.accel
-    strvelocity = structure2atttiude.velocity
+    # todo: update this to provide interface for flexible appendages
+    current_coupling_coefficient = model.coupling_coefficient(0)
+    appendage_acceleration = @SVector zeros(2)
 
-    k1 = _calc_differential_dynamics(model, currentTime              , angularvelocity                   , distinput, ctrlinput, straccel, strvelocity)
-    k2 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k1, distinput, ctrlinput, straccel, strvelocity)
-    k3 = _calc_differential_dynamics(model, currentTime + Tsampling/2, angularvelocity + Tsampling/2 * k2, distinput, ctrlinput, straccel, strvelocity)
-    k4 = _calc_differential_dynamics(model, currentTime + Tsampling  , angularvelocity + Tsampling   * k3, distinput, ctrlinput, straccel, strvelocity)
+    k1 = _calc_differential_attitude_dynamics(model, currentTime              , angular_velocity                   , attitude_disturbance, attitude_control_torque, appendage_acceleration, current_coupling_coefficient)
+    k2 = _calc_differential_attitude_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, attitude_disturbance, attitude_control_torque, appendage_acceleration, current_coupling_coefficient)
+    k3 = _calc_differential_attitude_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k2, attitude_disturbance, attitude_control_torque, appendage_acceleration, current_coupling_coefficient)
+    k4 = _calc_differential_attitude_dynamics(model, currentTime + Tsampling  , angular_velocity + Tsampling   * k3, attitude_disturbance, attitude_control_torque, appendage_acceleration, current_coupling_coefficient)
 
-    updated_angularvelocity = angularvelocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
+    updated_angular_velocity = angular_velocity + Tsampling/6 * (k1 + 2*k2 + 2*k3 + k4)
 
-    return updated_angularvelocity
+    return updated_angular_velocity
 end
 
 """

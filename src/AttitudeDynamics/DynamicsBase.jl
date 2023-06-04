@@ -5,13 +5,14 @@ using ..Frames, ..UtilitiesBase
 
 export AbstractAttitudeDynamicsModel, update_angularvelocity, setdynamicsmodel, calc_angular_momentum
 
+abstract type AbstractAttitudeDynamicsModel end
+
 include("RigidBody.jl")
 @reexport using .RigidBody
 
 include("ConstrainedModeling.jl")
 @reexport using .ConstrainedModeling
 
-AbstractAttitudeDynamicsModel = Union{RigidBodyModel, ConstrainedModel}
 
 """
     setdynamicsmodel
@@ -25,14 +26,15 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         inertia = load_matrix(paramsetting["inertia"])
 
         # get dimension of the structural motion of the flexible appendages
-        coupling = [
-            1.0 0.0
-            0.0 1.0
+        coupling = x -> SMatrix{3, 2}([
+            x 0.0
+            0.0 x
             0.0 0.0
-        ] # for debug
+        ]) # for debug
 
-        dimstructurestate = size(coupling, 2)
-        model = ConstrainedModel(inertia, coupling, dimstructurestate)
+        appendages_model = nothing
+
+        model = ConstrainedModel(inertia, coupling, appendages_model)
 
     elseif paramsetting["model"] == "Rigid body"
 
@@ -70,8 +72,7 @@ function update_angularvelocity(
     angularvelocity::SVector{3, Float64},
     Tsampling::Real,
     distinput::SVector{3, Float64},
-    ctrlinput::SVector{3, Float64},
-    structure2attitude::NamedTuple
+    ctrlinput::SVector{3, Float64}
     )::SVector{3, Float64}
 
     # check size of vectors
@@ -80,10 +81,10 @@ function update_angularvelocity(
     check_size(ctrlinput, 3)
 
     # switch based on the type of `model`
-    if typeof(model) == RigidBodyModel
+    if typeof(model) <: RigidBodyModel
         angularvelocity = RigidBody.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput)
-    elseif typeof(model) == ConstrainedModel
-        angularvelocity = ConstrainedModeling.update_angularvelocity(model, currentTime, angularvelocity, Tsampling, distinput, ctrlinput, structure2attitude)
+    elseif typeof(model) <: ConstrainedModel
+        angularvelocity = ConstrainedModeling.update_angularvelocity(model, currentTime, Tsampling, angularvelocity, distinput, ctrlinput)
     else
         error("given model is invalid")
     end
@@ -100,9 +101,9 @@ function calc_angular_momentum(
     check_size(angular_velocity, 3)
 
     # switch based on the type of model
-    if typeof(model) == RigidBodyModel
+    if typeof(model) <: RigidBodyModel
         L = RigidBody.calc_angular_momentum(model, angular_velocity)
-    elseif typeof(model) == ConstrainedModel
+    elseif typeof(model) <: ConstrainedModel
         L = ConstrainedModeling.calc_angular_momentum(model, angular_velocity)
     else
         error("given model is invalid")
