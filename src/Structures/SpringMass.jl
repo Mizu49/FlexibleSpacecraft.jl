@@ -535,7 +535,11 @@ function defmodel(paramdict::AbstractDict)
     dimdistinput = paramdict["system"]["control input"]["dimension"]
     Edist = load_matrix(paramdict["system"]["disturbance input"]["coefficient"])
 
-    Ecoupling = load_matrix(paramdict["system"]["coupling"])
+    Ecoupling = transpose([
+        1.0 0.0
+        0.0 1.0
+        0.0 0.0
+    ]) # for debug
 
     # define the parameters struct
     params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)

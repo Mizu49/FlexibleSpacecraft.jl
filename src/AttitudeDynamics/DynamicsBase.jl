@@ -25,7 +25,11 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         inertia = load_matrix(paramsetting["inertia"])
 
         # get dimension of the structural motion of the flexible appendages
-        coupling = load_matrix(paramsetting["coupling"])
+        coupling = [
+            1.0 0.0
+            0.0 1.0
+            0.0 0.0
+        ] # for debug
 
         dimstructurestate = size(coupling, 2)
         model = ConstrainedModel(inertia, coupling, dimstructurestate)

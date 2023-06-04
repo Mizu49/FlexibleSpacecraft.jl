@@ -23,12 +23,50 @@ spacecraft["attitude dynamics"] = Dict(
         1000.0    0.0    0.0
         0.0    1000.0    0.0
         0.0       0.0 1000.0
-    ],
-    "coupling" => [
-        1.0 0.0
-        0.0 1.0
-        0.0 0.0
     ]
+)
+
+## Flexible appendages
+spacecraft["appendage"] = Dict(
+    "modeling" => "spring-mass",
+    "system" => Dict(
+        "coord" => "physical",
+        "DOF" => 2,
+        "mass" => [
+            100  0
+            0   50
+        ],
+        "stiffness" => [
+            6e4  -1e4
+            -1e4  1e4
+        ],
+        "damping" => Dict(
+            "config" => "Rayleigh",
+            "alpha" => 0,
+            "beta" => 0.005
+        ),
+        "control input" => Dict(
+            "dimension" => 1,
+            "coefficient" => [
+                5
+                0
+            ]
+        ),
+        "disturbance input" => Dict(
+            "dimension" => 1,
+            "coefficient" => [
+                3
+                0
+            ]
+        )
+    ),
+    "disturbance" => Dict(
+        "type" => "vibration",
+        "dimension" => 1,
+        "angular velocity" => [1, 0],
+        "amplitude" => [0, 0],
+        "phase" => [0, 0]
+    )
 )
 
 ## attitude disturbance configuration
@@ -56,53 +94,6 @@ spacecraft["Orbit"] = Dict(
     ),
     # Note for this parameter setting
     "OrbitInfo" => "Test orbit parameters"
-)
-
-## Flexible appendages
-spacecraft["appendage"] = Dict(
-    "modeling" => "spring-mass",
-    "system" => Dict(
-        "coord" => "physical",
-        "DOF" => 2,
-        "mass" => [
-            100  0
-            0   50
-        ],
-        "stiffness" => [
-            6e4  -1e4
-            -1e4  1e4
-        ],
-        "damping" => Dict(
-            "config" => "Rayleigh",
-            "alpha" => 0,
-            "beta" => 0.005
-        ),
-        "coupling" => [
-            1 0 0
-            0 1 0
-        ],
-        "control input" => Dict(
-            "dimension" => 1,
-            "coefficient" => [
-                5
-                0
-            ]
-        ),
-        "disturbance input" => Dict(
-            "dimension" => 1,
-            "coefficient" => [
-                3
-                0
-            ]
-        )
-    ),
-    "disturbance" => Dict(
-        "type" => "vibration",
-        "dimension" => 1,
-        "angular velocity" => [1, 0],
-        "amplitude" => [0, 0],
-        "phase" => [0, 0]
-    )
 )
 
 ## Attitude control
