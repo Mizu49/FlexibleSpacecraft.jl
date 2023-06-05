@@ -1,9 +1,9 @@
 """
-    StructuresBase
+    AppendagesBase
 
 module for wrapping all the submodules for the structual dynamics for flexible spacecraft
 """
-module StructuresBase
+module AppendagesBase
 
 using Reexport, YAML, StaticArrays
 using ..UtilitiesBase, ..StructureDisturbance

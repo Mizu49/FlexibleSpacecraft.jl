@@ -1,7 +1,7 @@
 module ParameterSettingBase
 
 using YAML
-using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..StructuresBase, ..AttitudeControlBase
+using ..Frames, ..DynamicsBase, ..KinematicsBase, ..AttitudeDisturbance, ..AppendagesBase, ..AttitudeControlBase
 import ..OrbitBase
 
 export SimulationConfig, load_matrix, set_simulation_parameters

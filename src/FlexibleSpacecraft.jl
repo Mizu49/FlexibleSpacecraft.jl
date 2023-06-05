@@ -37,8 +37,8 @@ include("Visualization/VisualizationBase.jl")
 include("FlexibleAppendages/StructureDisturbance.jl")
 @reexport using .StructureDisturbance
 
-include("FlexibleAppendages/StructuresBase.jl")
-@reexport using .StructuresBase
+include("FlexibleAppendages/AppendagesBase.jl")
+@reexport using .AppendagesBase
 
 include("AttitudeControl/AttitudeControlBase.jl")
 @reexport using .AttitudeControlBase
