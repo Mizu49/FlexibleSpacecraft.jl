@@ -6,7 +6,7 @@ submodule that accommodate the implementation of the linear model for the attitu
 module ConstrainedModeling
 
 using StaticArrays
-using ..Frames, ..DynamicsBase
+using ..Frames, ..DynamicsBase, ..AppendagesBase
 
 export ConstrainedModel
 
@@ -24,7 +24,7 @@ struct ConstrainedModel{T <: Union{AbstractMatrix, Function}} <: AbstractAttitud
     coupling_coefficient::Function
 
     ## Flexible appendage dynamics
-    appendage_model
+    appendagesinfo::AppendagesInfo
 
 end
 

@@ -17,6 +17,12 @@ include("DataContainers/Frames.jl")
 include("OrbitalDynamics/OrbitBase.jl")
 @reexport using .OrbitBase
 
+include("FlexibleAppendages/StructureDisturbance.jl")
+@reexport using .StructureDisturbance
+
+include("FlexibleAppendages/AppendagesBase.jl")
+@reexport using .AppendagesBase
+
 # Inculde module `AttitudeDisturbance`
 include("AttitudeDisturbance/AttitudeDisturbance.jl")
 @reexport using .AttitudeDisturbance
@@ -33,12 +39,6 @@ include("AttitudeDynamics/Evaluation.jl")
 # Include module `VisualizationBase`
 include("Visualization/VisualizationBase.jl")
 @reexport using .VisualizationBase
-
-include("FlexibleAppendages/StructureDisturbance.jl")
-@reexport using .StructureDisturbance
-
-include("FlexibleAppendages/AppendagesBase.jl")
-@reexport using .AppendagesBase
 
 include("AttitudeControl/AttitudeControlBase.jl")
 @reexport using .AttitudeControlBase

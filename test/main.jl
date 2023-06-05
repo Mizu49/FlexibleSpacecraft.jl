@@ -4,11 +4,11 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-include("spacecraft2.jl")
-(simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = set_simulation_parameters(spacecraft)
+include("spacecraft1.jl")
+(simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, attitudecontroller) = set_simulation_parameters(spacecraft)
 
 # run simulation
-simtime = @timed simdata = runsimulation(attitudemodel, initvalue, orbitinfo, attidistinfo, appendageinfo, simconfig, attitudecontroller)
+simtime = @timed simdata = runsimulation(attitudemodel, initvalue, orbitinfo, attidistinfo, simconfig, attitudecontroller)
 
 # test the quaternion value to check the stability of the simulation
 @test quaternion_constraint(simdata.attitude.quaternion)
@@ -22,11 +22,6 @@ Makie.inline!(true)
 display(fig_angularvelocity)
 display(fig_quaternion)
 display(fig_rollpitchyaw)
-
-if !isnothing(appendageinfo)
-    fig_appendage_displacement = plot_physicalstate(simdata.time, simdata.appendages.physicalstate)
-    display(fig_appendage_displacement)
-end
 
 fig_angularmomentum = plot_angular_momentum(simdata.time, simdata.attitude.angularmomentum)
 display(fig_angularmomentum)

@@ -8,7 +8,7 @@ module AppendagesBase
 using Reexport, YAML, StaticArrays
 using ..UtilitiesBase, ..StructureDisturbance
 
-export AppendageInfo, AppendageData, initappendagedata, setstructure, update_appendages!
+export AppendagesInfo, AppendageData, initappendagedata, set_appendage_info, update_appendages!
 
 # abstract types for the flexible appendages
 abstract type AbstractAppendageParameters end
@@ -57,11 +57,11 @@ mutable struct AppendageInternals<:AbstractAppendageInternals
 end
 
 """
-    AppendageInfo
+    AppendagesInfo
 
 information of the flexible appendages
 """
-struct AppendageInfo
+struct AppendagesInfo
     params::Union{AbstractAppendageParameters, Nothing}
     model::Union{AbstractAppendageModel, Nothing}
     internals::Union{AbstractAppendageInternals, Nothing}
@@ -69,7 +69,7 @@ struct AppendageInfo
 end
 
 """
-    setstructure
+    set_appendage_info
 
 API function to define the model of the flexible appendages. Argument is the dictionary type variable
 
@@ -77,7 +77,7 @@ API function to define the model of the flexible appendages. Argument is the dic
 
 * `configdata::AbstractDict`: path for the configuration file for the structural appendages
 """
-function setstructure(configdata::AbstractDict)::Union{AppendageInfo, Nothing}
+function set_appendage_info(configdata::AbstractDict)::Union{AppendagesInfo, Nothing}
 
     if haskey(configdata, "modeling") == false
         throw(ErrorException("`modeling` is undefined in configuration"))
@@ -100,7 +100,7 @@ function setstructure(configdata::AbstractDict)::Union{AppendageInfo, Nothing}
             throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
         end
 
-        return AppendageInfo(params, model, internals, disturbance)
+        return AppendagesInfo(params, model, internals, disturbance)
 
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
@@ -113,7 +113,7 @@ end
 
 initializer for the data container for structural simulation
 """
-function initappendagedata(info::AppendageInfo, initphysicalstate::Vector, datanum::Int)
+function initappendagedata(info::AppendagesInfo, initphysicalstate::Vector, datanum::Int)
 
     # physical state vector (physical coordinate)
     physicalstate = [zeros(SVector{info.model.dimstate}) for _ in 1:datanum]
@@ -140,7 +140,7 @@ function initappendagedata(info::AppendageInfo, initphysicalstate::Vector, datan
 end
 
 
-function update_appendages!(info::AppendageInfo, Ts::Real, currenttime, currentstate, attitude2structure, strctrlinput, strdistinput)
+function update_appendages!(info::AppendagesInfo, Ts::Real, currenttime, currentstate, attitude2structure, strctrlinput, strdistinput)
 
     attiinput = attitude2structure.angularvelocity
 

@@ -1,7 +1,7 @@
 module DynamicsBase
 
 using Reexport, StaticArrays
-using ..Frames, ..UtilitiesBase
+using ..Frames, ..UtilitiesBase, ..AppendagesBase
 
 export AbstractAttitudeDynamicsModel, update_attitude_dynamics, setdynamicsmodel, calc_angular_momentum
 
@@ -32,9 +32,11 @@ function setdynamicsmodel(paramsetting::AbstractDict)
             0.0 0.0
         ]) # for debug
 
-        appendages_model = nothing
+        # set information on flexible appendages
+        appendagesinfo = set_appendage_info(paramsetting["appendages"])
 
-        model = ConstrainedModel(inertia, coupling, appendages_model)
+        # set constrained model model of the flexible spacecraft
+        model = ConstrainedModel(inertia, coupling, appendagesinfo)
 
     elseif paramsetting["model"] == "Rigid body"
 
