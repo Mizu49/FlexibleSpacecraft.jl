@@ -34,10 +34,10 @@ include("AttitudeDynamics/Evaluation.jl")
 include("Visualization/VisualizationBase.jl")
 @reexport using .VisualizationBase
 
-include("Structures/StructureDisturbance.jl")
+include("FlexibleAppendages/StructureDisturbance.jl")
 @reexport using .StructureDisturbance
 
-include("Structures/StructuresBase.jl")
+include("FlexibleAppendages/StructuresBase.jl")
 @reexport using .StructuresBase
 
 include("AttitudeControl/AttitudeControlBase.jl")
