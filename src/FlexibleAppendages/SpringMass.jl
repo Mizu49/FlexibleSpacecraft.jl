@@ -6,7 +6,7 @@ submodule that contains all features for spring-mass modeling of flexible append
 module SpringMass
 
 using LinearAlgebra, StaticArrays
-using ..UtilitiesBase, ..StructuresBase
+using ..UtilitiesBase, ..AppendagesBase
 
 export physical2modal, PhysicalSystem, ModalSystem, SpringMassModel, StateSpace, updatestate, modalstate2physicalstate, physicalstate2modalstate, SpringMassParams
 
@@ -244,7 +244,7 @@ StateSpace(model::SpringMassModel)
 ```
 
 """
-struct StateSpace<:StructuresBase.AbstractAppendageModel
+struct StateSpace<:AppendagesBase.AbstractAppendageModel
 
     # dimension of the state and input vectors
     DOF::Int
@@ -468,7 +468,7 @@ struct for accomodating the parameters for the spring mass structural model
 * `Edisturbance::AbstractVecOrMat`: coefficient matrix for the disturbance input
 
 """
-struct SpringMassParams<:StructuresBase.AbstractAppendageParameters
+struct SpringMassParams<:AppendagesBase.AbstractAppendageParameters
     # mass matrix
     M::AbstractMatrix
     # damping matrix
