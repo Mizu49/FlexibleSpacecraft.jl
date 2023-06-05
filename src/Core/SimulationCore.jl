@@ -32,7 +32,6 @@ struct SimData
     datanum::Unsigned
     attitude::AttitudeData
     attitude_disturbance::AttitudeDisturbanceData
-    appendages::Union{AppendageData, Nothing}
     orbit::Union{OrbitData, Nothing}
 end
 
@@ -70,7 +69,6 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     initvalue::InitKinematicsData,
     orbitinfo::Union{OrbitInfo, Nothing},
     attidistinfo::AttitudeDisturbanceInfo,
-    appendageinfo::Union{AppendageInfo, Nothing},
     simconfig::SimulationConfig,
     attitude_controller::AbstractAttitudeController
     )::SimData
@@ -80,7 +78,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     Ts = simconfig.samplingtime
 
     # Data containers
-    tl = _init_datacontainers(simconfig, initvalue, appendageinfo, orbitinfo, attidistinfo)
+    tl = _init_datacontainers(simconfig, initvalue, orbitinfo, attidistinfo)
 
     ### main loop of the simulation
     progress = Progress(tl.datanum, 1, "Running...", 20)   # progress meter

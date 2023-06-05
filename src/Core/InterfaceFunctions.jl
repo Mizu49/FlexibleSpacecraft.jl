@@ -8,7 +8,6 @@ initialize data container
 function _init_datacontainers(
     simconfig::SimulationConfig,
     initvalue::InitKinematicsData,
-    appendageinfo::Union{AppendageInfo, Nothing},
     orbitinfo::Union{OrbitInfo, Nothing},
     attidistinfo::AttitudeDisturbanceInfo
     )::SimData
@@ -21,13 +20,6 @@ function _init_datacontainers(
     # Initialize data containers for the attitude dynamics
     attitude = initattitudedata(datanum, initvalue)
 
-    # initialize data container for the structural motion of the flexible appendages
-    if isnothing(appendageinfo)
-        appendages = nothing
-    else
-        appendages = initappendagedata(appendageinfo, [0, 0, 0, 0], datanum)
-    end
-
     # initialize orbit state data array
     if isnothing(orbitinfo)
         orbit = nothing
@@ -39,7 +31,7 @@ function _init_datacontainers(
     attidist = init_attitude_disturbance_data(datanum, attidistinfo)
 
     # initialize simulation data container
-    tl = SimData(time, datanum, attitude, attidist, appendages, orbit)
+    tl = SimData(time, datanum, attitude, attidist, orbit)
 
     return tl
 end

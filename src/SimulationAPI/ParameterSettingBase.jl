@@ -83,7 +83,7 @@ function set_simulation_parameters(filepath::String)
 
     # Flexible appendage
     if haskey(paramread, "appendage")
-        appendageinfo = setstructure(paramread["appendage"])
+        appendageinfo = set_appendage_info(paramread["appendage"])
     end
 
     # Attitude controller
@@ -133,11 +133,6 @@ function set_simulation_parameters(spacecraft::AbstractDict)
         throw(AssertionError("disturbance configuration is not found on parameter setting file"))
     end
 
-    # Flexible appendage
-    if haskey(spacecraft, "appendage")
-        appendageinfo = setstructure(spacecraft["appendage"])
-    end
-
     # Attitude controller
     if haskey(spacecraft, "attitude controller")
         attitude_controller = set_attitudecontroller(spacecraft["attitude controller"])
@@ -145,7 +140,7 @@ function set_simulation_parameters(spacecraft::AbstractDict)
         throw(AssertionError("attitude controller configuration is not found on parameter setting file"))
     end
 
-    return (simconfig, attimodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitude_controller)
+    return (simconfig, attimodel, attidistinfo, initvalue, orbitinfo, attitude_controller)
 end
 
 """
