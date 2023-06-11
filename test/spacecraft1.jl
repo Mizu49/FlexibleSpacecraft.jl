@@ -58,13 +58,6 @@ spacecraft["attitude dynamics"] = Dict(
                 ]
             )
         ),
-        "disturbance" => Dict(
-            "type" => "vibration",
-            "dimension" => 1,
-            "angular velocity" => [1, 0],
-            "amplitude" => [0, 0],
-            "phase" => [0, 0]
-        )
     )
 )
 
