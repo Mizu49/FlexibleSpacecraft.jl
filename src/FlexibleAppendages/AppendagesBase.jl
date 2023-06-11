@@ -15,20 +15,13 @@ abstract type AbstractAppendageParameters end
 abstract type AbstractAppendageModel end
 abstract type AbstractAppendageInternals end
 
-include("SpringMass.jl")
-@reexport using .SpringMass
+include("DiscreteModeling.jl")
+@reexport using .DiscreteModeling
 
 """
     AppendageData
 
 struct of the data container for the states and inputs of the structural response of the flexible appendages
-
-# Fields
-
-* `state::AbstractVector{<:AbstractVector}`: data container for the state vector trajectory of the flexible appendage
-* `physicalstate::AbstractVector{<:AbstractVector}`: data container for the physical displacement and velocity trajectory of the flexible appendage
-* `controlinput::AbstractVector{<:AbstractVector}`: data container for the control input trajectory
-* `disturbance::AbstractVector{<:AbstractVector}`: data container for the disturbance input trajectory
 """
 struct AppendageData
     state::AbstractVector{<:Union{AbstractVector, Real}}
@@ -37,24 +30,6 @@ struct AppendageData
     disturbance::AbstractVector{<:Union{AbstractVector, Real}}
 end
 
-"""
-    AppendageInternals
-
-internals of the appendage data
-"""
-mutable struct AppendageInternals<:AbstractAppendageInternals
-    previousstate::AbstractVector{<:Real}
-    currentstate::AbstractVector{<:Real}
-    currentaccel::AbstractVector{<:Real}
-
-    AppendageInternals(DOF::Integer) = begin
-
-        initstate = SVector{2*DOF, Real}(zeros(2*DOF))
-        initaccel = SVector{DOF, Real}(zeros(DOF))
-
-        new(initstate, initstate, initaccel)
-    end
-end
 
 """
     AppendagesInfo
@@ -64,7 +39,6 @@ information of the flexible appendages
 struct AppendagesInfo
     params::Union{AbstractAppendageParameters, Nothing}
     model::Union{AbstractAppendageModel, Nothing}
-    internals::Union{AbstractAppendageInternals, Nothing}
     disturbance::Union{StructureDisturbance.AbstractAppendageDisturbance, Nothing}
 end
 
@@ -90,8 +64,7 @@ function set_appendage_info(configdata::AbstractDict)::Union{AppendagesInfo, Not
     elseif configdata["modeling"] == "spring-mass"
         # formulate spring-mass model of the flexible appendages
 
-        (params, model) = SpringMass.defmodel(configdata)
-        internals = AppendageInternals(2)
+        (params, model) = DiscreteModeling.defmodel(configdata)
 
         # configure disturbance input to the flexible appendage
         if haskey(configdata, "disturbance")
@@ -100,7 +73,7 @@ function set_appendage_info(configdata::AbstractDict)::Union{AppendagesInfo, Not
             throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
         end
 
-        return AppendagesInfo(params, model, internals, disturbance)
+        return AppendagesInfo(params, model, disturbance)
 
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
@@ -145,11 +118,7 @@ function update_appendages!(info::AppendagesInfo, Ts::Real, currenttime, current
     attiinput = attitude2structure.angularvelocity
 
     # time evolution
-    nextstate = SpringMass.updatestate(info.model, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
-
-    info.internals.previousstate = currentstate
-    info.internals.currentstate = nextstate
-    info.internals.currentaccel = (nextstate[(info.model.DOF+1):end] - currentstate[(info.model.DOF+1):end]) / Ts
+    nextstate = DiscreteModeling.updatestate(info.model, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
     return nextstate
 end

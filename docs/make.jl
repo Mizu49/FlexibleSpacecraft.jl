@@ -22,7 +22,7 @@ makedocs(
             "Disturbance input" => "dynamics/disturbance.md",
             "Structures" => [
                 "Index" => "dynamics/structures/structures.md",
-                "Spring mass model" => "dynamics/structures/SpringMass.md"
+                "Spring mass model" => "dynamics/structures/DiscreteModeling.md"
             ]
         ],
         "Libraries" => [
