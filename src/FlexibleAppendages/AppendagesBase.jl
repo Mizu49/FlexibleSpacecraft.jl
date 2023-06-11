@@ -5,18 +5,17 @@ module for wrapping all the submodules for the structual dynamics for flexible s
 """
 module AppendagesBase
 
-using Reexport, YAML, StaticArrays
-using ..UtilitiesBase, ..StructureDisturbance
+using YAML, StaticArrays
+using ..UtilitiesBase
 
 export AppendagesInfo, AppendageData, initappendagedata, set_appendage_info, update_appendages!
 
 # abstract types for the flexible appendages
 abstract type AbstractAppendageParameters end
 abstract type AbstractAppendageModel end
-abstract type AbstractAppendageInternals end
 
 include("DiscreteModeling.jl")
-@reexport using .DiscreteModeling
+using .DiscreteModeling
 
 """
     AppendageData
@@ -26,8 +25,6 @@ struct of the data container for the states and inputs of the structural respons
 struct AppendageData
     state::AbstractVector{<:Union{AbstractVector, Real}}
     physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
-    controlinput::AbstractVector{<:Union{AbstractVector, Real}}
-    disturbance::AbstractVector{<:Union{AbstractVector, Real}}
 end
 
 
@@ -37,9 +34,8 @@ end
 information of the flexible appendages
 """
 struct AppendagesInfo
-    params::Union{AbstractAppendageParameters, Nothing}
-    model::Union{AbstractAppendageModel, Nothing}
-    disturbance::Union{StructureDisturbance.AbstractAppendageDisturbance, Nothing}
+    params::AbstractAppendageParameters
+    model::AbstractAppendageModel
 end
 
 """
@@ -57,29 +53,14 @@ function set_appendage_info(configdata::AbstractDict)::Union{AppendagesInfo, Not
         throw(ErrorException("`modeling` is undefined in configuration"))
     end
 
-    if configdata["modeling"] == "none"
-        # flexible appendage does not exist
-        return nothing
-
-    elseif configdata["modeling"] == "spring-mass"
-        # formulate spring-mass model of the flexible appendages
-
+    if configdata["modeling"] == "spring-mass"
+        # formulate discrete spring-mass model of the flexible appendages
         (params, model) = DiscreteModeling.defmodel(configdata)
-
-        # configure disturbance input to the flexible appendage
-        if haskey(configdata, "disturbance")
-            disturbance = setstrdistconfig(configdata["disturbance"])
-        else
-            throw(ErrorException("configuration for the disturbance input to the appendage structure is missing"))
-        end
-
-        return AppendagesInfo(params, model, disturbance)
-
+        return AppendagesInfo(params, model)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
 end
-
 
 """
     initappendagedata
@@ -103,13 +84,7 @@ function initappendagedata(info::AppendagesInfo, initphysicalstate::Vector, data
         controlinput = [zeros(SVector{info.model.dimctrlinput}) for _ in 1:datanum]
     end
 
-    if info.model.dimdistinput == 1
-        disturbance = [0.0 for _ in 1:datanum]
-    else
-        disturbance = [zeros(SVector{info.model.dimdistinput}) for _ in 1:datanum]
-    end
-
-    return AppendageData(state, physicalstate, controlinput, disturbance)
+    return AppendageData(state, physicalstate, controlinput)
 end
 
 
