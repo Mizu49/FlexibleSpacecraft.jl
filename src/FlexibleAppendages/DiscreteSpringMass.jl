@@ -46,7 +46,7 @@ Representation of dynamics part of the structural system in physical coordinate.
 
 # Fields
 
-* `DOF::Integer`: dimension of the structural system
+* `DOF::Int`: dimension of the structural system
 * `M::Matrix`: mass matrix in physical coordinate
 * `D::Matrix`: damping matrix in physical coordinate
 * `K::Matrix`: stiffness matrix in physical coordinate
@@ -79,9 +79,9 @@ physicalsystem = PhysicalSystem(M, D, K)
 ```
 """
 struct PhysicalSystem
-    DOF::Integer
-    dimctrl::Integer
-    dimdist::Integer
+    DOF::Int
+    dimctrl::Int
+    dimdist::Int
     M::SMatrix
     D::SMatrix
     K::SMatrix
@@ -135,7 +135,7 @@ Representation of dynamics part of the structural system in mass-normalized moda
 
 # Fields
 
-* `DOF::Integer`: dimension of the structural system
+* `DOF::Int`: dimension of the structural system
 * `PHI::Matrix`: modal transformation matrix
 * `OMEGA::Matrix`: modal angular velocity matrix
 * `XI::Matrix`: modal damping matrix
@@ -174,10 +174,10 @@ modalsystem = physical2modal(physicalsystem)
 ```
 """
 struct ModalSystem
-    dimmode::Integer
-    DOF::Integer
-    dimctrl::Integer
-    dimdist::Integer
+    dimmode::Int
+    DOF::Int
+    dimctrl::Int
+    dimdist::Int
     PHI::SMatrix
     OMEGA::SMatrix
     XI::SMatrix
