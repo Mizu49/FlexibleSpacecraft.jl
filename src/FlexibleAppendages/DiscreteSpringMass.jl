@@ -13,19 +13,30 @@ struct for accomodating the parameters for the spring mass structural model
 * `Edisturbance::AbstractVecOrMat`: coefficient matrix for the disturbance input
 
 """
-struct SpringMassParams<:AppendagesBase.AbstractAppendageParameters
+struct SpringMassParams{DOF, dimctrl, dimdist}<:AppendagesBase.AbstractAppendageParameters
     # mass matrix
-    M::AbstractMatrix
+    M::SMatrix{DOF, DOF}
     # damping matrix
-    D::AbstractMatrix
+    D::SMatrix{DOF, DOF}
     # stiffness matrix
-    K::AbstractMatrix
-    # attitude coupling input coefficient matrix
-    Ecoupling::AbstractMatrix
+    K::SMatrix{DOF, DOF}
     # control input coefficient matrix
-    Econtrol::AbstractVecOrMat
+    Econtrol::SMatrix{DOF, dimctrl}
     # disturbance input coefficient matrix
-    Edisturbance::AbstractVecOrMat
+    Edisturbance::SMatrix{DOF, dimdist}
+end
+
+function SpringMassParams(
+    M::AbstractMatrix,
+    D::AbstractMatrix,
+    K::AbstractMatrix,
+    Econtrol::AbstractMatrix,
+    Edisturbance::AbstractMatrix,
+    )
+    DOF = size(M, 1)
+    dimctrl = size(Econtrol, 2)
+    dimdist = size(Edisturbance, 2)
+    return SpringMassParams{DOF, dimctrl, dimdist}(M, D, K, Econtrol, Edisturbance)
 end
 
 """
@@ -35,10 +46,10 @@ Representation of dynamics part of the structural system in physical coordinate.
 
 # Fields
 
-* `dim::Integer`: dimension of the structural system
-* `mass_matrix::Matrix`: mass matrix in physical coordinate
-* `damping_matrix::Matrix`: damping matrix in physical coordinate
-* `stiffness_matrix::Matrix`: stiffness matrix in physical coordinate
+* `DOF::Integer`: dimension of the structural system
+* `M::Matrix`: mass matrix in physical coordinate
+* `D::Matrix`: damping matrix in physical coordinate
+* `K::Matrix`: stiffness matrix in physical coordinate
 
 # Mathematical representation
 
@@ -55,7 +66,7 @@ This data containter corresponds to the left hand side of the equation of motion
 # Constructor
 
 ```julia
-PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)
+PhysicalSystem(M::Matrix, D::Matrix, K::Matrix)
 ```
 
 # Example
@@ -68,22 +79,53 @@ physicalsystem = PhysicalSystem(M, D, K)
 ```
 """
 struct PhysicalSystem
-    dim::Integer
+    DOF::Integer
+    dimctrl::Integer
+    dimdist::Integer
+    M::SMatrix
+    D::SMatrix
+    K::SMatrix
+    Ectrl::SMatrix
+    Edist::SMatrix
+end
 
-    mass_matrix::Matrix
-    damping_matrix::Matrix
-    stiffness_matrix::Matrix
+function PhysicalSystem(
+    M::SMatrix,
+    D::SMatrix,
+    K::SMatrix,
+    Ectrl::SMatrix,
+    Edist::SMatrix
+    )
+    DOF = size(M, 1)
+    dimctrl = size(Ectrl, 2)
+    dimdist = size(Edist, 2)
+    return PhysicalSystem(DOF, dimctrl, dimdist, M, D, K, Ectrl, Edist)
+end
 
-    # Constructor
-    """
-        PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)
+function PhysicalSystem(
+    M::Matrix,
+    D::Matrix,
+    K::Matrix,
+    Ectrl::Matrix,
+    Edist::Matrix
+    )
+    DOF = size(M, 1)
+    dimctrl = size(Ectrl, 2)
+    dimdist = size(Edist, 2)
+    return PhysicalSystem(
+        DOF,
+        dimctrl,
+        dimdist,
+        SMatrix{DOF, DOF}(M),
+        SMatrix{DOF, DOF}(D),
+        SMatrix{DOF, DOF}(K),
+        SMatrix{DOF, dimctrl}(Ectrl),
+        SMatrix{DOF, dimdist}(Edist)
+    )
+end
 
-    Constructor for data container `PhysicalSystem`
-    """
-    PhysicalSystem(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix) = begin
-        dim = size(mass_matrix, 1)
-        new(dim, mass_matrix, damping_matrix, stiffness_matrix)
-    end
+function PhysicalSystem(params::SpringMassParams{DOF, dimctrl, dimdist}) where {DOF, dimctrl, dimdist}
+    return PhysicalSystem(DOF, dimctrl, dimdist, params.M, params.D, params.K, params.Econtrol, params.Edisturbance)
 end
 
 """
@@ -93,7 +135,7 @@ Representation of dynamics part of the structural system in mass-normalized moda
 
 # Fields
 
-* `dim::Integer`: dimension of the structural system
+* `DOF::Integer`: dimension of the structural system
 * `PHI::Matrix`: modal transformation matrix
 * `OMEGA::Matrix`: modal angular velocity matrix
 * `XI::Matrix`: modal damping matrix
@@ -132,126 +174,84 @@ modalsystem = physical2modal(physicalsystem)
 ```
 """
 struct ModalSystem
-    dim::Integer
-
-    PHI::Matrix
-    OMEGA::Matrix
-    XI::Matrix
-
-    # Constructor
-    ModalSystem(PHI::Matrix, OMEGA::Matrix, XI::Matrix) = begin
-        dim = size(PHI, 1)
-        new(dim, PHI, OMEGA, XI)
-    end
-end
-
-"""
-    SpringMassModel
-
-Spring mass representation of the entire system modeling
-
-# Mathematical representation
-
-```math
-\\ddot{\\mathbf{\\eta}} + 2 \\boldsymbol{\\Xi \\Omega} \\dot{\\mathbf{\\eta}} + \\boldsymbol{\\Omega}^2 \\mathbf{\\eta} = \\boldsymbol{\\Phi}^{\\mathrm{T}} \\mathbf{D} \\boldsymbol{\\omega} + \\boldsymbol{\\Phi}^{\\mathrm{T}} \\mathbf{F}_{\\mathrm{ctrl}} \\mathbf{f_\\mathrm{ctrl}} + \\boldsymbol{\\Phi}^{\\mathrm{T}} \\mathbf{F}_{\\mathrm{dist}} \\mathbf{f_\\mathrm{dist}}
-```
-
-# Fields
-
-* `DOF::Integer`: dimension of the displacement vector of the system
-* `dimcontrolinput::Integer`: dimension of the control input vector
-* `dimdistinput::Integer`: dimension of the disturbance input vector
-* `system::ModalSystem`: mass-normalized modal representation of the system
-* `D::AbstractMatrix`: coupling matrix wiht the attitude motion (time derivative of the angular velocity vector)
-* `Fctrl::AbstractVecOrMat`: coefficient matrix or vector of the control input vector
-* `Fdist::AbstractVecOrMat`: coefficient matrix or vector of the disturbance input vector
-"""
-struct SpringMassModel
-    # degrees of freedom of the system
+    dimmode::Integer
     DOF::Integer
-    # dimension of the control input vector
-    dimcontrolinput::Integer
-    # dimension of the disturbance input vector
-    dimdistinput::Integer
-    # Representation of the structural system
-    system::ModalSystem
-
-    # coupling matrix with the attitude dynamics (time derivative of the angular velocity vector)
-    D::AbstractMatrix
-
-    # control input matrix or vector
-    Fctrl::AbstractVecOrMat
-    # disturbance input matrix or vector
-    Fdist::AbstractVecOrMat
-
-    # Inner constructor for struct `SpringMassModel`
-    SpringMassModel(system::ModalSystem, D::AbstractMatrix, Fctrl::AbstractVecOrMat, Fdist::AbstractVecOrMat) = begin
-        # get dimension of the system
-        DOF = system.dim
-        dimcontrolinput = size(Fctrl, 2)
-        dimdistinput = size(Fdist, 2)
-
-        new(DOF, dimcontrolinput, dimdistinput, system, D, Fctrl, Fdist)
-    end
-
-    SpringMassModel(system::PhysicalSystem, D::AbstractMatrix, Fctrl::AbstractVecOrMat, Fdist::AbstractVecOrMat) = begin
-
-        # convert physical system representation into modal system representation
-        system = physical2modal(system)
-
-        # get dimension of the system
-        DOF = system.dim
-        dimcontrolinput = size(Fctrl, 2)
-        dimdistinput = size(Fdist, 2)
-
-        new(DOF, dimcontrolinput, dimdistinput, system, D, Fctrl, Fdist)
-    end
+    dimctrl::Integer
+    dimdist::Integer
+    PHI::SMatrix
+    OMEGA::SMatrix
+    XI::SMatrix
 end
 
-function physical2modal(physicalsystem::PhysicalSystem)::ModalSystem
-
-    return physical2modal(physicalsystem.mass_matrix, physicalsystem.damping_matrix, physicalsystem.stiffness_matrix)
+function ModalSystem(PHI::Matrix, OMEGA::Matrix, XI::Matrix, Ectrl::Matrix, Edist::Matrix)
+    DOF = size(PHI, 1)
+    dimmode = size(PHI, 2)
+    dimctrl = size(Ectrl, 2)
+    dimdist = size(Edist, 2)
+    return ModalSystem(
+        dimmode,
+        DOF,
+        dimctrl,
+        dimdist,
+        SMatrix{DOF, DOF}(PHI),
+        SMatrix{DOF, DOF}(OMEGA),
+        SMatrix{DOF, DOF}(XI)
+    )
 end
+
+function ModalSystem(PHI::SMatrix, OMEGA::SMatrix, XI::SMatrix, Ectrl::SMatrix, Edist::SMatrix)
+    DOF = size(PHI, 1)
+    dimmode = size(PHI, 2)
+    dimctrl = size(Ectrl, 2)
+    dimdist = size(Edist, 2)
+    return ModalSystem(dimmode, DOF, dimctrl, dimdist, PHI, OMEGA, XI)
+end
+
 
 """
-    physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)::ModalSystem
+    physical2modal(M::Matrix, D::Matrix, K::Matrix)::ModalSystem
 
 return tuple of the modal transformation matrix and modal damping matrix for the mass-normalized modal coordinates
 """
-function physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_matrix::Matrix)::ModalSystem
+function physical2modal(physicalsystem::PhysicalSystem)::ModalSystem
 
-    # dimension of the structure
-    dim = size(mass_matrix, 1)
+    M = physicalsystem.M
+    K = physicalsystem.K
+    D = physicalsystem.D
+    DOF = physicalsystem.DOF
+
+    #TODO: fix this to implement modal reduction feature
+    dimmode = DOF
 
     # Eigen value decomposition
     # https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.eigvecs
-    PHI = eigvecs(mass_matrix, stiffness_matrix)
+    PHI = eigvecs(M, K)
 
     # mass normalization
-    mr = zeros(dim)
-    for ind = 1:dim
-        mr[ind] = PHI[:, ind]' * mass_matrix * PHI[:, ind]
+    mr = zeros(DOF)
+    for ind = 1:DOF
+        mr[ind] = PHI[:, ind]' * M * PHI[:, ind]
         PHI[:, ind] = sqrt(1/mr[ind])*PHI[:, ind]
 
         # redo the calculation of modal mass, mr[idx] == 1.0
-        mr[ind] = PHI[:, ind]' * mass_matrix * PHI[:, ind]
+        mr[ind] = PHI[:, ind]' * M * PHI[:, ind]
     end
 
     # natural angular frequency matrix
     # OMEGA is defined to be diagonal matrix of natural angular frequency, not its squared value
-    OMEGA = sqrt(transpose(PHI) * stiffness_matrix * PHI)
+    OMEGA = sqrt(transpose(PHI) * K * PHI)
 
     # calculate modal stiffness matrix Kr = omega^2
-    kr = zeros(dim)
-    for idx = 1:dim
+    kr = zeros(DOF)
+    for idx = 1:DOF
         kr[idx] = OMEGA[idx, idx]^2
     end
 
     # modal damping ratio
-    cr = zeros(dim)
-    xi_r = zeros(dim)
-    for idx = 1:dim
-        cr[idx] = transpose(PHI[:, idx]) * damping_matrix * PHI[:, idx]
+    cr = zeros(DOF)
+    xi_r = zeros(DOF)
+    for idx = 1:DOF
+        cr[idx] = transpose(PHI[:, idx]) * D * PHI[:, idx]
         xi_r[idx] = cr[idx]/(2 * sqrt(mr[idx] * kr[idx]))
     end
     XI = diagm(xi_r)
@@ -262,5 +262,13 @@ function physical2modal(mass_matrix::Matrix, damping_matrix::Matrix, stiffness_m
     PHI = PHI[:, sortidx]
     XI = XI[sortidx, sortidx]
 
-    return ModalSystem(PHI, OMEGA, XI)
+    return ModalSystem(
+        dimmode,
+        DOF,
+        physicalsystem.dimctrl,
+        physicalsystem.dimdist,
+        SMatrix{DOF, dimmode}(PHI),
+        SMatrix{dimmode, dimmode}(OMEGA),
+        SMatrix{dimmode, dimmode}(XI)
+    )
 end
