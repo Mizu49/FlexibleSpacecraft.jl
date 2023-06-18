@@ -38,8 +38,8 @@ Each matrix is defined as follows:
 # Fields
 
 * `dimstate::Int`: dimension of the state vector
-* `dimctrlinput::Int`: dimension of the control input vector
-* `dimdistinput::Int`: dimension of the disturbance input vector
+* `modalsystem.dimctrl::Int`: dimension of the control input vector
+* `modalsystem.dimdist::Int`: dimension of the disturbance input vector
 * `sysA::SMatrix`: system matrix
 * `sysB::StaticArray`: coefficient matrix or vector for control input
 * `sysEcplg::SMatrix`: input matrix for the coupling part (subscript represents coupling)
@@ -57,57 +57,62 @@ struct StateSpace<:AppendagesBase.AbstractAppendageModel
     # dimension of the state and input vectors
     DOF::Int
     dimstate::Int
-    dimctrlinput::Int
-    dimdistinput::Int
+    dimctrl::Int
+    dimdist::Int
 
     sysA::SMatrix # system matrix
     sysB::StaticArray # control input matrix
-    sysEcplg::SMatrix # input matrix for the coupling part (subscript represents coupling)
-    sysEdist::StaticArray # input matrix for the disturbance input (subscript represents disturbance)
+    sysEdist::StaticArray # input matrix for the disturbance
 
     modalstate2physicalstate::SMatrix
+end
 
-    StateSpace(model::SpringMassModel) = begin
+function StateSpace(modalsystem::ModalSystem)
 
-        dimstate = 2 * model.DOF
-        dimctrlinput = model.dimcontrolinput
-        dimdistinput = model.dimdistinput
+    # dimenstion of the mode and inputs
+    dimstate = 2 * modalsystem.dimmode
 
-        sysA = SMatrix{dimstate, dimstate}([
-            zeros(model.DOF, model.DOF) I
-            -model.system.OMEGA^2 -2 * model.system.XI * model.system.OMEGA
+    sysA = SMatrix{dimstate, dimstate}([
+        zeros(modalsystem.dimmode, modalsystem.dimmode) I
+        -modalsystem.OMEGA^2 -2 * modalsystem.XI * modalsystem.OMEGA
+    ])
+
+    # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
+    if modalsystem.dimctrl == 1
+        sysB = SVector{dimstate}([
+            zeros(modalsystem.dimmode)
+            modalsystem.Ectrl
         ])
-
-        # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
-        if dimctrlinput == 1
-            sysB = SVector{dimstate}([
-                zeros(model.DOF)
-                model.Fctrl
-            ])
-        else
-            sysB = SMatrix{dimstate, dimctrlinput}([
-                zeros(model.DOF, model.dimcontrolinput)
-                model.Fctrl
-            ])
-        end
-
-        sysEcplg = SMatrix{dimstate, 3}([zeros(model.DOF, 3); model.D])
-
-        # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
-        if dimdistinput == 1
-            sysEdist = SVector{dimstate}([zeros(model.DOF); model.Fdist])
-        else
-            sysEdist = SMatrix{dimstate, dimdistinput}([zeros(model.DOF, model.dimdistinput); model.Fdist])
-        end
-
-        # transformation matrix for state vector in modal coordinate to physical coordinate
-        modalstate2physicalstate = SMatrix{dimstate, dimstate, Real}([
-            model.system.PHI zeros(model.DOF, model.DOF)
-            zeros(model.DOF, model.DOF) model.system.PHI
+    else
+        sysB = SMatrix{dimstate, modalsystem.dimctrl}([
+            zeros(modalsystem.dimmode, modalsystem.dimctrl)
+            modalsystem.Ectrl
         ])
-
-        new(model.DOF, dimstate, dimctrlinput, dimdistinput, sysA, sysB, sysEcplg, sysEdist, modalstate2physicalstate)
     end
+
+    # Need to switch the definition (`SVector` or `SMatrix`) based on the dimension
+    if modalsystem.dimdist == 1
+        sysEdist = SVector{dimstate}([zeros(modalsystem.dimmode); modalsystem.Edist])
+    else
+        sysEdist = SMatrix{dimstate, modalsystem.dimdist}([zeros(modalsystem.dimmode, modalsystem.dimdist); modalsystem.Edist])
+    end
+
+    # transformation matrix for state vector in modal coordinate to physical coordinate
+    modalstate2physicalstate = SMatrix{dimstate, dimstate, Real}([
+        modalsystem.PHI zeros(modalsystem.dimmode, modalsystem.dimmode)
+        zeros(modalsystem.dimmode, modalsystem.dimmode) modalsystem.PHI
+    ])
+
+    return StateSpace(
+        modalsystem.dimmode,
+        dimstate,
+        modalsystem.dimctrl,
+        modalsystem.dimdist,
+        sysA,
+        sysB,
+        sysEdist,
+        modalstate2physicalstate
+    )
 end
 
 """

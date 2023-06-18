@@ -181,6 +181,8 @@ struct ModalSystem
     PHI::SMatrix
     OMEGA::SMatrix
     XI::SMatrix
+    Ectrl::SMatrix
+    Edist::SMatrix
 end
 
 function ModalSystem(PHI::Matrix, OMEGA::Matrix, XI::Matrix, Ectrl::Matrix, Edist::Matrix)
@@ -195,7 +197,9 @@ function ModalSystem(PHI::Matrix, OMEGA::Matrix, XI::Matrix, Ectrl::Matrix, Edis
         dimdist,
         SMatrix{DOF, DOF}(PHI),
         SMatrix{DOF, DOF}(OMEGA),
-        SMatrix{DOF, DOF}(XI)
+        SMatrix{DOF, DOF}(XI),
+        SMatrix{DOF, dimctrl}(Ectrl),
+        SMatrix{DOF, dimdist}(Edist)
     )
 end
 
@@ -204,7 +208,7 @@ function ModalSystem(PHI::SMatrix, OMEGA::SMatrix, XI::SMatrix, Ectrl::SMatrix, 
     dimmode = size(PHI, 2)
     dimctrl = size(Ectrl, 2)
     dimdist = size(Edist, 2)
-    return ModalSystem(dimmode, DOF, dimctrl, dimdist, PHI, OMEGA, XI)
+    return ModalSystem(dimmode, DOF, dimctrl, dimdist, PHI, OMEGA, XI, Ectrl, Edist)
 end
 
 
@@ -225,7 +229,7 @@ function physical2modal(physicalsystem::PhysicalSystem)::ModalSystem
 
     # Eigen value decomposition
     # https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.eigvecs
-    PHI = eigvecs(M, K)
+    PHI = SizedMatrix{dimmode, dimmode}(eigvecs(M, K))
 
     # mass normalization
     mr = zeros(DOF)
@@ -267,8 +271,10 @@ function physical2modal(physicalsystem::PhysicalSystem)::ModalSystem
         DOF,
         physicalsystem.dimctrl,
         physicalsystem.dimdist,
-        SMatrix{DOF, dimmode}(PHI),
-        SMatrix{dimmode, dimmode}(OMEGA),
-        SMatrix{dimmode, dimmode}(XI)
+        PHI,
+        OMEGA,
+        XI,
+        physicalsystem.Ectrl,
+        physicalsystem.Edist
     )
 end
