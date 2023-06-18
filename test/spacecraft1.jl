@@ -31,8 +31,8 @@ spacecraft["attitude dynamics"] = Dict(
             "coord" => "physical",
             "DOF" => 2,
             "mass" => [
-                100  0
-                0   50
+                100.0  0.0
+                0.0   50.0
             ],
             "stiffness" => [
                 6e4  -1e4
@@ -40,21 +40,21 @@ spacecraft["attitude dynamics"] = Dict(
             ],
             "damping" => Dict(
                 "config" => "Rayleigh",
-                "alpha" => 0,
+                "alpha" => 0.0,
                 "beta" => 0.005
             ),
             "control input" => Dict(
                 "dimension" => 1,
                 "coefficient" => [
-                    5
-                    0
+                    5.0
+                    0.0
                 ]
             ),
             "disturbance input" => Dict(
                 "dimension" => 1,
                 "coefficient" => [
-                    3
-                    0
+                    3.0
+                    0.0
                 ]
             )
         ),

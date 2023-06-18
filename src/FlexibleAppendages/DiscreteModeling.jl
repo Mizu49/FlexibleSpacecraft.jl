@@ -26,13 +26,12 @@ function that incorporates the model formulation process
 function defmodel(params::SpringMassParams)
 
     # Create representation of the system in physical coordinate
-    physicalsystem = PhysicalSystem(params.M, params.D, params.K)
+    physicalsystem = PhysicalSystem(params)
     # Convert representation of the system in modal coordinate
     modalsystem = physical2modal(physicalsystem)
 
-    systemmodel = SpringMassModel(modalsystem, params.Ecoupling, params.Econtrol, params.Edisturbance)
-
-    model = StateSpace(systemmodel)
+    # TOOD: fix this
+    # model = StateSpace(systemmodel)
 
     return model
 end
@@ -66,14 +65,8 @@ function defmodel(paramdict::AbstractDict)
     dimdistinput = paramdict["system"]["control input"]["dimension"]
     Edist = load_matrix(paramdict["system"]["disturbance input"]["coefficient"])
 
-    Ecoupling = transpose([
-        1.0 0.0
-        0.0 1.0
-        0.0 0.0
-    ]) # for debug
-
     # define the parameters struct
-    params = SpringMassParams(M, D, K, Ecoupling, Ectrl, Edist)
+    params = SpringMassParams{DOF, dimcontrolinput, dimdistinput}(M, D, K, Ectrl, Edist)
     # define the state-space model
     simmodel = defmodel(params)
 
