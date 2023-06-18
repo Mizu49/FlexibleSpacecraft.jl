@@ -30,8 +30,7 @@ function defmodel(params::SpringMassParams)
     # Convert representation of the system in modal coordinate
     modalsystem = physical2modal(physicalsystem)
 
-    # TOOD: fix this
-    # model = StateSpace(systemmodel)
+    model = StateSpace(modalsystem)
 
     return model
 end
