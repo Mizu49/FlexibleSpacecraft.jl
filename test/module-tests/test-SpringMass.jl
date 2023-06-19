@@ -6,7 +6,7 @@ using StaticArrays
 
 # parameter setting
 paramfile = "./test/module-tests/param-springmass.yml"
-(params, model) = set_appendage_info(paramfile)
+(params, model) = set_appendages_model(paramfile)
 
 # Test the simulation feature
 Ts = 1e-4

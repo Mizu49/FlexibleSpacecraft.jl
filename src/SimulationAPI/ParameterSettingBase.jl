@@ -83,7 +83,7 @@ function set_simulation_parameters(filepath::String)
 
     # Flexible appendage
     if haskey(paramread, "appendage")
-        appendageinfo = set_appendage_info(paramread["appendage"])
+        appendageinfo = set_appendages_model(paramread["appendage"])
     end
 
     # Attitude controller

@@ -8,7 +8,7 @@ module AppendagesBase
 using YAML, StaticArrays
 using ..UtilitiesBase
 
-export AppendagesInfo, AppendageData, initappendagedata, set_appendage_info, update_appendages!
+export AppendageData, initappendagedata, set_appendages_model, update_appendages!, AbstractAppendageParameters, AbstractAppendageModel
 
 # abstract types for the flexible appendages
 abstract type AbstractAppendageParameters end
@@ -27,19 +27,8 @@ struct AppendageData
     physicalstate::AbstractVector{<:Union{AbstractVector, Real}}
 end
 
-
 """
-    AppendagesInfo
-
-information of the flexible appendages
-"""
-struct AppendagesInfo
-    params::AbstractAppendageParameters
-    model::AbstractAppendageModel
-end
-
-"""
-    set_appendage_info
+    set_appendages_model
 
 API function to define the model of the flexible appendages. Argument is the dictionary type variable
 
@@ -47,7 +36,7 @@ API function to define the model of the flexible appendages. Argument is the dic
 
 * `configdata::AbstractDict`: path for the configuration file for the structural appendages
 """
-function set_appendage_info(configdata::AbstractDict)::Union{AppendagesInfo, Nothing}
+function set_appendages_model(configdata::AbstractDict)
 
     if haskey(configdata, "modeling") == false
         throw(ErrorException("`modeling` is undefined in configuration"))
@@ -56,7 +45,7 @@ function set_appendage_info(configdata::AbstractDict)::Union{AppendagesInfo, Not
     if configdata["modeling"] == "spring-mass"
         # formulate discrete spring-mass model of the flexible appendages
         (params, model) = DiscreteModeling.defmodel(configdata)
-        return AppendagesInfo(params, model)
+        return (params, model)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
@@ -67,7 +56,7 @@ end
 
 initializer for the data container for structural simulation
 """
-function initappendagedata(info::AppendagesInfo, initphysicalstate::Vector, datanum::Int)
+function initappendagedata(info::AbstractAppendageModel, initphysicalstate::Vector, datanum::Int)
 
     # physical state vector (physical coordinate)
     physicalstate = [zeros(SVector{info.model.dimstate}) for _ in 1:datanum]
@@ -88,12 +77,12 @@ function initappendagedata(info::AppendagesInfo, initphysicalstate::Vector, data
 end
 
 
-function update_appendages!(info::AppendagesInfo, Ts::Real, currenttime, currentstate, attitude2structure, strctrlinput, strdistinput)
+function update_appendages!(model::AbstractAppendageModel, Ts::Real, currenttime, currentstate, attitude2structure, strctrlinput, strdistinput)
 
     attiinput = attitude2structure.angularvelocity
 
     # time evolution
-    nextstate = DiscreteModeling.updatestate(info.model, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
+    nextstate = DiscreteModeling.updatestate(model, Ts, currenttime, currentstate, attiinput, strctrlinput, strdistinput)
 
     return nextstate
 end

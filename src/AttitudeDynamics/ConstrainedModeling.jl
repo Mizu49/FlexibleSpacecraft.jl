@@ -20,11 +20,9 @@ struct ConstrainedModel{T <: Union{AbstractMatrix, Function}} <: AbstractAttitud
     # Inertia Matrix
     inertia::T
 
-    ## Coupling coefficient
-    coupling_coefficient::Function
-
     ## Flexible appendage dynamics
-    appendagesinfo::AppendagesInfo
+    appendages_params::AbstractAppendageParameters
+    appendages_model::AbstractAppendageModel
 
 end
 
@@ -81,8 +79,8 @@ function update_attitude_dynamics(
     )::SVector{3, Float64}
 
     # todo: update this to provide interface for flexible appendages
-    current_coupling_coefficient = model.coupling_coefficient(0)
-    appendage_acceleration = @SVector zeros(2)
+    current_coupling_coefficient = @SMatrix zeros(3, 2) # fix me
+    appendage_acceleration = @SVector zeros(2) # fix me
 
     k1 = _calc_differential_attitude_dynamics(model, currentTime              , angular_velocity                   , attitude_disturbance, attitude_control_torque, appendage_acceleration, current_coupling_coefficient)
     k2 = _calc_differential_attitude_dynamics(model, currentTime + Tsampling/2, angular_velocity + Tsampling/2 * k1, attitude_disturbance, attitude_control_torque, appendage_acceleration, current_coupling_coefficient)
