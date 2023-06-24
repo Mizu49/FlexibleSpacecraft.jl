@@ -78,7 +78,7 @@ PhysicalSystem(M::Matrix, D::Matrix, K::Matrix)
 physicalsystem = PhysicalSystem(M, D, K)
 ```
 """
-struct PhysicalSystem
+struct PhysicalSystem <: AbstractAppendageSystem
     DOF::Int
     dimctrl::Int
     dimdist::Int
@@ -173,7 +173,7 @@ physicalsystem = PhysicalSystem(M, C, K)
 modalsystem = physical2modal(physicalsystem)
 ```
 """
-struct ModalSystem
+struct ModalSystem <: AbstractAppendageSystem
     dimmode::Int
     DOF::Int
     dimctrl::Int

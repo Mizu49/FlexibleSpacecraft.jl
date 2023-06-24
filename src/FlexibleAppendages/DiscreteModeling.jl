@@ -30,9 +30,9 @@ function defmodel(params::SpringMassParams)
     # Convert representation of the system in modal coordinate
     modalsystem = physical2modal(physicalsystem)
 
-    model = StateSpace(modalsystem)
+    statespacemodel = StateSpace(modalsystem)
 
-    return model
+    return (modalsystem, statespacemodel)
 end
 
 """
@@ -67,9 +67,9 @@ function defmodel(paramdict::AbstractDict)
     # define the parameters struct
     params = SpringMassParams{DOF, dimcontrolinput, dimdistinput}(M, D, K, Ectrl, Edist)
     # define the state-space model
-    simmodel = defmodel(params)
+    (modalsystem, statespacemodel) = defmodel(params)
 
-    return (params, simmodel)
+    return (params, modalsystem, statespacemodel)
 end
 
 end

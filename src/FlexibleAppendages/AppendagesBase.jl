@@ -8,11 +8,12 @@ module AppendagesBase
 using YAML, StaticArrays
 using ..UtilitiesBase
 
-export AppendageData, initappendagedata, set_appendages_model, update_appendages!, AbstractAppendageParameters, AbstractAppendageModel
+export AppendageData, initappendagedata, set_appendages_model, update_appendages!, AbstractAppendageParameters, AbstractAppendageModel, AbstractAppendageSystem
 
 # abstract types for the flexible appendages
 abstract type AbstractAppendageParameters end
 abstract type AbstractAppendageModel end
+abstract type AbstractAppendageSystem end
 
 include("DiscreteModeling.jl")
 using .DiscreteModeling
@@ -44,8 +45,8 @@ function set_appendages_model(configdata::AbstractDict)
 
     if configdata["modeling"] == "spring-mass"
         # formulate discrete spring-mass model of the flexible appendages
-        (params, model) = DiscreteModeling.defmodel(configdata)
-        return (params, model)
+        (params, modalsystem, statespacemodel) = DiscreteModeling.defmodel(configdata)
+        return (params, modalsystem, statespacemodel)
     else
         throw(ErrorException("No matching modeling method for the current configuration found. Possible typo in the configuration"))
     end
