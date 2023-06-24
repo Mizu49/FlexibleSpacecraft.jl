@@ -22,6 +22,7 @@ struct ConstrainedModel{T <: Union{AbstractMatrix, Function}} <: AbstractAttitud
 
     ## Flexible appendage dynamics
     appendages_params::AbstractAppendageParameters
+    appendages_modalsystem::AbstractAppendageSystem
     appendages_model::AbstractAppendageModel
 
 end

@@ -26,10 +26,10 @@ function setdynamicsmodel(paramsetting::AbstractDict)
         inertia = load_matrix(paramsetting["inertia"])
 
         # set information on flexible appendages
-        (appendage_params, appendage_model) = set_appendages_model(paramsetting["appendages"])
+        (appendage_params, appendage_modalsystem, appendage_model) = set_appendages_model(paramsetting["appendages"])
 
         # set constrained model model of the flexible spacecraft
-        model = ConstrainedModel(inertia, appendage_params, appendage_model)
+        model = ConstrainedModel(inertia, appendage_params, appendage_modalsystem, appendage_model)
 
     elseif paramsetting["model"] == "Rigid body"
 
