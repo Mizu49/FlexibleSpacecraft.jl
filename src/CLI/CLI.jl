@@ -22,7 +22,7 @@ Run simulation with FlexibleSpacecraft.jl according to given configuration files
 
     # Read the YAML file to obtain the pathes for the configulation files
     print("loading the simulation configulation files...")
-    (simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = readparamfile(configfilepath)
+    (simconfig, attitudemodel, distconfig, initvalue, orbitinfo, strparam, strmodel) = set_simulation_parameters(configfilepath)
     println("completed!")
 
     # run simulation

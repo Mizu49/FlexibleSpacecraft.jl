@@ -1,0 +1,52 @@
+# parameter configuration file for `FlexibleSpacecraft.jl`
+
+config:
+    name: example spacecraft No. 2
+    note: This model is for test purpose
+    sampling time: 1e-3 # Sampling period of simulation (second)
+    time length: 5000 # Time length of simulation (second)
+
+initial value:
+    roll-pitch-yaw: [0, 0, 0]
+    angular velocity: [0, 0, 0]
+
+
+attitude dynamics:
+    model: Rigid body
+    inertia:
+        45000, 0, 0
+        0, 1200, 0
+        0, 0, 50000
+
+disturbance:
+    constant torque: [0.0, 0.0, 0.0]
+    gravitational torque: true
+    step trajectory: nothing
+
+
+Orbit:
+    # Specify the model used in the simulation of orbital motion
+    Dynamics model: Circular
+    # Orbital elements
+    Orbital elements:
+        right ascension: 0
+        inclination: 0
+        semimajor axis: 6371e3
+        eccentricity: 0
+        argument of perigee: 0
+        true anomaly at epoch: 0
+    # Note for this parameter setting
+    OrbitInfo: Test orbit parameters
+
+appendage:
+    modeling: none
+    disturbance:
+        type: no disturbance
+        dimension: 1
+        angular velocity: [1, 0]
+        amplitude: [5000, 0]
+        phase: [0, 0]
+
+attitude controller:
+    strategy: none
+    config:

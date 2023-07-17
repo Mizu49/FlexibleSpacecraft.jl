@@ -9,7 +9,8 @@ function _init_datacontainers(
     simconfig::SimulationConfig,
     initvalue::InitKinematicsData,
     appendageinfo::Union{AppendageInfo, Nothing},
-    orbitinfo::Union{OrbitInfo, Nothing}
+    orbitinfo::Union{OrbitInfo, Nothing},
+    attidistinfo::AttitudeDisturbanceInfo
     )::SimData
 
     time = 0:simconfig.samplingtime:simconfig.simulationtime
@@ -34,8 +35,11 @@ function _init_datacontainers(
         orbit = initorbitdata(datanum, orbitinfo)
     end
 
+    # initialize attitude disturbance
+    attidist = init_attitude_disturbance_data(datanum, attidistinfo)
+
     # initialize simulation data container
-    tl = SimData(time, datanum, attitude, appendages, orbit)
+    tl = SimData(time, datanum, attitude, attidist, appendages, orbit)
 
     return tl
 end
@@ -113,6 +117,8 @@ calculate the disturbance input torque for the attitude dynamics
 function _calculate_attitude_disturbance(
     simconfig::SimulationConfig,
     attidistinfo::AttitudeDisturbanceInfo,
+    attidistdata::AttitudeDisturbanceData,
+    simcnt::Unsigned,
     currenttime::Real,
     attitudemodel::AbstractAttitudeDynamicsModel,
     orbitinfo::Union{OrbitInfo, Nothing},
@@ -126,10 +132,11 @@ function _calculate_attitude_disturbance(
         orbit_angularvelocity = orbitinfo.internals.angularvelocity
     end
 
-    LVLHframe = C_ECI2LVLH * UnitFrame
+    # altitude of the spacecraft
+    orbital_altitude = 400e3
 
     # disturbance input calculation
-    distinput = AttitudeDisturbance.calc_attitudedisturbance(attidistinfo, attitudemodel.inertia, currenttime, orbit_angularvelocity, C_ECI2Body, C_ECI2LVLH, LVLHframe, simconfig.samplingtime)
+    distinput = calc_attitudedisturbance!(attidistinfo, attitudemodel, attidistdata, simcnt, currenttime, C_ECI2Body, C_ECI2LVLH, orbital_altitude ,simconfig.samplingtime)
 
     # apply transformation matrix
     distinput = C_ECI2Body * distinput

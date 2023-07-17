@@ -31,6 +31,7 @@ struct SimData
     time::StepRangeLen
     datanum::Unsigned
     attitude::AttitudeData
+    attitude_disturbance::AttitudeDisturbanceData
     appendages::Union{AppendageData, Nothing}
     orbit::Union{OrbitData, Nothing}
 end
@@ -79,7 +80,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
     Ts = simconfig.samplingtime
 
     # Data containers
-    tl = _init_datacontainers(simconfig, initvalue, appendageinfo, orbitinfo)
+    tl = _init_datacontainers(simconfig, initvalue, appendageinfo, orbitinfo, attidistinfo)
 
     ### main loop of the simulation
     progress = Progress(tl.datanum, 1, "Running...", 20)   # progress meter
@@ -96,7 +97,7 @@ simdata = runsimulation(attitudemodel, strmodel, initvalue, orbitinfo, orbitinte
 
         ### input to the attitude dynamics
         # disturbance input
-        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, currenttime, attitudemodel, orbitinfo, C_ECI2LVLH, C_ECI2Body)
+        attitude_disturbance_input = _calculate_attitude_disturbance(simconfig, attidistinfo, tl.attitude_disturbance, simcnt, currenttime, attitudemodel, orbitinfo, C_ECI2LVLH, C_ECI2Body)
 
         # control input
         attitude_control_input = _calculate_attitude_control(attitude_controller, RPYangle, SVector{3}(zeros(3)), C_ECI2Body)
