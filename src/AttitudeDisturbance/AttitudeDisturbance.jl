@@ -209,7 +209,7 @@ function calc_attitudedisturbance!(
 
     # apply step trajectory torque
     if !isnothing(info.config.steptraj)
-        trajectory = _step_trajectory!(info.config.steptraj, info.internals.steptraj, currenttime, Tsampling)
+        trajectory = transpose(C_ECI2Body) * _step_trajectory!(info.config.steptraj, info.internals.steptraj, currenttime, Tsampling)
         attidistdata.trajectory[simcnt] = trajectory
     else
         trajectory = SVector{3}(zeros(3))
@@ -223,8 +223,11 @@ function calc_attitudedisturbance!(
         gravity_torque = SVector{3}(zeros(3))
     end
 
+    # apply constant torque in the body reference frame
+    const_torque = transpose(C_ECI2Body) * _constant_torque(info.config.consttorque)
+
     # sum up all disturbance component
-    disturbance_torque = _constant_torque(info.config.consttorque) + trajectory + gravity_torque
+    disturbance_torque = const_torque + trajectory + gravity_torque
     attidistdata.all[simcnt] = disturbance_torque
 
     return disturbance_torque

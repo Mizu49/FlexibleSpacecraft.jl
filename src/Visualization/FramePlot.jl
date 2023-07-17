@@ -89,7 +89,8 @@ function animate_attitude(
 
     # get initial body reference frame
     C_LVLH2BRF = euler2dcm(RPYangles[1])
-    BRF = C_LVLH2BRF * LVLHUnitFrame
+    # calculate the body reference frame defined in the LVLH frame
+    BRF = transpose(C_LVLH2BRF) * LVLHUnitFrame
 
     # vectors for the corrdinate frame
     (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
@@ -141,10 +142,11 @@ function animate_attitude(
 
         # update values
         C_LVLH2BRF = euler2dcm(RPYangles[idx])
-        BRF = C_LVLH2BRF * LVLHUnitFrame
+        BRF = transpose(C_LVLH2BRF) * LVLHUnitFrame
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
-        spacecraft_points = C_LVLH2BRF * spacecraft.points
+        # calculate spacecraft points are defined in the LVLH frame
+        spacecraft_points = transpose(C_LVLH2BRF) * spacecraft.points
 
         # update observables
         obs_x[] = BRF_x
