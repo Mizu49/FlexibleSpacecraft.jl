@@ -36,11 +36,11 @@ function OrbitalPlane2RadialAlongTrack(elements::OrbitalElements, orbitalpositio
     current_position = deg2rad(elements.true_anomaly) + orbitalposition
 
     # calculate the radial along track
-    return C2(-current_position)
+    return transpose(C2(current_position))
 end
 
 function OrbitalPlane2RadialAlongTrack(elements::Nothing, orbitalposition::Real)::SMatrix{3, 3, Float64}
-    return C2(0)
+    return transpose(C2(0))
 end
 
 function calc_orbitalframe(elem::OrbitalElements, ECI_frame::Frame)::Frame

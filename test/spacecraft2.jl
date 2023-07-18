@@ -7,7 +7,7 @@ spacecraft["config"] = Dict(
     "name" => "example spacecraft",
     "note" => "This model is for test purpose",
     "sampling time" => 1e-3,
-    "time length" => 100
+    "time length" => 1000
 )
 
 ## initlal value of the attitude
@@ -28,7 +28,7 @@ spacecraft["attitude dynamics"] = Dict(
 
 ## attitude disturbance configuration
 spacecraft["disturbance"] = Dict(
-    "constant torque" => [0.0, 0.0, 0.0],
+    "constant torque" => [0.5, 0.0, 0.0],
     "gravitational torque" => false,
     "step trajectory" => nothing
 )
