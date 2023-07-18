@@ -138,9 +138,6 @@ function _calculate_attitude_disturbance(
     # disturbance input calculation
     distinput = calc_attitudedisturbance!(attidistinfo, attitudemodel, attidistdata, simcnt, currenttime, C_ECI2Body, C_ECI2LVLH, orbital_altitude ,simconfig.samplingtime)
 
-    # apply transformation matrix
-    distinput = C_ECI2Body * distinput
-
     return distinput
 end
 

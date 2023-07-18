@@ -4,7 +4,7 @@ include("../src/FlexibleSpacecraft.jl")
 using .FlexibleSpacecraft
 
 # define parameter for the spacecraft
-include("spacecraft3.jl")
+include("spacecraft2.jl")
 (simconfig, attitudemodel, attidistinfo, initvalue, orbitinfo, appendageinfo, attitudecontroller) = set_simulation_parameters(spacecraft)
 
 # run simulation
@@ -32,4 +32,4 @@ fig_angularmomentum = plot_angular_momentum(simdata.time, simdata.attitude.angul
 display(fig_angularmomentum)
 
 # spacecraft attitude animation
-# animate_attitude(simdata.time, simdata.attitude.eulerangle)
+animate_attitude(simdata.time, simdata.attitude.eulerangle)
