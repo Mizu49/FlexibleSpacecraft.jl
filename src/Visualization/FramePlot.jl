@@ -70,7 +70,8 @@ Generates animation of frame rotation as GIF figure
 """
 function animate_attitude(
     time::StepRangeLen,
-    RPYangles::Vector{<:SVector{3}};
+    C_ECI2BRF::Vector{<:SMatrix{3, 3}},
+    ECI2LVLH::Vector{<:SMatrix{3, 3}};
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
@@ -87,13 +88,8 @@ function animate_attitude(
         animindex = dataindex[1]:steps:dataindex[end]
     end
 
-    # get initial body reference frame
-    C_LVLH2BRF = euler2dcm(RPYangles[1])
-    # calculate the body reference frame defined in the LVLH frame
-    BRF = transpose(C_LVLH2BRF) * LVLHUnitFrame
-
-    # vectors for the corrdinate frame
-    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
+    # initialize vectors for the corrdinate frame
+    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(LVLHUnitFrame)
 
     # spacecraft body polygon
     spacecraft = get_spacecraft_polygon()
@@ -140,13 +136,13 @@ function animate_attitude(
     prog = Progress(length(animindex), 1, "Animating...", 20) # progress meter
     record(fig, filename, animindex; framerate = FPS) do idx
 
-        # update values
-        C_LVLH2BRF = euler2dcm(RPYangles[idx])
-        BRF = transpose(C_LVLH2BRF) * LVLHUnitFrame
+        # update attitude vectors
+        C_LVLH2BRF = transpose(C_ECI2BRF[idx]) * transpose(ECI2LVLH[idx])
+        BRF = C_LVLH2BRF * LVLHUnitFrame
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
         # calculate spacecraft points are defined in the LVLH frame
-        spacecraft_points = transpose(C_LVLH2BRF) * spacecraft.points
+        spacecraft_points = C_LVLH2BRF * spacecraft.points
 
         # update observables
         obs_x[] = BRF_x
