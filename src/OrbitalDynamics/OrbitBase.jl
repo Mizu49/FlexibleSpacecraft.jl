@@ -70,7 +70,7 @@ struct of the data containers for the orbital motion
 struct OrbitData
     angularposition::Vector{<:Real}
     angularvelocity::Vector{<:Real}
-    LVLH::Vector{<:Frame}
+    C_ECI2LVLH::Vector{SMatrix{3, 3}}
 end
 
 """
@@ -83,7 +83,7 @@ function initorbitdata(datanum::Integer, orbitinfo::OrbitInfo)::OrbitData
     return OrbitData(
         zeros(datanum),
         zeros(datanum),
-        initframes(datanum, orbitinfo.planeframe)
+        [SMatrix{3, 3}(zeros(3, 3)) for _ = 1:datanum]
     )
 end
 
