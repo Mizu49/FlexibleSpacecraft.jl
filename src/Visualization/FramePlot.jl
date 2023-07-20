@@ -75,7 +75,9 @@ function animate_attitude(
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
-    filename = "attitude.gif"
+    filename = "attitude.gif",
+    elevation = pi/6,
+    azimuth   = pi/4
     )
 
     # extract indeces of data to be plotted
@@ -107,8 +109,8 @@ function animate_attitude(
         xlabel = "x label",
         ylabel = "y label",
         zlabel = "z label",
-        elevation = pi/6,
-        azimuth   = pi/4,
+        elevation = elevation,
+        azimuth   = azimuth,
         aspect = :data,
         viewmode = :fit,
         limits = (-1.5, 1.5, -1.5, 1.5, -1.5, 1.5)
