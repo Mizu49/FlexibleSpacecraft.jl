@@ -71,7 +71,7 @@ Generates animation of frame rotation as GIF figure
 function animate_attitude(
     time::StepRangeLen,
     C_ECI2BRF::Vector{<:SMatrix{3, 3}},
-    ECI2LVLH::Vector{<:SMatrix{3, 3}};
+    C_ECI2LVLH::Vector{<:SMatrix{3, 3}};
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
@@ -139,7 +139,8 @@ function animate_attitude(
     record(fig, filename, animindex; framerate = FPS) do idx
 
         # update attitude vectors
-        C_LVLH2BRF = transpose(C_ECI2BRF[idx]) * transpose(ECI2LVLH[idx])
+        # C_LVLH2BRF =  transpose(C_ECI2LVLH[idx]) * transpose(C_ECI2BRF[idx])
+        C_LVLH2BRF = transpose(C_ECI2BRF[idx] * C_ECI2LVLH[idx])
         BRF = C_LVLH2BRF * LVLHUnitFrame
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
