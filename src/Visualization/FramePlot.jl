@@ -1,6 +1,6 @@
 module FramePlot
 
-using GLMakie, ProgressMeter, StaticArrays, ColorTypes
+using GLMakie, ProgressMeter, StaticArrays, ColorTypes, LinearAlgebra
 using ...UtilitiesBase, ...DataContainers, ...Frames, ...KinematicsBase, ...OrbitBase
 
 export animate_attitude
@@ -62,6 +62,8 @@ function _plot_frame!(ax, ref_x, ref_y, ref_z, color_config)
 
     return
 end
+
+const T = SMatrix{3, 3}(diagm([1.0, -1.0, -1.0]))
 
 """
     frame_gif
@@ -140,8 +142,9 @@ function animate_attitude(
 
         # update attitude vectors
         # C_LVLH2BRF =  transpose(C_ECI2LVLH[idx]) * transpose(C_ECI2BRF[idx])
-        C_LVLH2BRF = transpose(C_ECI2BRF[idx] * C_ECI2LVLH[idx])
-        BRF = C_LVLH2BRF * LVLHUnitFrame
+        C_LVLH2BRF = T * transpose(C_ECI2BRF[idx] * transpose(C_ECI2LVLH[idx]))
+        # C_LVLH2BRF = transpose(C_ECI2BRF[idx])
+        BRF = C_LVLH2BRF * UnitFrame
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
         # calculate spacecraft points are defined in the LVLH frame

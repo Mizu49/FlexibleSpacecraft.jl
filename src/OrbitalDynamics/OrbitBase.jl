@@ -138,7 +138,7 @@ end
 """
     transformation matrix from unit frame to LVLH referential frame
 """
-const T_UnitFrame2LVLHFrame = diagm([1.0, -1.0, -1.0])
+const T_UnitFrame2LVLHFrame = SMatrix{3, 3}(diagm([1.0, -1.0, -1.0]))
 
 """
     LVLH referential frame
