@@ -65,15 +65,28 @@ end
 
 const T = SMatrix{3, 3}(diagm([1.0, -1.0, -1.0]))
 
+function _extract_data(simdata)
+
+    time = simdata.time
+
+    C_ECI2BRF = simdata.attitude.C_ECI2BRF
+
+    if isnothing(simdata.orbit)
+        C_ECI2LVLH = nothing
+    else
+        C_ECI2LVLH = simdata.orbit.C_ECI2LVLH
+    end
+
+    return (time, C_ECI2BRF, C_ECI2LVLH)
+end
+
 """
     frame_gif
 
 Generates animation of frame rotation as GIF figure
 """
 function animate_attitude(
-    time::StepRangeLen,
-    C_ECI2BRF::Vector{<:SMatrix{3, 3}},
-    C_ECI2LVLH::Vector{<:SMatrix{3, 3}};
+    simdata;
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
@@ -81,6 +94,9 @@ function animate_attitude(
     elevation = pi/6,
     azimuth   = pi/4
     )
+
+    # extract necessary data
+    (time, C_ECI2BRF, C_ECI2LVLH) = _extract_data(simdata)
 
     # extract indeces of data to be plotted
     Tsampling = convert(Float64, time.step)
@@ -141,9 +157,12 @@ function animate_attitude(
     record(fig, filename, animindex; framerate = FPS) do idx
 
         # update attitude vectors
-        # C_LVLH2BRF =  transpose(C_ECI2LVLH[idx]) * transpose(C_ECI2BRF[idx])
-        C_LVLH2BRF = T * transpose(C_ECI2BRF[idx] * transpose(C_ECI2LVLH[idx]))
-        # C_LVLH2BRF = transpose(C_ECI2BRF[idx])
+        if isnothing(C_ECI2LVLH)
+            C_LVLH2BRF = T * transpose(C_ECI2BRF[idx])
+        else
+            # C_LVLH2BRF =  transpose(C_ECI2LVLH[idx]) * transpose(C_ECI2BRF[idx])
+            C_LVLH2BRF = T * transpose(C_ECI2BRF[idx] * transpose(C_ECI2LVLH[idx]))
+        end
         BRF = C_LVLH2BRF * UnitFrame
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
