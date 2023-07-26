@@ -32,4 +32,4 @@ fig_angularmomentum = plot_angular_momentum(simdata.time, simdata.attitude.angul
 display(fig_angularmomentum)
 
 # spacecraft attitude animation
-animate_attitude(simdata, elevation = 0, azimuth = pi/2, Tgif = 1)
+animate_attitude(simdata, elevation = pi/6, azimuth = pi/6, Tgif = 1)
