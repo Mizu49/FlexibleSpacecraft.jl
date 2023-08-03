@@ -1,6 +1,6 @@
 module FramePlot
 
-using GLMakie, ProgressMeter, StaticArrays, ColorTypes
+using GLMakie, ProgressMeter, StaticArrays, ColorTypes, LinearAlgebra
 using ...UtilitiesBase, ...DataContainers, ...Frames, ...KinematicsBase, ...OrbitBase
 
 export animate_attitude
@@ -63,19 +63,40 @@ function _plot_frame!(ax, ref_x, ref_y, ref_z, color_config)
     return
 end
 
+const T = SMatrix{3, 3}(diagm([1.0, -1.0, -1.0]))
+
+function _extract_data(simdata)
+
+    time = simdata.time
+
+    C_ECI2BRF = simdata.attitude.C_ECI2BRF
+
+    if isnothing(simdata.orbit)
+        C_ECI2LVLH = nothing
+    else
+        C_ECI2LVLH = simdata.orbit.C_ECI2LVLH
+    end
+
+    return (time, C_ECI2BRF, C_ECI2LVLH)
+end
+
 """
     frame_gif
 
 Generates animation of frame rotation as GIF figure
 """
 function animate_attitude(
-    time::StepRangeLen,
-    RPYangles::Vector{<:SVector{3}};
+    simdata;
     Tgif = 1e-1,
     FPS = 20,
     timerange = (0, 0),
-    filename = "attitude.gif"
+    filename = "attitude.gif",
+    elevation = pi/6,
+    azimuth   = pi/4
     )
+
+    # extract necessary data
+    (time, C_ECI2BRF, C_ECI2LVLH) = _extract_data(simdata)
 
     # extract indeces of data to be plotted
     Tsampling = convert(Float64, time.step)
@@ -87,13 +108,8 @@ function animate_attitude(
         animindex = dataindex[1]:steps:dataindex[end]
     end
 
-    # get initial body reference frame
-    C_LVLH2BRF = euler2dcm(RPYangles[1])
-    # calculate the body reference frame defined in the LVLH frame
-    BRF = transpose(C_LVLH2BRF) * LVLHUnitFrame
-
-    # vectors for the corrdinate frame
-    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
+    # initialize vectors for the corrdinate frame
+    (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(LVLHUnitFrame)
 
     # spacecraft body polygon
     spacecraft = get_spacecraft_polygon()
@@ -111,8 +127,8 @@ function animate_attitude(
         xlabel = "x label",
         ylabel = "y label",
         zlabel = "z label",
-        elevation = pi/6,
-        azimuth   = pi/4,
+        elevation = elevation,
+        azimuth   = azimuth,
         aspect = :data,
         viewmode = :fit,
         limits = (-1.5, 1.5, -1.5, 1.5, -1.5, 1.5)
@@ -140,13 +156,18 @@ function animate_attitude(
     prog = Progress(length(animindex), 1, "Animating...", 20) # progress meter
     record(fig, filename, animindex; framerate = FPS) do idx
 
-        # update values
-        C_LVLH2BRF = euler2dcm(RPYangles[idx])
-        BRF = transpose(C_LVLH2BRF) * LVLHUnitFrame
+        # update attitude vectors
+        if isnothing(C_ECI2LVLH)
+            C_LVLH2BRF = T * transpose(C_ECI2BRF[idx])
+        else
+            # C_LVLH2BRF =  transpose(C_ECI2LVLH[idx]) * transpose(C_ECI2BRF[idx])
+            C_LVLH2BRF = T * transpose(C_ECI2BRF[idx] * transpose(C_ECI2LVLH[idx]))
+        end
+        BRF = C_LVLH2BRF * UnitFrame
         (BRF_x, BRF_y, BRF_z) = _Frame2Arrows(BRF)
 
         # calculate spacecraft points are defined in the LVLH frame
-        spacecraft_points = transpose(C_LVLH2BRF) * spacecraft.points
+        spacecraft_points = C_LVLH2BRF * spacecraft.points
 
         # update observables
         obs_x[] = BRF_x
