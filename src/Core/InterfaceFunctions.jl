@@ -61,7 +61,7 @@ function _calculate_orbit!(
 
     orbitdata.angularposition[simcnt] = orbitinfo.internals.angularposition
     orbitdata.angularvelocity[simcnt] = orbitinfo.internals.angularvelocity
-    orbitdata.C_ECI2LVLH[simcnt] = C_ECI2LVLH
+    orbitdata.LVLH[simcnt] = C_ECI2LVLH * UnitFrame
 
     return C_ECI2LVLH
 end
@@ -92,7 +92,7 @@ function _calculate_attitude_state!(attitudemodel::AbstractAttitudeDynamicsModel
 
     # Update current attitude
     C_ECI2Body = ECI2BodyFrame(quaternion)
-    attidata.C_ECI2BRF[simcnt] = C_ECI2Body
+    attidata.bodyframe[simcnt] = C_ECI2Body * UnitFrame
 
     # update the roll-pitch-yaw representations
     C_LVLH2BRF = C_ECI2Body * transpose(C_ECI2LVLH)

@@ -70,7 +70,7 @@ struct of the data containers for the orbital motion
 struct OrbitData
     angularposition::Vector{<:Real}
     angularvelocity::Vector{<:Real}
-    C_ECI2LVLH::Vector{SMatrix{3, 3}}
+    LVLH::Vector{<:Frame}
 end
 
 """
@@ -83,7 +83,7 @@ function initorbitdata(datanum::Integer, orbitinfo::OrbitInfo)::OrbitData
     return OrbitData(
         zeros(datanum),
         zeros(datanum),
-        [SMatrix{3, 3}(zeros(3, 3)) for _ = 1:datanum]
+        initframes(datanum, orbitinfo.planeframe)
     )
 end
 
@@ -138,7 +138,7 @@ end
 """
     transformation matrix from unit frame to LVLH referential frame
 """
-const T_UnitFrame2LVLHFrame = SMatrix{3, 3}(diagm([1.0, -1.0, -1.0]))
+const T_UnitFrame2LVLHFrame = diagm([1.0, -1.0, -1.0])
 
 """
     LVLH referential frame
